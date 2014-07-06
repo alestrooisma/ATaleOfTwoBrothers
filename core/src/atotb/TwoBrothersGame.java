@@ -3,6 +3,7 @@ package atotb;
 import atotb.controller.*;
 import atotb.model.*;
 import atotb.model.items.*;
+import atotb.util.MessageLog;
 import atotb.util.PathFinder;
 import atotb.view.*;
 import com.badlogic.gdx.Game;
@@ -29,6 +30,7 @@ public class TwoBrothersGame extends Game {
 	private InputMultiplexer inputHandlers;
 	private InputAdapter battleHandler;
 	private PathFinder pathFinder;
+	private MessageLog log;
 	//
 	// Shared resources
 	private SpriteBatch batch;
@@ -83,6 +85,10 @@ public class TwoBrothersGame extends Game {
 	}
 
 	private void setUpController() {
+		// Create message log
+		log = new MessageLog(5);
+
+		// Set up input listeners
 		inputHandlers = new InputMultiplexer();
 		inputHandlers.addProcessor(new MainInputHandler(this));
 		Gdx.input.setInputProcessor(inputHandlers);
@@ -93,6 +99,10 @@ public class TwoBrothersGame extends Game {
 	//
 	public Model getModel() {
 		return model;
+	}
+
+	public MessageLog getLog() {
+		return log;
 	}
 
 	public Unit getSelectedUnit() {
@@ -186,15 +196,15 @@ public class TwoBrothersGame extends Game {
 		if (distance <= u.getMovesRemaining()) {
 			actuallyMoveUnit(u, destX, destY);
 			u.reduceMoves(distance);
-		} else if (u.mayDash() 
+		} else if (u.mayDash()
 				&& distance <= u.getMovesRemaining() + u.getDashDistance()) {
 			actuallyMoveUnit(u, destX, destY);
 			u.setMovesRemaining(0);
 			u.setHasDashed();
-			System.out.println("Dashing!");
+			log.push("Dashing!");
 		}
 	}
-	
+
 	public void actuallyMoveUnit(Unit u, int destX, int destY) {
 		BattleMap map = getModel().getBattleMap();
 		map.getTile(u.getPosition()).removeUnit();
@@ -203,10 +213,8 @@ public class TwoBrothersGame extends Game {
 	}
 
 	public void targetUnit(Unit target) {
-		//TODO check for action
-		// else...
+		//TODO check for action, otherwise use main weapon.
 
-		System.out.println("Targeting " + target.getName());
 		boolean acted = false;
 		Weapon w = getSelectedUnit().getWeapon();
 
@@ -216,10 +224,12 @@ public class TwoBrothersGame extends Game {
 					acted = fireRangedWeapon(getSelectedUnit(), target, w);
 				} //else if (w instanceof MeleeWeapon) {}
 			} else {
-				System.out.println("May not act anymore.");
+				log.push(getSelectedUnit().getName() + " may not act anymore.");
 			}
 		} else {
-			System.out.println("No weapon!");
+			log.push(getSelectedUnit().getName()
+					+ " is targeting " + target.getName()
+					+ " but has no weapon!");
 		}
 		if (acted) {
 			getSelectedUnit().setMovesRemaining(0);
@@ -227,15 +237,17 @@ public class TwoBrothersGame extends Game {
 			getSelectedUnit().setMayDash(false);
 		}
 		if (!target.isAlive()) {
-			System.out.println("Killed " + target.getName());
+			log.push(getSelectedUnit().getName() + " killed " + target.getName() + "!");
 			model.getBattleMap().getTile(target.getPosition()).removeUnit();
 		}
 	}
 
 	private boolean fireRangedWeapon(Unit user, Unit target, Weapon weapon) {
-		System.out.println("Firing! (damage  = " + weapon.getPower() + ")");
+		log.push(user.getName() + " fires at " + target.getName() + " - " + weapon.getPower() + " damage!");
 		target.applyDamage(weapon.getPower());
-		System.out.println(target.getName() + "'s remaining health = " + target.getCurrentHealth());
+		if (target.getCurrentHealth() > 0) {
+			log.push(target.getName() + "'s remaining health = " + target.getCurrentHealth());
+		}
 		return true;
 	}
 

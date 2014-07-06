@@ -5,10 +5,14 @@ Phase 1 - tRPG gameplay
 - [ ] Abilities
 - [ ] Proper combat model based on stats and equipment
 
-Phase 2 - animation and UI
+Phase 2 - graphics, animation and UI
 ------------------
+- [ ] Movement indicators
+- [ ] Grid
 - [ ] Death animation
-- [ ] Mouse cursor messages
+- [ ] Projectile animation
+- [ ] Mouse cursor messages (dashing, charging, fire)
+- [ ] Result messages on target position (damage, miss)
 - [ ] Action choice menu
 - [ ] Party window
 - [ ] Selection info

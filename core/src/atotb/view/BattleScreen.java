@@ -35,6 +35,8 @@ public class BattleScreen implements Screen {
 	private final IsometricTiledMapRenderer mapRenderer;
 	private final TiledMap map;
 	private final Vector3 vec = new Vector3();
+	private int windowWidth;
+	private int windowHeight;
 
 	public BattleScreen(TwoBrothersGame game, SpriteBatch batch, BitmapFont font) {
 		this.game = game;
@@ -151,21 +153,32 @@ public class BattleScreen implements Screen {
 
 		// Render UI
 		batch.setProjectionMatrix(uiCamera.combined);
-
 		batch.begin();
-		font.draw(batch, "" + x + ", " + y, 10, 20);
+
+		// Tile coordinates of mouse position
+		font.draw(batch, "" + x + ", " + y, windowWidth - 50, 20);
+
+		// Selected unit information
 		if (u != null) {
 			double dash = u.mayDash() ? u.getDashDistance() : 0;
-			font.draw(batch, 
-					u.getName(), 
-					10, Gdx.graphics.getHeight()-10);
-			font.draw(batch, 
-					"HP: " + u.getCurrentHealth() + "\\" + u.getMaxHealth(), 
-					10, Gdx.graphics.getHeight() - 30);
-			font.draw(batch, 
-					"Moves remaining: " + u.getMovesRemaining() + "+" + dash, 
-					10, Gdx.graphics.getHeight() - 50);
+			font.draw(batch,
+					u.getName(),
+					10, windowHeight - 10);
+			font.draw(batch,
+					"HP: " + u.getCurrentHealth() + "\\" + u.getMaxHealth(),
+					10, windowHeight - 30);
+			font.draw(batch,
+					"Moves remaining: " + u.getMovesRemaining() + "+" + dash,
+					10, windowHeight - 50);
 		}
+
+		// Message log
+		int N = game.getLog().getLogSize();
+		for (int i = N - 1; i >= 0; i--) {
+			font.draw(batch, game.getLog().get(i), 10, 20*(i+1));
+		}
+
+		// Finish UI drawing
 		batch.end();
 	}
 
@@ -191,6 +204,8 @@ public class BattleScreen implements Screen {
 
 	@Override
 	public void resize(int width, int height) {
+		windowWidth = width;
+		windowHeight = height;
 		viewport.update(width, height);
 		uiViewport.update(width, height);
 		uiCamera.translate(width / 2, height / 2);

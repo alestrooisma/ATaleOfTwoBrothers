@@ -54,7 +54,7 @@ public class Model {
 		do {
 			currentPlayer = (currentPlayer + 1) % armies.length;
 			if (currentPlayer == p) {
-				//TODO handle endgame here, or don't allow logic to get here.
+				//TODO handle endgame here, or (better) don't allow logic to get here.
 				System.out.println("Player " + p + " wins!");
 				return;
 			}
