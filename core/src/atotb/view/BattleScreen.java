@@ -101,6 +101,24 @@ public class BattleScreen implements Screen {
 				batch.draw(Resources.cursor, vec.x, vec.y);
 		}
 
+		// Draw walk/dash range markers - TODO order
+		for (int i = 0; i < game.getModel().getBattleMap().getWidth(); i++) {
+			for (int j = 0; j < game.getModel().getBattleMap().getHeight(); j++) {
+				double d = game.getPathfinder().getDistanceTo(i, j);
+				Unit u = game.getSelectedUnit();
+				if (d == 0) {
+					// Don't draw
+				} else if (d <= u.getMovesRemaining()) {
+					tileToScreenCoords(i, j, vec);
+					batch.draw(Resources.walkMarker, vec.x, vec.y);
+				} else if (u.mayDash()
+						&& d <= u.getMovesRemaining() + u.getDashDistance()) {
+					tileToScreenCoords(i, j, vec);
+					batch.draw(Resources.dashMarker, vec.x, vec.y);
+				}
+			}
+		}
+
 		Unit u = game.getSelectedUnit();
 
 		// Draw unit selection marker underlayer
@@ -110,7 +128,7 @@ public class BattleScreen implements Screen {
 			batch.draw(Resources.selectionMarkerUnder, vec.x - 4, vec.y + 16);
 		}
 
-		// Render units on map
+		// Render units on map - TODO order
 		for (Army army : game.getModel().getArmies()) {
 			for (Unit unit : army.getUnits()) {
 				if (unit.isAlive()) {
@@ -175,7 +193,7 @@ public class BattleScreen implements Screen {
 		// Message log
 		int N = game.getLog().getLogSize();
 		for (int i = N - 1; i >= 0; i--) {
-			font.draw(batch, game.getLog().get(i), 10, 20*(i+1));
+			font.draw(batch, game.getLog().get(i), 10, 20 * (i + 1));
 		}
 
 		// Finish UI drawing

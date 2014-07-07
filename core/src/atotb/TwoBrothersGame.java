@@ -112,6 +112,10 @@ public class TwoBrothersGame extends Game {
 		return model.getCurrentArmy().getUnits().get(selectedUnit);
 	}
 
+	public PathFinder getPathfinder() {
+		return pathfinder;
+	}
+
 	// Game state modifiers
 	//
 	private void startBattle() {
@@ -180,7 +184,7 @@ public class TwoBrothersGame extends Game {
 		pathfinder.calculateDistancesFrom(
 				u.getPosition().x, u.getPosition().y, maxMoves);
 	}
-	
+
 	public void deselectUnit() {
 		selectedUnit = -1;
 	}
@@ -205,7 +209,7 @@ public class TwoBrothersGame extends Game {
 	public void moveUnit(Unit u, int destX, int destY) {
 		// Calculate distance
 		double distance = walkingDistance(destX, destY);
-		
+
 		// Check range and move if possible
 		if (distance <= u.getMovesRemaining()) {
 			actuallyMoveUnit(u, destX, destY);
@@ -217,9 +221,6 @@ public class TwoBrothersGame extends Game {
 			u.setHasDashed();
 			log.push("Dashing!");
 		}
-		
-		// Recalculate movement range
-		preparePathFinder();
 	}
 
 	public void actuallyMoveUnit(Unit u, int destX, int destY) {
@@ -227,6 +228,9 @@ public class TwoBrothersGame extends Game {
 		map.getTile(u.getPosition()).removeUnit();
 		map.getTile(destX, destY).setUnit(u);
 		u.setPosition(destX, destY);
+
+		// Recalculate movement range
+		preparePathFinder();
 	}
 
 	public void targetUnit(Unit target) {
@@ -275,7 +279,7 @@ public class TwoBrothersGame extends Game {
 		if (!model.getBattleMap().contains(destX, destY)) {
 			return Double.MAX_VALUE;
 		}
-		
+
 		return pathfinder.getDistanceTo(destX, destY);
 	}
 

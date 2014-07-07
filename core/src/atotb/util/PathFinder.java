@@ -39,28 +39,32 @@ public class PathFinder {
 		// Breadth first 'search'
 		Item item = list.next();
 		int x, y;
-		double c = 0;
-		while (item != null && c < limit) {
+		double c;
+		while (item != null) {
 			x = item.x;
 			y = item.y;
 			c = map[x][y];
 			//TODO repool item here
-			
-			explore(x - 1, y, c + 1);
-			explore(x + 1, y, c + 1);
-			explore(x, y - 1, c + 1);
-			explore(x, y + 1, c + 1);
-			explore(x - 1, y - 1, c + 1.5);
-			explore(x - 1, y + 1, c + 1.5);
-			explore(x + 1, y - 1, c + 1.5);
-			explore(x + 1, y + 1, c + 1.5);
-			
+
+			if (c + 1 <= limit) {
+				explore(x - 1, y, c + 1);
+				explore(x + 1, y, c + 1);
+				explore(x, y - 1, c + 1);
+				explore(x, y + 1, c + 1);
+				if (c + 1.5 <= limit) {
+					explore(x - 1, y - 1, c + 1.5);
+					explore(x - 1, y + 1, c + 1.5);
+					explore(x + 1, y - 1, c + 1.5);
+					explore(x + 1, y + 1, c + 1.5);
+				}
+			}
+
 			item = list.next();
 		}
 	}
 
 	private void explore(int x, int y, double c) {
-		if (x >= 0 && x < width && y >= 0 && y < height 
+		if (x >= 0 && x < width && y >= 0 && y < height
 				&& map[x][y] == Double.MAX_VALUE) {
 			map[x][y] = c;
 			list.add(x, y);

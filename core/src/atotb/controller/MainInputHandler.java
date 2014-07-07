@@ -24,10 +24,11 @@ public class MainInputHandler extends InputAdapter {
 
 	@Override
 	public boolean keyDown(int keycode) {
-		if (keycode == Keys.ESCAPE) {
-			Gdx.app.exit();
-			return true;
-		}
+		switch (keycode) {
+			case Keys.ESCAPE:
+				Gdx.app.exit();
+				return true;
+		} 
 		return false;
 	}
 

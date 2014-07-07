@@ -3,6 +3,7 @@ package atotb.controller;
 import com.badlogic.gdx.graphics.Texture;
 
 public class Resources {
+	// Markers
 	public static Texture cursor;
 	public static Texture selectionMarkerUnder;
 	public static Texture selectionMarkerOver;
@@ -10,6 +11,10 @@ public class Resources {
 	public static Texture hoverMarkerOver;
 	public static Texture targetMarkerUnder;
 	public static Texture targetMarkerOver;
+	public static Texture walkMarker;
+	public static Texture dashMarker;
+	//
+	// Units
 	public static Texture dale;
 	public static Texture harryn;
 	public static Texture wolf;
@@ -24,6 +29,8 @@ public class Resources {
 		hoverMarkerOver = new Texture("markers/ellipse-bottom-blue.png");
 		targetMarkerUnder = new Texture("markers/ellipse-hero-selected-top.png");
 		targetMarkerOver = new Texture("markers/ellipse-hero-selected-bottom.png");
+		walkMarker = new Texture("markers/dot-blue.png");
+		dashMarker = new Texture("markers/dot-yellow.png");
 		cursor = new Texture("markers/border.png");
 		wolf = new Texture("units/wolf.png");
 		dale = new Texture("units/peasant.png");
@@ -38,6 +45,8 @@ public class Resources {
 		hoverMarkerOver.dispose();
 		targetMarkerUnder.dispose();
 		targetMarkerOver.dispose();
+		walkMarker.dispose();
+		dashMarker.dispose();
 		dale.dispose();
 		harryn.dispose();
 		wolf.dispose();
