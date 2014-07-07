@@ -3,6 +3,7 @@ Phase 1 - tRPG gameplay
 - [ ] Melee combat
 - [ ] Load model information of map from file
 - [ ] Proper pathfinding
+- [ ] Camera control
 - [ ] Abilities
 - [ ] Proper combat model based on stats and equipment
 

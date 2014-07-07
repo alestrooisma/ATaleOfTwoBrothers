@@ -1,5 +1,7 @@
 package atotb.util;
 
+import atotb.model.BattleMap;
+
 /**
  * TODO pooling TODO inaccessible terrain TODO full map
  *
@@ -7,15 +9,13 @@ package atotb.util;
  */
 public class PathFinder {
 
-	private final int width;
-	private final int height;
+	private final BattleMap bmap;
 	private final double[][] map;
 	private final List list;
 
-	public PathFinder(int width, int height) {
-		this.width = width;
-		this.height = height;
-		map = new double[width][height];
+	public PathFinder(BattleMap bmap) {
+		this.bmap = bmap;
+		map = new double[bmap.getWidth()][bmap.getHeight()];
 		list = new List();
 	}
 
@@ -25,8 +25,8 @@ public class PathFinder {
 
 	public void calculateDistancesFrom(int xi, int yi, double limit) {
 		// Reset fields
-		for (int i = 0; i < width; i++) {
-			for (int j = 0; j < height; j++) {
+		for (int i = 0; i < bmap.getWidth(); i++) {
+			for (int j = 0; j < bmap.getHeight(); j++) {
 				map[i][j] = Double.MAX_VALUE;
 			}
 		}
@@ -64,8 +64,9 @@ public class PathFinder {
 	}
 
 	private void explore(int x, int y, double c) {
-		if (x >= 0 && x < width && y >= 0 && y < height
-				&& map[x][y] == Double.MAX_VALUE) {
+		if (x >= 0 && x < bmap.getWidth() && y >= 0 && y < bmap.getHeight()
+				&& map[x][y] == Double.MAX_VALUE
+				&& bmap.getTile(x, y).isAccessible()) {
 			map[x][y] = c;
 			list.add(x, y);
 		}

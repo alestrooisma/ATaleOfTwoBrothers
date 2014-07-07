@@ -135,8 +135,8 @@ public class TwoBrothersGame extends Game {
 		map.addUnit(model.getPlayerParty().getUnits().get(0), 9, 11);
 		map.addUnit(model.getPlayerParty().getUnits().get(1), 6, 14);
 
-		pathfinder = new PathFinder(20, 20); //TODO hardcoded
 		model.startBattle(map, enemy);
+		pathfinder = new PathFinder(model.getBattleMap());
 		selectedUnit = 0;
 		setScreen(battleScreen);
 		inputHandlers.addProcessor(battleHandler);
