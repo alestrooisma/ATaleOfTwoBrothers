@@ -29,7 +29,7 @@ public class TwoBrothersGame extends Game {
 	// Controller
 	private InputMultiplexer inputHandlers;
 	private InputAdapter battleHandler;
-	private PathFinder pathFinder;
+	private PathFinder pathfinder;
 	private MessageLog log;
 	//
 	// Shared resources
@@ -131,7 +131,7 @@ public class TwoBrothersGame extends Game {
 		map.addUnit(model.getPlayerParty().getUnits().get(0), 9, 11);
 		map.addUnit(model.getPlayerParty().getUnits().get(1), 6, 14);
 
-		pathFinder = new PathFinder(20, 20); //TODO hardcoded
+		pathfinder = new PathFinder(20, 20); //TODO hardcoded
 		model.startBattle(map, enemy);
 		selectedUnit = 0;
 		setScreen(battleScreen);
@@ -162,14 +162,25 @@ public class TwoBrothersGame extends Game {
 		startTurn(model.getCurrentArmy());
 	}
 
-	public void selectUnit(int number) {
-		selectedUnit = number;
-	}
-
 	public void selectUnit(Unit unit) {
 		selectUnit(model.getCurrentArmy().getUnits().indexOf(unit));
 	}
 
+	public void selectUnit(int number) {
+		selectedUnit = number;
+		preparePathFinder();
+	}
+
+	private void preparePathFinder() {
+		Unit u = getSelectedUnit();
+		double maxMoves = u.getMovesRemaining();
+		if (u.mayDash()) {
+			maxMoves += u.getDashDistance();
+		}
+		pathfinder.calculateDistancesFrom(
+				u.getPosition().x, u.getPosition().y, maxMoves);
+	}
+	
 	public void deselectUnit() {
 		selectedUnit = -1;
 	}
@@ -192,7 +203,10 @@ public class TwoBrothersGame extends Game {
 	}
 
 	public void moveUnit(Unit u, int destX, int destY) {
-		double distance = walkingDistance(u, destX, destY);
+		// Calculate distance
+		double distance = walkingDistance(destX, destY);
+		
+		// Check range and move if possible
 		if (distance <= u.getMovesRemaining()) {
 			actuallyMoveUnit(u, destX, destY);
 			u.reduceMoves(distance);
@@ -203,6 +217,9 @@ public class TwoBrothersGame extends Game {
 			u.setHasDashed();
 			log.push("Dashing!");
 		}
+		
+		// Recalculate movement range
+		preparePathFinder();
 	}
 
 	public void actuallyMoveUnit(Unit u, int destX, int destY) {
@@ -253,50 +270,13 @@ public class TwoBrothersGame extends Game {
 
 	// Queries
 	//
-	public double walkingDistance(Unit unit, int destX, int destY) {
-		int unitX = unit.getPosition().x;
-		int unitY = unit.getPosition().y;
-
+	public double walkingDistance(int destX, int destY) {
 		// Check if destination is on map
 		if (!model.getBattleMap().contains(destX, destY)) {
 			return Double.MAX_VALUE;
 		}
-
-		// Get max distance allowed
-		double maxMoves = unit.getMovesRemaining();
-		if (unit.mayDash()) {
-			maxMoves += unit.getDashDistance();
-		}
-
-		// Rough check
-		if (roughDistance(unitX, unitY, destX, destY) > maxMoves) {
-			return Double.MAX_VALUE;
-		}
-
-		// Precise check
-		return preciseDistance(unitX, unitY, destX, destY, maxMoves);
-	}
-
-	public double roughDistance(int x1, int y1, int x2, int y2) {
-		int dx = abs(x1 - x2);
-		int dy = abs(y1 - y2);
-		int min, max;
-		if (dx > dy) {
-			min = dy;
-			max = dx;
-		} else {
-			min = dx;
-			max = dy;
-		}
-		return min * 1.5 + max - min;
-	}
-
-	public double preciseDistance(int x1, int y1, int x2, int y2) {
-		return preciseDistance(x1, y1, x2, y2, Integer.MAX_VALUE);
-	}
-
-	public double preciseDistance(int x1, int y1, int x2, int y2, double limit) {
-		return pathFinder.findDistance(x1, y1, x2, y2, limit);
+		
+		return pathfinder.getDistanceTo(destX, destY);
 	}
 
 	// The dispose method

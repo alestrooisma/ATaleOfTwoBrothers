@@ -1,9 +1,8 @@
 package atotb.util;
 
 /**
- * TODO pooling
- * TODO inaccessible terrain
- * TODO full map
+ * TODO pooling TODO inaccessible terrain TODO full map
+ *
  * @author Ale Strooisma
  */
 public class PathFinder {
@@ -12,9 +11,6 @@ public class PathFinder {
 	private final int height;
 	private final double[][] map;
 	private final List list;
-	private int targetX;
-	private int targetY;
-	boolean success = false;
 
 	public PathFinder(int width, int height) {
 		this.width = width;
@@ -23,31 +19,33 @@ public class PathFinder {
 		list = new List();
 	}
 
-	public double findDistance(int x1, int y1, int x2, int y2, double limit) {
+	public double getDistanceTo(int x, int y) {
+		return map[x][y];
+	}
+
+	public void calculateDistancesFrom(int xi, int yi, double limit) {
 		// Reset fields
-		for (int x = 0; x < width; x++) {
-			for (int y = 0; y < height; y++) {
-				map[x][y] = -1;
+		for (int i = 0; i < width; i++) {
+			for (int j = 0; j < height; j++) {
+				map[i][j] = Double.MAX_VALUE;
 			}
 		}
-		map[x1][y1] = 0;
 		list.clear();
-		targetX = x2;
-		targetY = y2;
-		success = false;
-		
-		// Starting point
-		list.add(x1, y1);
 
-		// Breadth first search
+		// Starting point
+		map[xi][yi] = 0;
+		list.add(xi, yi);
+
+		// Breadth first 'search'
 		Item item = list.next();
 		int x, y;
-		double c;
-		while (!success && item != null) {
+		double c = 0;
+		while (item != null && c < limit) {
 			x = item.x;
 			y = item.y;
-			//repool item
 			c = map[x][y];
+			//TODO repool item here
+			
 			explore(x - 1, y, c + 1);
 			explore(x + 1, y, c + 1);
 			explore(x, y - 1, c + 1);
@@ -56,17 +54,14 @@ public class PathFinder {
 			explore(x - 1, y + 1, c + 1.5);
 			explore(x + 1, y - 1, c + 1.5);
 			explore(x + 1, y + 1, c + 1.5);
+			
 			item = list.next();
 		}
-		return map[targetX][targetY];
 	}
 
 	private void explore(int x, int y, double c) {
-		if (x == targetX && y == targetY) {
-			map[x][y] = c;
-			success = true;
-		} else if (x >= 0 && x < width && y >= 0 && y < height 
-				&& map[x][y] == -1) {
+		if (x >= 0 && x < width && y >= 0 && y < height 
+				&& map[x][y] == Double.MAX_VALUE) {
 			map[x][y] = c;
 			list.add(x, y);
 		}

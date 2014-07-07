@@ -1,13 +1,14 @@
 Phase 1 - tRPG gameplay
 ------------------
 - [ ] Melee combat
+- [ ] Load model information of map from file
 - [ ] Proper pathfinding
 - [ ] Abilities
 - [ ] Proper combat model based on stats and equipment
 
 Phase 2 - graphics, animation and UI
 ------------------
-- [ ] Movement indicators
+- [ ] Movement (range) indicators
 - [ ] Grid
 - [ ] Death animation
 - [ ] Projectile animation
