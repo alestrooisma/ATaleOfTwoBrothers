@@ -121,9 +121,13 @@ public class TwoBrothersGame extends Game {
 	//
 	private void startBattle() {
 		Army enemy = new Army("Wolves", "A pack of wolves.", "Uh, oh, it seems you've encountered a pack of ferocious wolves!");
+		Weapon fangs = new MeleeWeapon("Fangs", "", "", 3);
 		Unit w1 = Unit.createUnit("Wolf", "A ferocious wolf!", "A hungry wolf is very dangerous.", enemy, 2, 5);
+		w1.setWeapon(fangs);
 		Unit w2 = Unit.createUnit("Wolf", "A ferocious wolf!", "A hungry wolf is very dangerous.", enemy, 2, 5);
+		w2.setWeapon(fangs);
 		Unit w3 = Unit.createUnit("Wolf", "A ferocious wolf!", "A hungry wolf is very dangerous.", enemy, 2, 5);
+		w3.setWeapon(fangs);
 
 		Tile[] tiles = new Tile[20 * 20]; //TODO hardcoded
 		for (int i = 0; i < tiles.length; i++) {

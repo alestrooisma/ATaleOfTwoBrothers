@@ -95,10 +95,12 @@ public class BattleScreen implements Screen {
 			case TARGET:
 				batch.draw(Resources.targetMarkerUnder, vec.x - 4, vec.y + 16);
 				break;
-//			case MOVE:
-//				break;
-			default:
+			case MOVE:
+			case NOTHING:
 				batch.draw(Resources.cursor, vec.x, vec.y);
+				break;
+//			case OUT_OF_BOUNDS:
+//				break;
 		}
 
 		// Draw walk/dash range markers - TODO order
@@ -216,6 +218,8 @@ public class BattleScreen implements Screen {
 			} else {
 				return MouseAction.MOVE;
 			}
+		} else {
+			return MouseAction.OUT_OF_BOUNDS;
 		}
 		return MouseAction.NOTHING;
 	}
@@ -297,6 +301,6 @@ public class BattleScreen implements Screen {
 
 	public enum MouseAction {
 
-		SELECT, MOVE, TARGET, NOTHING;
+		SELECT, MOVE, TARGET, NOTHING, OUT_OF_BOUNDS;
 	}
 }
