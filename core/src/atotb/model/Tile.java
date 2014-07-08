@@ -34,6 +34,6 @@ public class Tile {
 	}
 
 	public boolean isAccessible() {
-		return getUnit() == null;
+		return getUnit() == null && terrain == 1; //TODO TEMP!
 	}
 }

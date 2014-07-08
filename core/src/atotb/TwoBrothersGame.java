@@ -12,9 +12,11 @@ import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.utils.PooledLinkedList;
+import com.badlogic.gdx.maps.MapProperties;
+import com.badlogic.gdx.maps.tiled.TiledMap;
+import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
+import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import java.awt.Point;
-import static java.lang.Math.abs;
 import java.util.ArrayList;
 
 public class TwoBrothersGame extends Game {
@@ -63,10 +65,10 @@ public class TwoBrothersGame extends Game {
 		};
 
 		Army player = new Army("player1", "Your army.", "The army you command.");
-		u = Unit.createUnit("Dale", "The oldest of the two brothers.", "Dale picked up a pitchfork, lacking a better weapon.", player, 5, 2.5);
+		u = Unit.createUnit("Dale", "The oldest of the two brothers.", "Dale picked up a pitchfork, lacking a better weapon.", player, 5, 3.5);
 		u.setWeapon(new MeleeWeapon("Pitchfork", "", "", 2));
 		u.addAction(defense);
-		u = Unit.createUnit("Harryn", "The younger of the two brothers.", "Harryn is decent with a bow.", player, 5, 2.5);
+		u = Unit.createUnit("Harryn", "The younger of the two brothers.", "Harryn is decent with a bow.", player, 5, 3.5);
 		u.setWeapon(new RangedWeapon("Old hunting bow", "", "", 3));
 
 		model = new Model(player);
@@ -120,6 +122,8 @@ public class TwoBrothersGame extends Game {
 	// Game state modifiers
 	//
 	private void startBattle() {
+
+		// Create enemy army
 		Army enemy = new Army("Wolves", "A pack of wolves.", "Uh, oh, it seems you've encountered a pack of ferocious wolves!");
 		Weapon fangs = new MeleeWeapon("Fangs", "", "", 3);
 		Unit w1 = Unit.createUnit("Wolf", "A ferocious wolf!", "A hungry wolf is very dangerous.", enemy, 2, 5);
@@ -129,20 +133,37 @@ public class TwoBrothersGame extends Game {
 		Unit w3 = Unit.createUnit("Wolf", "A ferocious wolf!", "A hungry wolf is very dangerous.", enemy, 2, 5);
 		w3.setWeapon(fangs);
 
-		Tile[] tiles = new Tile[20 * 20]; //TODO hardcoded
-		for (int i = 0; i < tiles.length; i++) {
-			tiles[i] = new Tile(new Point(i % 20, i / 20), 0); //TODO hardcoded
-		}
-		BattleMap map = new BattleMap(20, 20, tiles); //TODO hardcoded
-		map.addUnit(w1, 4, 9);
-		map.addUnit(w2, 11, 2);
-		map.addUnit(w3, 13, 5);
-		map.addUnit(model.getPlayerParty().getUnits().get(0), 9, 11);
-		map.addUnit(model.getPlayerParty().getUnits().get(1), 6, 14);
+		// Load the map
+		TiledMap tileMap = new TmxMapLoader().load("maps/testmap.tmx");
+		MapProperties prop = tileMap.getProperties();
+		int mapWidth = prop.get("width", Integer.class);
+		int mapHeight = prop.get("height", Integer.class);
+		TiledMapTileLayer layer = (TiledMapTileLayer)tileMap.getLayers().get(0);
 
-		model.startBattle(map, enemy);
+		Tile[] tiles = new Tile[mapWidth * mapHeight]; //TODO hardcoded
+		for (int y = 0; y < mapHeight; y++) {
+			for (int x = 0; x < mapWidth; x++) {
+				int t;
+				prop = layer.getCell(y, x).getTile().getProperties();
+				if (prop.containsKey("accessible")) {
+					t = 1;
+				} else {
+					t = 0;
+				}
+				tiles[x + y*mapWidth] = new Tile(new Point(x, y), t); //TODO hardcoded
+			}
+		}
+		BattleMap battleMap = new BattleMap(mapWidth, mapHeight, tiles); //TODO hardcoded
+		System.out.println(battleMap.addUnit(w1, 4, 9));
+		System.out.println(battleMap.addUnit(w2, 11, 2));
+		System.out.println(battleMap.addUnit(w3, 13, 5));
+		System.out.println(battleMap.addUnit(model.getPlayerParty().getUnits().get(0), 9, 11));
+		System.out.println(battleMap.addUnit(model.getPlayerParty().getUnits().get(1), 6, 14));
+
+		model.startBattle(battleMap, enemy);
 		pathfinder = new PathFinder(model.getBattleMap());
 		selectedUnit = 0;
+		battleScreen.setMap(tileMap);
 		setScreen(battleScreen);
 		inputHandlers.addProcessor(battleHandler);
 		startTurn(model.getCurrentArmy());
@@ -329,7 +350,7 @@ public class TwoBrothersGame extends Game {
 				actuallyMoveUnit(user, tx - 1, ty);
 				break;
 		}
-		
+
 		//TODO replace by locking into combat
 		log.push(user.getName() + " charges at " + target.getName() + " - " + weapon.getPower() + " damage!");
 		target.applyDamage(weapon.getPower());

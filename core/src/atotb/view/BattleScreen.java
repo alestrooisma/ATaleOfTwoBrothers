@@ -32,8 +32,8 @@ public class BattleScreen implements Screen {
 	private final OrthographicCamera uiCamera;
 	private final Viewport viewport;
 	private final Viewport uiViewport;
-	private final IsometricTiledMapRenderer mapRenderer;
-	private final TiledMap map;
+	private IsometricTiledMapRenderer mapRenderer;
+	private TiledMap map;
 	private final Vector3 vec = new Vector3();
 	private int windowWidth;
 	private int windowHeight;
@@ -52,9 +52,10 @@ public class BattleScreen implements Screen {
 		// Set up the UI camera
 		uiCamera = new OrthographicCamera();
 		uiViewport = new ScreenViewport(uiCamera);
+	}
 
-		// Prepare the map
-		map = new TmxMapLoader().load("maps/testmap.tmx");
+	public void setMap(TiledMap map) {
+		this.map = map;
 		mapRenderer = new IsometricTiledMapRenderer(map, 1, batch);
 	}
 
@@ -118,6 +119,8 @@ public class BattleScreen implements Screen {
 					tileToScreenCoords(i, j, vec);
 					batch.draw(Resources.dashMarker, vec.x, vec.y);
 				}
+//				tileToScreenCoords(i, j, vec);
+//				font.draw(batch, "" + game.getModel().getBattleMap().getTile(i, j).getTerrain(),vec.x+32-5,vec.y+16+20);
 			}
 		}
 

@@ -1,12 +1,13 @@
 Phase 1 - tRPG gameplay
 ------------------
 - [ ] Melee combat
-- [ ] Load model information of map from file
+- [x] Load model information of map from file
 - [ ] Proper pathfinding
   - [x] Correct determination of reachable tiles (BFS)
   - [ ] Obtaining a path to the destination (backtracking)
 - [ ] Camera control
 - [ ] Abilities
+- [ ] Basic AI
 
 Phase 2 - graphics, animation and UI
 ------------------
