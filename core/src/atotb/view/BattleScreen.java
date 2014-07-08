@@ -5,6 +5,7 @@ import atotb.controller.Resources;
 import atotb.model.Army;
 import atotb.model.Unit;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -12,7 +13,6 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.maps.tiled.TiledMap;
-import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.IsometricTiledMapRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
@@ -59,8 +59,14 @@ public class BattleScreen implements Screen {
 		mapRenderer = new IsometricTiledMapRenderer(map, 1, batch);
 	}
 
+	public OrthographicCamera getCamera() {
+		return camera;
+	}
+
 	@Override
 	public void render(float dt) {
+		handleInput();
+		
 		// Clear buffers and paint the background dark gray
 		Gdx.gl.glClearColor(0.2f, 0.2f, 0.2f, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
@@ -206,6 +212,41 @@ public class BattleScreen implements Screen {
 
 		// Finish UI drawing
 		batch.end();
+	}
+
+	private void handleInput() {
+//		if (Gdx.input.isKeyPressed(Input.Keys.A)) {
+//			camera.zoom += 0.02;
+//			if (camera.zoom > 2) {
+//				camera.zoom = 2;
+//			}
+//		}
+//		if (Gdx.input.isKeyPressed(Input.Keys.Q)) {
+//			camera.zoom -= 0.02;
+//			if (camera.zoom < 1) {
+//				camera.zoom = 1;
+//			}
+//		}
+		if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+//			if (camera.position.x > WIDTH / 2) {
+				camera.translate(-3, 0, 0);
+//			}
+		}
+		if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+//			if (camera.position.x < 1024 - WIDTH / 2) {
+				camera.translate(3, 0, 0);
+//			}
+		}
+		if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
+//			if (camera.position.y > HEIGHT / 2) {
+				camera.translate(0, -3, 0);
+//			}
+		}
+		if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
+//			if (camera.position.y < 1024 - HEIGHT / 2) {
+				camera.translate(0, 3, 0);
+//			}
+		}
 	}
 
 	public MouseAction getMouseAction(int x, int y) {

@@ -75,6 +75,7 @@ public class TwoBrothersGame extends Game {
 	}
 
 	private void setUpView() {
+		Gdx.graphics.setVSync(true);
 		// Create one sprite batch and bitmap font to be used throughout the 
 		// entire program.
 		batch = new SpriteBatch();
@@ -245,6 +246,7 @@ public class TwoBrothersGame extends Game {
 			actuallyMoveUnit(u, destX, destY);
 			u.setMovesRemaining(0);
 			u.setHasDashed();
+			u.setMayAct(false); //TODO temp
 			log.push("Dashing!");
 		}
 	}
