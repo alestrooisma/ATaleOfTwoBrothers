@@ -154,11 +154,11 @@ public class TwoBrothersGame extends Game {
 			}
 		}
 		BattleMap battleMap = new BattleMap(mapWidth, mapHeight, tiles); //TODO hardcoded
-		System.out.println(battleMap.addUnit(w1, 4, 9));
-		System.out.println(battleMap.addUnit(w2, 11, 2));
-		System.out.println(battleMap.addUnit(w3, 13, 5));
-		System.out.println(battleMap.addUnit(model.getPlayerParty().getUnits().get(0), 9, 11));
-		System.out.println(battleMap.addUnit(model.getPlayerParty().getUnits().get(1), 6, 14));
+		battleMap.addUnit(w1, 4, 9);
+		battleMap.addUnit(w2, 11, 2);
+		battleMap.addUnit(w3, 13, 5);
+		battleMap.addUnit(model.getPlayerParty().getUnits().get(0), 9, 11);
+		battleMap.addUnit(model.getPlayerParty().getUnits().get(1), 6, 14);
 
 		model.startBattle(battleMap, enemy);
 		pathfinder = new PathFinder(model.getBattleMap());

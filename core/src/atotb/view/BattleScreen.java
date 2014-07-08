@@ -193,6 +193,9 @@ public class BattleScreen implements Screen {
 			font.draw(batch,
 					"Moves remaining: " + u.getMovesRemaining() + "+" + dash,
 					10, windowHeight - 50);
+			font.draw(batch,
+					"May act: " + (u.mayAct() ? "yes" : "false"),
+					10, windowHeight - 70);
 		}
 
 		// Message log
