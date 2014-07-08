@@ -23,6 +23,14 @@ public class PathFinder {
 		return map[x][y];
 	}
 
+	public double getDistanceTo_safe(int x, int y) {
+		if (bmap.contains(x, y)) {
+			return getDistanceTo(x, y);
+		} else {
+			return Double.MAX_VALUE;
+		}
+	}
+
 	public void calculateDistancesFrom(int xi, int yi, double limit) {
 		// Reset fields
 		for (int i = 0; i < bmap.getWidth(); i++) {

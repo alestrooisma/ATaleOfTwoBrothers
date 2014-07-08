@@ -3,9 +3,10 @@ Phase 1 - tRPG gameplay
 - [ ] Melee combat
 - [ ] Load model information of map from file
 - [ ] Proper pathfinding
+  - [x] Correct determination of reachable tiles (BFS)
+  - [ ] Obtaining a path to the destination (backtracking)
 - [ ] Camera control
 - [ ] Abilities
-- [ ] Proper combat model based on stats and equipment
 
 Phase 2 - graphics, animation and UI
 ------------------
@@ -16,12 +17,23 @@ Phase 2 - graphics, animation and UI
 - [ ] Mouse cursor messages (dashing, charging, fire)
 - [ ] Result messages on target position (damage, miss)
 - [ ] Action choice menu
-- [ ] Party window
 - [ ] Selection info
+- [ ] Party window
 
-Phase 3 - overworld
+Phase 3 - combat model
+------------------
+- [ ] Add full set of equipment and stats
+- [ ] Proper combat model based on stats and equipment
+  - [ ] Hit chance
+  - [ ] Damage calculation
+- [ ] Unique melee model
+
+Phase 4 - overworld
 ------------------
 - [ ] central overworld class - member of model class
 
-Phase 4 - content and polish
+Phase 5 - content and polish
 ------------------
+- [ ] Original art
+- [ ] Many items
+- [ ] Many events

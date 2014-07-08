@@ -64,6 +64,7 @@ public class TwoBrothersGame extends Game {
 
 		Army player = new Army("player1", "Your army.", "The army you command.");
 		u = Unit.createUnit("Dale", "The oldest of the two brothers.", "Dale picked up a pitchfork, lacking a better weapon.", player, 5, 2.5);
+		u.setWeapon(new MeleeWeapon("Pitchfork", "", "", 2));
 		u.addAction(defense);
 		u = Unit.createUnit("Harryn", "The younger of the two brothers.", "Harryn is decent with a bow.", player, 5, 2.5);
 		u.setWeapon(new RangedWeapon("Old hunting bow", "", "", 3));
@@ -208,7 +209,7 @@ public class TwoBrothersGame extends Game {
 
 	public void moveUnit(Unit u, int destX, int destY) {
 		// Calculate distance
-		double distance = walkingDistance(destX, destY);
+		double distance = pathfinder.getDistanceTo_safe(destX, destY);
 
 		// Check range and move if possible
 		if (distance <= u.getMovesRemaining()) {
@@ -243,7 +244,9 @@ public class TwoBrothersGame extends Game {
 			if (getSelectedUnit().mayAct()) {
 				if (w instanceof RangedWeapon) {
 					acted = fireRangedWeapon(getSelectedUnit(), target, w);
-				} //else if (w instanceof MeleeWeapon) {}
+				} else if (w instanceof MeleeWeapon) {
+					acted = charge(getSelectedUnit(), target, w);
+				}
 			} else {
 				log.push(getSelectedUnit().getName() + " may not act anymore.");
 			}
@@ -272,15 +275,64 @@ public class TwoBrothersGame extends Game {
 		return true;
 	}
 
-	// Queries
-	//
-	public double walkingDistance(int destX, int destY) {
-		// Check if destination is on map
-		if (!model.getBattleMap().contains(destX, destY)) {
-			return Double.MAX_VALUE;
+	private boolean charge(Unit user, Unit target, Weapon weapon) {
+		int tx = target.getPosition().x;
+		int ty = target.getPosition().y;
+		double nw = pathfinder.getDistanceTo_safe(tx, ty - 1);
+		double ne = pathfinder.getDistanceTo_safe(tx + 1, ty);
+		double se = pathfinder.getDistanceTo_safe(tx, ty + 1);
+		double sw = pathfinder.getDistanceTo_safe(tx - 1, ty);
+
+		// Find best target location
+		int dir = 1;
+		double d = nw;
+		if (ne < d) {
+			dir = 2;
+			d = ne;
+		}
+		if (se < d) {
+			dir = 3;
+			d = se;
+		}
+		if (sw < d) {
+			dir = 4;
+			d = sw;
 		}
 
-		return pathfinder.getDistanceTo(destX, destY);
+		// Check range
+		double maxMoves = user.getMovesRemaining();
+		if (user.mayDash()) {
+			maxMoves += user.getDashDistance();
+		}
+		if (d > maxMoves) {
+			log.push(target.getName() + " is out of charging range for "
+					+ user.getName());
+			return false;
+		}
+
+		// In range, so move there
+		switch (dir) {
+			case 1: //nw
+				actuallyMoveUnit(user, tx, ty - 1);
+				break;
+			case 2: //ne
+				actuallyMoveUnit(user, tx + 1, ty);
+				break;
+			case 3: //se
+				actuallyMoveUnit(user, tx, ty + 1);
+				break;
+			case 4: //sw
+				actuallyMoveUnit(user, tx - 1, ty);
+				break;
+		}
+		
+		//TODO replace by locking into combat
+		log.push(user.getName() + " charges at " + target.getName() + " - " + weapon.getPower() + " damage!");
+		target.applyDamage(weapon.getPower());
+		if (target.getCurrentHealth() > 0) {
+			log.push(target.getName() + "'s remaining health = " + target.getCurrentHealth());
+		}
+		return true;
 	}
 
 	// The dispose method
