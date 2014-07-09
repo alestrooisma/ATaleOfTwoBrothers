@@ -141,21 +141,21 @@ public class TwoBrothersGame extends Game {
 		int mapWidth = prop.get("width", Integer.class);
 		int mapHeight = prop.get("height", Integer.class);
 		TiledMapTileLayer layer = (TiledMapTileLayer) tileMap.getLayers().get(0);
-
-		Tile[] tiles = new Tile[mapWidth * mapHeight]; //TODO hardcoded
+		
+		BattleMap battleMap = new BattleMap(mapWidth, mapHeight);
 		for (int y = 0; y < mapHeight; y++) {
 			for (int x = 0; x < mapWidth; x++) {
-				int t;
+				int t; //TODO temporary stuff
 				prop = layer.getCell(y, x).getTile().getProperties();
 				if (prop.containsKey("accessible")) {
 					t = 1;
 				} else {
 					t = 0;
 				}
-				tiles[x + y * mapWidth] = new Tile(new Point(x, y), t); //TODO hardcoded
+				battleMap.setTile(new Tile(new Point(x, y), t));
 			}
 		}
-		BattleMap battleMap = new BattleMap(mapWidth, mapHeight, tiles); //TODO hardcoded
+		
 		battleMap.addUnit(w1, 4, 9);
 		battleMap.addUnit(w2, 11, 2);
 		battleMap.addUnit(w3, 13, 5);

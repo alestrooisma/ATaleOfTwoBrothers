@@ -5,132 +5,56 @@ import java.awt.geom.Point2D;
 
 /**
  * An implementation of Map, being tiled map.
- *
- * TODO remove negative coords
  * 
  * @author Ale Strooisma
  */
 public class BattleMap {
 
-	private int minX, maxX, minY, maxY;
-	private Tile[] tiles;
+	private final Tile[][] tiles;
 
 	/**
 	 * Creates a new instance of map with the given dimension and tiles.
 	 * Requires: tiles.length >= (maxX-minX+1)*(maxY-minY)+(maxX-minX)
 	 *
-	 * @param minX the smallest allowed x coordinate
-	 * @param maxX the largest allowed x coordinate
-	 * @param minY the smallest allowed y coordinate
-	 * @param maxY the largest allowed y coordinate
 	 * @param tiles the tiles to be on the map
 	 */
-	public BattleMap(int minX, int maxX, int minY, int maxY, Tile[] tiles) {
-		this.minX = minX;
-		this.maxX = maxX;
-		this.minY = minY;
-		this.maxY = maxY;
+	public BattleMap(Tile[][] tiles) {
 		this.tiles = tiles;
 	}
 
 	/**
 	 * Creates an empty map of the given dimensions.
 	 *
-	 * @param minX the smallest allowed x coordinate
-	 * @param maxX the largest allowed x coordinate
-	 * @param minY the smallest allowed y coordinate
-	 * @param maxY the largest allowed y coordinate
-	 */
-	public BattleMap(int minX, int maxX, int minY, int maxY) {
-		this.minX = minX;
-		this.maxX = maxX;
-		this.minY = minY;
-		this.maxY = maxY;
-		this.tiles = new Tile[transformCoords(maxX, maxY) + 1]; //TODO mins!
-	}
-
-	/**
-	 * Creates a new instance of map with the given dimensions and tiles, 
-	 * setting the lower coordinate bounds to 0.
-	 *
-	 * @param width the width of the map
-	 * @param height the height of the map
-	 * @param tiles the tiles to be on the map
-	 */
-	public BattleMap(int width, int height, Tile[] tiles) {
-		this.minX = 0;
-		this.maxX = width - 1;
-		this.minY = 0;
-		this.maxY = height - 1;
-		this.tiles = tiles;
-	}
-
-	/**
-	 * Creates a new instance of map with the given dimensions, setting the 
-	 * lower coordinate bounds to 0.
-	 *
 	 * @param width the width of the map
 	 * @param height the height of the map
 	 */
 	public BattleMap(int width, int height) {
-		this.minX = 0;
-		this.maxX = width - 1;
-		this.minY = 0;
-		this.maxY = height - 1;
-		this.tiles = new Tile[transformCoords(maxX, maxY) + 1]; //TODO mins!
-	}
-
-	/**
-	 * Returns the lowest allowed x coordinate of this map.
-	 *
-	 * @return the lowest x coordinate
-	 */
-	public int getMinX() {
-		return minX;
-	}
-
-	/**
-	 * Returns the highest allowed x coordinate of this map.
-	 *
-	 * @return the highest x coordinate
-	 */
-	public int getMaxX() {
-		return maxX;
-	}
-
-	/**
-	 * Returns the lowest allowed y coordinate of this map.
-	 *
-	 * @return the lowest y coordinate
-	 */
-	public int getMinY() {
-		return minY;
-	}
-
-	/**
-	 * Returns the highest allowed y coordinate of this map.
-	 *
-	 * @return the highest y coordinate
-	 */
-	public int getMaxY() {
-		return maxY;
+		this.tiles = new Tile[width][height]; //TODO mins!
 	}
 	
+	/**
+	 * Returns the width of the map.
+	 * @return the width of the map
+	 */
 	public int getWidth() {
-		return minX + 1 + maxX;
+		return tiles.length;
 	}
 	
+	/**
+	 * Returns the height of the map.
+	 * @return the height of the map
+	 */
 	public int getHeight() {
-		return minY + 1 + maxY;
+		return tiles[0].length;
 	}
 
 	/**
-	 * Returns the array of tiles, which basically is the internal
-	 * representation of the map.
+	 * Returns an array of tiles, which is the internal representation of the 
+	 * map.
 	 *
 	 * @return the array of tiles
 	 */
-	public Tile[] getTiles() {
+	public Tile[][] getTiles() {
 		return tiles;
 	}
 
@@ -142,7 +66,7 @@ public class BattleMap {
 	 * @return the tile at coordinates (x, y)
 	 */
 	public Tile getTile(int x, int y) {
-		return tiles[transformCoords(x, y)];
+		return tiles[x][y];
 	}
 
 	/**
@@ -156,26 +80,23 @@ public class BattleMap {
 	}
 
 	/**
-	 * Sets the tile at the given coordinates to the given tile.
+	 * Sets the tile at its coordinates.
 	 *
-	 * @param tile the tile to be placed at the given coordinates
-	 * @param x the x coordinate of where the tile should be be set
-	 * @param y the y coordinate of where the tile should be be set
+	 * @param tile the tile to set on the map
 	 */
-	public void setTile(Tile tile, int x, int y) {
-		tiles[transformCoords(x, y)] = tile;
+	public void setTile(Tile tile) {
+		tiles[tile.getPosition().x][tile.getPosition().y] = tile;
 	}
 
 	/**
-	 * Sets the tile at the given coordinates to the given tile.
-	 *
-	 * @param tile the tile to be placed at the given coordinates
-	 * @param position where the tile should be be set
+	 * Add a unit to the map. 
+	 * Puts the unit on the tile and sets the unit's position.
+	 * 
+	 * @param u the unit to add
+	 * @param x the x coordinate to put it at
+	 * @param y the y coordinate to put it at
+	 * @return true if the unit can be placed at that position.
 	 */
-	public void setTile(Tile tile, Point position) {
-		setTile(tile, position.x, position.y);
-	}
-
 	public boolean addUnit(Unit u, int x, int y) {
 		Tile tile = getTile(x,y);
 		if (tile.isAccessible()) {
@@ -187,6 +108,14 @@ public class BattleMap {
 		}
 	}
 
+	/**
+	 * Add a unit to the map. 
+	 * Puts the unit on the tile and sets the unit's position.
+	 * 
+	 * @param u the unit to add
+	 * @param position the coordinates to put it at
+	 * @return true if the unit can be placed at that position.
+	 */
 	public boolean addUnit(Unit u, Point position) {
 		return addUnit(u, position.x, position.y);
 	}
@@ -199,8 +128,7 @@ public class BattleMap {
 	 * @return true if the point is within the bounds
 	 */
 	public boolean contains(double x, double y) {
-		return x >= minX && x <= maxX
-				&& y >= minY && y <= maxY;
+		return x >= 0 && x < getWidth()	&& y >= 0 && y < getHeight();
 	}
 	
 	/**
@@ -211,17 +139,5 @@ public class BattleMap {
 	 */
 	public boolean contains(Point2D point) {
 		return contains(point.getX(), point.getY());
-	}
-
-	/**
-	 * Transforms 2D coordinates into an array index used by getTile and
-	 * setTile.
-	 *
-	 * @param x the x coordinate
-	 * @param y the y coordinate
-	 * @return the transformed coordinates
-	 */
-	protected final int transformCoords(int x, int y) {
-		return (maxX - minX + 1) * (y - minY) + (x - minX);
 	}
 }

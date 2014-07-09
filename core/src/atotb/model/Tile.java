@@ -4,8 +4,8 @@ import java.awt.Point;
 import java.util.LinkedList;
 
 public class Tile {
-	private Point position;
-	private int terrain;
+	private final Point position;
+	private final int terrain;
 	private Unit unit;
 
 	public Tile(Point position, int terrain) {
@@ -34,6 +34,6 @@ public class Tile {
 	}
 
 	public boolean isAccessible() {
-		return getUnit() == null && terrain == 1; //TODO TEMP!
+		return getUnit() == null && terrain == 1; //TODO terrain == 1 is temporary!
 	}
 }

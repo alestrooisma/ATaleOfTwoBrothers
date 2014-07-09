@@ -25,8 +25,7 @@ public class Unit extends Element {
 	private double movesRemaining;
 	private boolean mayDash;
 	private boolean mayAct;
-	private Unit opponent;
-	private boolean combatResolved;
+	private Unit opponent = null;
 
 	public Unit(String name, String summary, String description,
 			Army army, int maxHealth, double speed) {

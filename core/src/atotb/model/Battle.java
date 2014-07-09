@@ -6,8 +6,8 @@ package atotb.model;
  */
 public class Battle {
 
-	private BattleMap battleMap;
-	private Army[] armies;
+	private final BattleMap battleMap;
+	private final Army[] armies;
 	private int currentPlayer;
 	private int turn;
 
