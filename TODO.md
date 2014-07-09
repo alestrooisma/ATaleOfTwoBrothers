@@ -1,11 +1,15 @@
 Phase 1 - tRPG gameplay
 ------------------
 - [ ] Melee combat
+  - [x] Charging
+  - [ ] Locked in combat
+  - [x] Resolve combat
+  - [ ] Bonus/malus
 - [x] Load model information of map from file
 - [ ] Proper pathfinding
   - [x] Correct determination of reachable tiles (BFS)
   - [ ] Obtaining a path to the destination (backtracking)
-- [ ] Camera control
+- [x] Camera control
 - [ ] Abilities
 - [ ] Basic AI
 

@@ -25,6 +25,7 @@ public class Unit extends Element {
 	private double movesRemaining;
 	private boolean mayDash;
 	private boolean mayAct;
+	private Unit opponent;
 
 	public Unit(String name, String summary, String description,
 			Army army, int maxHealth, double speed) {
@@ -171,6 +172,14 @@ public class Unit extends Element {
 		movesRemaining = speed;
 		mayDash = true;
 		mayAct = true;
+	}
+
+	public void setLockedIntoCombat(Unit opponent) {
+		this.opponent = opponent;
+	}
+
+	public Unit getLockedIntoCombat() {
+		return opponent;
 	}
 
 	// Queries

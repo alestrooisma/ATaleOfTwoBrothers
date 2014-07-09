@@ -16,6 +16,7 @@ import com.badlogic.gdx.maps.MapProperties;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
+import com.badlogic.gdx.math.MathUtils;
 import java.awt.Point;
 import java.util.ArrayList;
 
@@ -65,11 +66,11 @@ public class TwoBrothersGame extends Game {
 		};
 
 		Army player = new Army("player1", "Your army.", "The army you command.");
-		u = Unit.createUnit("Dale", "The oldest of the two brothers.", "Dale picked up a pitchfork, lacking a better weapon.", player, 5, 3.5);
+		u = Unit.createUnit("Dale", "The oldest of the two brothers.", "Dale picked up a pitchfork, lacking a better weapon.", player, 10, 3.5);
 		u.setWeapon(new MeleeWeapon("Pitchfork", "", "", 2));
 		u.addAction(defense);
-		u = Unit.createUnit("Harryn", "The younger of the two brothers.", "Harryn is decent with a bow.", player, 5, 3.5);
-		u.setWeapon(new RangedWeapon("Old hunting bow", "", "", 3));
+		u = Unit.createUnit("Harryn", "The younger of the two brothers.", "Harryn is decent with a bow.", player, 10, 3.5);
+		u.setWeapon(new RangedWeapon("Old hunting bow", "", "", 6));
 
 		model = new Model(player);
 	}
@@ -126,12 +127,12 @@ public class TwoBrothersGame extends Game {
 
 		// Create enemy army
 		Army enemy = new Army("Wolves", "A pack of wolves.", "Uh, oh, it seems you've encountered a pack of ferocious wolves!");
-		Weapon fangs = new MeleeWeapon("Fangs", "", "", 3);
-		Unit w1 = Unit.createUnit("Wolf", "A ferocious wolf!", "A hungry wolf is very dangerous.", enemy, 2, 5);
+		Weapon fangs = new MeleeWeapon("Fangs", "", "", 4);
+		Unit w1 = Unit.createUnit("Wolf", "A ferocious wolf!", "A hungry wolf is very dangerous.", enemy, 5, 5);
 		w1.setWeapon(fangs);
-		Unit w2 = Unit.createUnit("Wolf", "A ferocious wolf!", "A hungry wolf is very dangerous.", enemy, 2, 5);
+		Unit w2 = Unit.createUnit("Wolf", "A ferocious wolf!", "A hungry wolf is very dangerous.", enemy, 5, 5);
 		w2.setWeapon(fangs);
-		Unit w3 = Unit.createUnit("Wolf", "A ferocious wolf!", "A hungry wolf is very dangerous.", enemy, 2, 5);
+		Unit w3 = Unit.createUnit("Wolf", "A ferocious wolf!", "A hungry wolf is very dangerous.", enemy, 5, 5);
 		w3.setWeapon(fangs);
 
 		// Load the map
@@ -139,7 +140,7 @@ public class TwoBrothersGame extends Game {
 		MapProperties prop = tileMap.getProperties();
 		int mapWidth = prop.get("width", Integer.class);
 		int mapHeight = prop.get("height", Integer.class);
-		TiledMapTileLayer layer = (TiledMapTileLayer)tileMap.getLayers().get(0);
+		TiledMapTileLayer layer = (TiledMapTileLayer) tileMap.getLayers().get(0);
 
 		Tile[] tiles = new Tile[mapWidth * mapHeight]; //TODO hardcoded
 		for (int y = 0; y < mapHeight; y++) {
@@ -151,7 +152,7 @@ public class TwoBrothersGame extends Game {
 				} else {
 					t = 0;
 				}
-				tiles[x + y*mapWidth] = new Tile(new Point(x, y), t); //TODO hardcoded
+				tiles[x + y * mapWidth] = new Tile(new Point(x, y), t); //TODO hardcoded
 			}
 		}
 		BattleMap battleMap = new BattleMap(mapWidth, mapHeight, tiles); //TODO hardcoded
@@ -287,10 +288,6 @@ public class TwoBrothersGame extends Game {
 			getSelectedUnit().setMayAct(false);
 			getSelectedUnit().setMayDash(false);
 		}
-		if (!target.isAlive()) {
-			log.push(getSelectedUnit().getName() + " killed " + target.getName() + "!");
-			model.getBattleMap().getTile(target.getPosition()).removeUnit();
-		}
 	}
 
 	private boolean fireRangedWeapon(Unit user, Unit target, Weapon weapon) {
@@ -298,6 +295,9 @@ public class TwoBrothersGame extends Game {
 		target.applyDamage(weapon.getPower());
 		if (target.getCurrentHealth() > 0) {
 			log.push(target.getName() + "'s remaining health = " + target.getCurrentHealth());
+		} else {
+			log.push(getSelectedUnit().getName() + " killed " + target.getName() + "!");
+			model.getBattleMap().getTile(target.getPosition()).removeUnit();
 		}
 		return true;
 	}
@@ -353,13 +353,35 @@ public class TwoBrothersGame extends Game {
 				break;
 		}
 
-		//TODO replace by locking into combat
-		log.push(user.getName() + " charges at " + target.getName() + " - " + weapon.getPower() + " damage!");
-		target.applyDamage(weapon.getPower());
-		if (target.getCurrentHealth() > 0) {
-			log.push(target.getName() + "'s remaining health = " + target.getCurrentHealth());
-		}
+		// Set locked into combat
+		user.setLockedIntoCombat(target);
+		target.setLockedIntoCombat(user);
+		log.push(user.getName() + " charges at " + target.getName());
+		resolveCombat(user, target);
 		return true;
+	}
+
+	private void resolveCombat(Unit attacker, Unit defender) {
+		int min = 3;
+		int max = 5;
+		int number = MathUtils.random(min, max);
+		for (int i = 0; i < number; i++) {
+			double damage = attacker.getWeapon().getPower();
+			defender.applyDamage(damage);
+			if (!defender.isAlive()) {
+				log.push(attacker.getName() + " hits " + defender.getName()
+						+ " for " + damage + " damage!");
+				log.push(attacker.getName() + " killed " + defender.getName() + "!");
+				model.getBattleMap().getTile(defender.getPosition()).removeUnit();
+				break;
+			}
+			log.push(attacker.getName() + " hits " + defender.getName()
+					+ " for " + damage + " damage! (HP left: "
+					+ defender.getCurrentHealth() + ")");
+			Unit temp = attacker;
+			attacker = defender;
+			defender = temp;
+		}
 	}
 
 	// The dispose method
