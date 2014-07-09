@@ -114,7 +114,7 @@ public class TwoBrothersGame extends Game {
 		if (selectedUnit < 0) {
 			return null;
 		}
-		return model.getCurrentArmy().getUnits().get(selectedUnit);
+		return model.getBattle().getCurrentArmy().getUnits().get(selectedUnit);
 	}
 
 	public PathFinder getPathfinder() {
@@ -162,18 +162,18 @@ public class TwoBrothersGame extends Game {
 		battleMap.addUnit(model.getPlayerParty().getUnits().get(0), 9, 11);
 		battleMap.addUnit(model.getPlayerParty().getUnits().get(1), 6, 14);
 
-		model.startBattle(battleMap, enemy);
-		pathfinder = new PathFinder(model.getBattleMap());
+		model.setBattle(new Battle(battleMap, model.getPlayerParty(), enemy));
+		pathfinder = new PathFinder(model.getBattle().getBattleMap());
 		selectedUnit = 0;
 		battleScreen.setMap(tileMap);
 		setScreen(battleScreen);
 		inputHandlers.addProcessor(battleHandler);
-		startTurn(model.getCurrentArmy());
+		startTurn(model.getBattle().getCurrentArmy());
 	}
 
 	private void startTurn(Army army) {
-		if (model.getCurrentPlayer() == 0) {
-			model.incrementTurn();
+		if (model.getBattle().getCurrentPlayer() == 0) {
+			model.getBattle().incrementTurn();
 		}
 
 		// Reset unit turn status
@@ -198,12 +198,12 @@ public class TwoBrothersGame extends Game {
 		deselectUnit();
 
 		// Start next player's turn
-		model.incrementCurrentPlayer();
-		startTurn(model.getCurrentArmy());
+		model.getBattle().nextPlayer();
+		startTurn(model.getBattle().getCurrentArmy());
 	}
 
 	public void selectUnit(Unit unit) {
-		selectUnit(model.getCurrentArmy().getUnits().indexOf(unit));
+		selectUnit(model.getBattle().getCurrentArmy().getUnits().indexOf(unit));
 	}
 
 	public void selectUnit(int number) {
@@ -234,7 +234,7 @@ public class TwoBrothersGame extends Game {
 	}
 
 	public void cycleUnit(int step) {
-		ArrayList<Unit> units = model.getCurrentArmy().getUnits();
+		ArrayList<Unit> units = model.getBattle().getCurrentArmy().getUnits();
 		int unit = selectedUnit;
 		do {
 			unit = ((unit + step) % units.size() + units.size()) % units.size();
@@ -261,7 +261,7 @@ public class TwoBrothersGame extends Game {
 	}
 
 	public void actuallyMoveUnit(Unit u, int destX, int destY) {
-		BattleMap map = getModel().getBattleMap();
+		BattleMap map = model.getBattle().getBattleMap();
 		map.getTile(u.getPosition()).removeUnit();
 		map.getTile(destX, destY).setUnit(u);
 		u.setPosition(destX, destY);
@@ -310,7 +310,7 @@ public class TwoBrothersGame extends Game {
 			log.push(target.getName() + "'s remaining health = " + target.getCurrentHealth());
 		} else {
 			log.push(user.getName() + " killed " + target.getName() + "!");
-			model.getBattleMap().getTile(target.getPosition()).removeUnit();
+			model.getBattle().getBattleMap().getTile(target.getPosition()).removeUnit();
 		}
 		return true;
 	}
@@ -385,7 +385,7 @@ public class TwoBrothersGame extends Game {
 				log.push(attacker.getName() + " hits " + defender.getName()
 						+ " for " + damage + " damage!");
 				log.push(attacker.getName() + " killed " + defender.getName() + "!");
-				model.getBattleMap().getTile(defender.getPosition()).removeUnit();
+				model.getBattle().getBattleMap().getTile(defender.getPosition()).removeUnit();
 				attacker.setLockedIntoCombat(null);
 				defender.setLockedIntoCombat(null);
 				break;

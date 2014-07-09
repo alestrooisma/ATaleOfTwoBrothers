@@ -37,7 +37,7 @@ public class BattleInputHandler extends InputAdapter {
 				screen.screenToTileCoords(vec);
 				int x = (int) vec.x;
 				int y = (int) vec.y;
-				Unit u = game.getModel().getBattleMap().getTile(x, y).getUnit();
+				Unit u = game.getModel().getBattle().getBattleMap().getTile(x, y).getUnit();
 				MouseAction ma = screen.getMouseAction(x, y);
 				switch (ma) {
 					case SELECT:

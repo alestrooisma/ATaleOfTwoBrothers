@@ -111,8 +111,8 @@ public class BattleScreen implements Screen {
 		}
 
 		// Draw walk/dash range markers - TODO order
-		for (int i = 0; i < game.getModel().getBattleMap().getWidth(); i++) {
-			for (int j = 0; j < game.getModel().getBattleMap().getHeight(); j++) {
+		for (int i = 0; i < game.getModel().getBattle().getBattleMap().getWidth(); i++) {
+			for (int j = 0; j < game.getModel().getBattle().getBattleMap().getHeight(); j++) {
 				double d = game.getPathfinder().getDistanceTo(i, j);
 				Unit u = game.getSelectedUnit();
 				if (d == 0) {
@@ -126,7 +126,7 @@ public class BattleScreen implements Screen {
 					batch.draw(Resources.dashMarker, vec.x, vec.y);
 				}
 //				tileToScreenCoords(i, j, vec);
-//				font.draw(batch, "" + game.getModel().getBattleMap().getTile(i, j).getTerrain(),vec.x+32-5,vec.y+16+20);
+//				font.draw(batch, "" + game.getModel().getBattle().getBattleMap().getTile(i, j).getTerrain(),vec.x+32-5,vec.y+16+20);
 			}
 		}
 
@@ -140,7 +140,7 @@ public class BattleScreen implements Screen {
 		}
 
 		// Render units on map - TODO order
-		for (Army army : game.getModel().getArmies()) {
+		for (Army army : game.getModel().getBattle().getArmies()) {
 			for (Unit unit : army.getUnits()) {
 				if (unit.isAlive()) {
 					Texture t;
@@ -250,12 +250,12 @@ public class BattleScreen implements Screen {
 	}
 
 	public MouseAction getMouseAction(int x, int y) {
-		if (game.getModel().getBattleMap().contains(x, y)) {
+		if (game.getModel().getBattle().getBattleMap().contains(x, y)) {
 			// Clicked on a tile
-			Unit u = game.getModel().getBattleMap().getTile(x, y).getUnit();
+			Unit u = game.getModel().getBattle().getBattleMap().getTile(x, y).getUnit();
 			if (u != null) {
 				// There is a unit on the tile
-				if (!u.isEnemy(game.getModel().getCurrentArmy())) {
+				if (!u.isEnemy(game.getModel().getBattle().getCurrentArmy())) {
 					// Unit is friendly -> select it
 					return MouseAction.SELECT;
 				} else if (game.getSelectedUnit().mayAct()) {
