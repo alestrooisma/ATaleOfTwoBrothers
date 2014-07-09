@@ -26,6 +26,7 @@ public class Unit extends Element {
 	private boolean mayDash;
 	private boolean mayAct;
 	private Unit opponent;
+	private boolean combatResolved;
 
 	public Unit(String name, String summary, String description,
 			Army army, int maxHealth, double speed) {
@@ -169,9 +170,15 @@ public class Unit extends Element {
 	}
 
 	public void reset() {
-		movesRemaining = speed;
-		mayDash = true;
-		mayAct = true;
+		if (!isLockedIntoCombat()) {
+			movesRemaining = speed;
+			mayDash = true;
+			mayAct = true;
+		} else {
+			movesRemaining = 0;
+			mayDash = false;
+			mayAct = false;
+		}
 	}
 
 	public void setLockedIntoCombat(Unit opponent) {
@@ -180,6 +187,10 @@ public class Unit extends Element {
 
 	public Unit getLockedIntoCombat() {
 		return opponent;
+	}
+
+	public boolean isLockedIntoCombat() {
+		return opponent != null;
 	}
 
 	// Queries

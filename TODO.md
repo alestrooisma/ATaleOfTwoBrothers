@@ -2,9 +2,10 @@ Phase 1 - tRPG gameplay
 ------------------
 - [ ] Melee combat
   - [x] Charging
-  - [ ] Locked in combat
+  - [x] Locked in combat
   - [x] Resolve combat
-  - [ ] Bonus/malus
+  - [ ] Resolve all combat each turn
+  - [ ] Consolidation
 - [x] Load model information of map from file
 - [ ] Proper pathfinding
   - [x] Correct determination of reachable tiles (BFS)
@@ -32,6 +33,9 @@ Phase 3 - combat model
   - [ ] Hit chance
   - [ ] Damage calculation
 - [ ] Unique melee model
+  - [ ] Choosing attack
+  - [ ] Option to disengage
+  - [ ] Bonus/malus
 
 Phase 4 - overworld
 ------------------
