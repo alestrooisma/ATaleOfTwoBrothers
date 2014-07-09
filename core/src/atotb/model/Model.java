@@ -3,7 +3,7 @@ package atotb.model;
 /**
  * The central class for the model of A Tale of Two Brothers.
  *
- * @author ale
+ * @author Ale Strooisma
  */
 public class Model {
 

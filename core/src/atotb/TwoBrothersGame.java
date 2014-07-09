@@ -25,6 +25,7 @@ public class TwoBrothersGame extends Game {
 	// Model
 	private Model model;
 	private int selectedUnit = -1;
+	private Weapon unarmed;
 	//
 	// View
 	private BattleScreen battleScreen;
@@ -71,6 +72,10 @@ public class TwoBrothersGame extends Game {
 		u.addAction(defense);
 		u = Unit.createUnit("Harryn", "The younger of the two brothers.", "Harryn is decent with a bow.", player, 10, 3.5);
 		u.setWeapon(new RangedWeapon("Old hunting bow", "", "", 6));
+
+		unarmed = new MeleeWeapon("Unarmed", "Lacking a melee weapon",
+				"This unit does not have a melee weapon, so it has to fight unarmed in hand-to-hand combat.",
+				1);
 
 		model = new Model(player);
 	}
@@ -141,7 +146,7 @@ public class TwoBrothersGame extends Game {
 		int mapWidth = prop.get("width", Integer.class);
 		int mapHeight = prop.get("height", Integer.class);
 		TiledMapTileLayer layer = (TiledMapTileLayer) tileMap.getLayers().get(0);
-		
+
 		BattleMap battleMap = new BattleMap(mapWidth, mapHeight);
 		for (int y = 0; y < mapHeight; y++) {
 			for (int x = 0; x < mapWidth; x++) {
@@ -155,7 +160,7 @@ public class TwoBrothersGame extends Game {
 				battleMap.setTile(new Tile(new Point(x, y), t));
 			}
 		}
-		
+
 		battleMap.addUnit(w1, 4, 9);
 		battleMap.addUnit(w2, 11, 2);
 		battleMap.addUnit(w3, 13, 5);
@@ -188,7 +193,7 @@ public class TwoBrothersGame extends Game {
 			}
 		}
 
-		// Select unit
+		// Select unit (only if player is human, otherwise give control to AI)
 		selectedUnit = -1;
 		nextUnit();
 	}
@@ -271,31 +276,35 @@ public class TwoBrothersGame extends Game {
 	}
 
 	public void targetUnit(Unit user, Unit target) {
-		//TODO check for action, otherwise use main weapon.
+		// Check if the unit is allowed to act
+		if (!user.mayAct()) {
+			log.push(user.getName() + " may not act anymore.");
+			return;
+		}
 
+		// Check if target can be attacked
 		if (target.isLockedIntoCombat()) {
 			log.push(target.getName() + " is locked into combat - can't attack.");
 			return;
 		}
 
-		boolean acted = false;
+		// Get the weapon
+		//TODO check for action, otherwise use main weapon.
 		Weapon w = user.getWeapon();
-
-		if (w != null) {
-			if (user.mayAct()) {
-				if (w instanceof RangedWeapon) {
-					acted = fireRangedWeapon(user, target, w);
-				} else if (w instanceof MeleeWeapon) {
-					acted = charge(user, target, w);
-				}
-			} else {
-				log.push(user.getName() + " may not act anymore.");
-			}
-		} else {
-			log.push(user.getName()
-					+ " is targeting " + target.getName()
-					+ " but has no weapon!");
+		if (w == null) {
+			w = unarmed;
 		}
+
+		// Execute action, depending on weapon type
+		boolean acted = false;
+		if (w instanceof RangedWeapon) {
+			acted = fireRangedWeapon(user, target, w);
+		} else if (w instanceof MeleeWeapon) {
+			acted = charge(user, target, w);
+		}
+		
+		// If the unit has acted, make it unable to act again
+		// TODO depending on exact action performed
 		if (acted) {
 			user.setMovesRemaining(0);
 			user.setMayAct(false);
@@ -379,8 +388,17 @@ public class TwoBrothersGame extends Game {
 		int max = 5;
 		int number = MathUtils.random(min, max);
 		for (int i = 0; i < number; i++) {
-			double damage = attacker.getWeapon().getPower();
+			// Get the weapon
+			Weapon w = attacker.getWeapon();
+			if (w == null || w instanceof RangedWeapon) {
+				w = unarmed;
+			}
+			
+			// Calculate and apply damage
+			double damage = w.getPower();
 			applyDamage(defender, damage);
+			
+			// If the blow is fatal, handle the defender's death
 			if (!defender.isAlive()) {
 				log.push(attacker.getName() + " hits " + defender.getName()
 						+ " for " + damage + " damage!");
@@ -389,10 +407,13 @@ public class TwoBrothersGame extends Game {
 				attacker.setLockedIntoCombat(null);
 				defender.setLockedIntoCombat(null);
 				break;
+			} else {
+				log.push(attacker.getName() + " hits " + defender.getName()
+						+ " for " + damage + " damage! (HP left: "
+						+ defender.getCurrentHealth() + ")");
 			}
-			log.push(attacker.getName() + " hits " + defender.getName()
-					+ " for " + damage + " damage! (HP left: "
-					+ defender.getCurrentHealth() + ")");
+			
+			// Switch roles of attacker and defender
 			Unit temp = attacker;
 			attacker = defender;
 			defender = temp;

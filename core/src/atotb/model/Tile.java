@@ -3,6 +3,10 @@ package atotb.model;
 import java.awt.Point;
 import java.util.LinkedList;
 
+/**
+ * 
+ * @author Ale Strooisma
+ */
 public class Tile {
 	private final Point position;
 	private final int terrain;
