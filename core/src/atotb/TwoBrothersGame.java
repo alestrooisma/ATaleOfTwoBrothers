@@ -91,7 +91,7 @@ public class TwoBrothersGame extends Game {
 
 	private void setUpController() {
 		// Create message log
-		log = new MessageLog(5);
+		log = new MessageLog(10);
 
 		// Set up input listeners
 		inputHandlers = new InputMultiplexer();
@@ -270,31 +270,36 @@ public class TwoBrothersGame extends Game {
 		preparePathFinder();
 	}
 
-	public void targetUnit(Unit target) {
+	public void targetUnit(Unit user, Unit target) {
 		//TODO check for action, otherwise use main weapon.
 
+		if (target.isLockedIntoCombat()) {
+			log.push(target.getName() + " is locked into combat - can't attack.");
+			return;
+		}
+		
 		boolean acted = false;
-		Weapon w = getSelectedUnit().getWeapon();
+		Weapon w = user.getWeapon();
 
 		if (w != null) {
-			if (getSelectedUnit().mayAct()) {
+			if (user.mayAct()) {
 				if (w instanceof RangedWeapon) {
-					acted = fireRangedWeapon(getSelectedUnit(), target, w);
+					acted = fireRangedWeapon(user, target, w);
 				} else if (w instanceof MeleeWeapon) {
-					acted = charge(getSelectedUnit(), target, w);
+					acted = charge(user, target, w);
 				}
 			} else {
-				log.push(getSelectedUnit().getName() + " may not act anymore.");
+				log.push(user.getName() + " may not act anymore.");
 			}
 		} else {
-			log.push(getSelectedUnit().getName()
+			log.push(user.getName()
 					+ " is targeting " + target.getName()
 					+ " but has no weapon!");
 		}
 		if (acted) {
-			getSelectedUnit().setMovesRemaining(0);
-			getSelectedUnit().setMayAct(false);
-			getSelectedUnit().setMayDash(false);
+			user.setMovesRemaining(0);
+			user.setMayAct(false);
+			user.setMayDash(false);
 		}
 	}
 
@@ -304,7 +309,7 @@ public class TwoBrothersGame extends Game {
 		if (target.getCurrentHealth() > 0) {
 			log.push(target.getName() + "'s remaining health = " + target.getCurrentHealth());
 		} else {
-			log.push(getSelectedUnit().getName() + " killed " + target.getName() + "!");
+			log.push(user.getName() + " killed " + target.getName() + "!");
 			model.getBattleMap().getTile(target.getPosition()).removeUnit();
 		}
 		return true;
@@ -381,6 +386,11 @@ public class TwoBrothersGame extends Game {
 						+ " for " + damage + " damage!");
 				log.push(attacker.getName() + " killed " + defender.getName() + "!");
 				model.getBattleMap().getTile(defender.getPosition()).removeUnit();
+				attacker.setLockedIntoCombat(null);
+				defender.setLockedIntoCombat(null);
+				if (defender == getSelectedUnit()) {
+					nextUnit();
+				}
 				break;
 			}
 			log.push(attacker.getName() + " hits " + defender.getName()

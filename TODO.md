@@ -4,7 +4,7 @@ Phase 1 - tRPG gameplay
   - [x] Charging
   - [x] Locked in combat
   - [x] Resolve combat
-  - [ ] Resolve all combat each turn
+  - [x] Resolve all combat each turn
   - [ ] Consolidation
 - [x] Load model information of map from file
 - [ ] Proper pathfinding
