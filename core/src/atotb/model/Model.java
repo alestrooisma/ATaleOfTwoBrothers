@@ -2,7 +2,7 @@ package atotb.model;
 
 /**
  * The central class for the model of A Tale of Two Brothers.
- * 
+ *
  * @author ale
  */
 public class Model {
@@ -19,7 +19,7 @@ public class Model {
 		armies = new Army[2];
 		armies[0] = playerParty;
 	}
-	
+
 	public void startBattle(BattleMap map, Army opponent) {
 		battleMap = map;
 		armies[1] = opponent;
@@ -50,15 +50,14 @@ public class Model {
 	}
 
 	public void incrementCurrentPlayer() {
-		int p = currentPlayer;
-		do {
-			currentPlayer = (currentPlayer + 1) % armies.length;
-			if (currentPlayer == p) {
-				//TODO handle endgame here, or (better) don't allow logic to get here.
-				System.out.println("Player " + p + " wins!");
-				return;
-			}
-		} while (getCurrentArmy().isDefeated());
+//		int p = currentPlayer;
+//		do {
+		currentPlayer = (currentPlayer + 1) % armies.length;
+//			if (currentPlayer == p) {
+//				// To prevent endless loop
+//				currentPlayer = p;
+//			}
+//		} while (getCurrentArmy().isDefeated());
 	}
 
 	public int getTurn() {

@@ -180,7 +180,7 @@ public class TwoBrothersGame extends Game {
 		for (Unit u : army.getUnits()) {
 			u.reset();
 		}
-		
+
 		// Resolve combat
 		for (Unit u : army.getUnits()) {
 			if (u.isLockedIntoCombat()) {
@@ -277,7 +277,7 @@ public class TwoBrothersGame extends Game {
 			log.push(target.getName() + " is locked into combat - can't attack.");
 			return;
 		}
-		
+
 		boolean acted = false;
 		Weapon w = user.getWeapon();
 
@@ -305,7 +305,7 @@ public class TwoBrothersGame extends Game {
 
 	private boolean fireRangedWeapon(Unit user, Unit target, Weapon weapon) {
 		log.push(user.getName() + " fires at " + target.getName() + " - " + weapon.getPower() + " damage!");
-		target.applyDamage(weapon.getPower());
+		applyDamage(target, weapon.getPower());
 		if (target.getCurrentHealth() > 0) {
 			log.push(target.getName() + "'s remaining health = " + target.getCurrentHealth());
 		} else {
@@ -380,7 +380,7 @@ public class TwoBrothersGame extends Game {
 		int number = MathUtils.random(min, max);
 		for (int i = 0; i < number; i++) {
 			double damage = attacker.getWeapon().getPower();
-			defender.applyDamage(damage);
+			applyDamage(defender, damage);
 			if (!defender.isAlive()) {
 				log.push(attacker.getName() + " hits " + defender.getName()
 						+ " for " + damage + " damage!");
@@ -388,9 +388,6 @@ public class TwoBrothersGame extends Game {
 				model.getBattleMap().getTile(defender.getPosition()).removeUnit();
 				attacker.setLockedIntoCombat(null);
 				defender.setLockedIntoCombat(null);
-				if (defender == getSelectedUnit()) {
-					nextUnit();
-				}
 				break;
 			}
 			log.push(attacker.getName() + " hits " + defender.getName()
@@ -399,6 +396,33 @@ public class TwoBrothersGame extends Game {
 			Unit temp = attacker;
 			attacker = defender;
 			defender = temp;
+		}
+	}
+
+	public void applyDamage(Unit target, double damage) {
+		double health = target.getCurrentHealth();
+		health -= damage;
+		if (health > 0) {
+			target.setCurrentHealth(health);
+		} else {
+			target.setCurrentHealth(0);
+			boolean unitsLeft = false;
+			for (Unit u : target.getArmy().getUnits()) {
+				if (u.isAlive()) {
+					unitsLeft = true;
+					break;
+				}
+			}
+			if (!unitsLeft) {
+				inputHandlers.removeProcessor(battleHandler);
+				if (target.getArmy() == model.getPlayerParty()) {
+					log.push("Defeat!");
+				} else {
+					log.push("Victory!");
+				}
+			} else if (target == getSelectedUnit()) {
+				nextUnit();
+			}
 		}
 	}
 

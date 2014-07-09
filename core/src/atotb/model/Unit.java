@@ -126,13 +126,6 @@ public class Unit extends Element {
 		this.currentHealth = currentHealth;
 	}
 
-	public void applyDamage(double damage) {
-		currentHealth -= damage;
-		if (currentHealth < 0) {
-			currentHealth = 0;
-		}
-	}
-
 	public double getMovesRemaining() {
 		return movesRemaining;
 	}
