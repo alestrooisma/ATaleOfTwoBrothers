@@ -175,12 +175,20 @@ public class TwoBrothersGame extends Game {
 		if (model.getCurrentPlayer() == 0) {
 			model.incrementTurn();
 		}
-		//turnStartTime = System.currentTimeMillis();
 
+		// Reset unit turn status
 		for (Unit u : army.getUnits()) {
 			u.reset();
 		}
+		
+		// Resolve combat
+		for (Unit u : army.getUnits()) {
+			if (u.isLockedIntoCombat()) {
+				resolveCombat(u, u.getLockedIntoCombat());
+			}
+		}
 
+		// Select unit
 		selectedUnit = -1;
 		nextUnit();
 	}
