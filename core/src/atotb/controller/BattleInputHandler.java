@@ -47,7 +47,7 @@ public class BattleInputHandler extends InputAdapter {
 						game.moveUnit(game.getSelectedUnit(), x, y);
 						break;
 					case TARGET:
-						game.targetUnit(game.getSelectedUnit(), u);
+						game.targetUnit(game.getSelectedUnit(), u, game.getPathFinder());
 						break;
 				}
 				return true;

@@ -31,6 +31,10 @@ public class PathFinder {
 		}
 	}
 
+	public void calculateDistancesFrom(int xi, int yi) {
+		calculateDistancesFrom(xi, yi, Double.MAX_VALUE);
+	}
+
 	public void calculateDistancesFrom(int xi, int yi, double limit) {
 		// Reset fields
 		for (int i = 0; i < bmap.getWidth(); i++) {

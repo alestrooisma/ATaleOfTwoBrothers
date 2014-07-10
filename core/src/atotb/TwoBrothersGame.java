@@ -1,6 +1,8 @@
 package atotb;
 
 import atotb.controller.*;
+import atotb.controller.ai.ArtificialIntelligence;
+import atotb.controller.ai.WolfAI;
 import atotb.model.*;
 import atotb.model.items.*;
 import atotb.util.MessageLog;
@@ -34,8 +36,9 @@ public class TwoBrothersGame extends Game {
 	// Controller
 	private InputMultiplexer inputHandlers;
 	private InputAdapter battleHandler;
-	private PathFinder pathfinder;
 	private MessageLog log;
+	private PathFinder pathfinder;
+	private ArtificialIntelligence[] ai;
 	//
 	// Shared resources
 	private SpriteBatch batch;
@@ -123,13 +126,13 @@ public class TwoBrothersGame extends Game {
 		return model.getBattle().getCurrentArmy().getUnits().get(selectedUnit);
 	}
 
-	public PathFinder getPathfinder() {
+	public PathFinder getPathFinder() {
 		return pathfinder;
 	}
 
 	// Game state modifiers
 	//
-	private void startBattle() {
+	public void startBattle() {
 
 		// Create enemy army
 		Army enemy = new Army("Wolves", "A pack of wolves.", "Uh, oh, it seems you've encountered a pack of ferocious wolves!");
@@ -169,30 +172,30 @@ public class TwoBrothersGame extends Game {
 		battleMap.addUnit(model.getPlayerParty().getUnits().get(1), 6, 14);
 
 		model.setBattle(new Battle(battleMap, model.getPlayerParty(), enemy));
+		ai = new ArtificialIntelligence[2];
+		ai[1] = new WolfAI();
 		pathfinder = new PathFinder(model.getBattle().getBattleMap());
 		battleScreen.setMap(tileMap);
 		setScreen(battleScreen);
-		inputHandlers.addProcessor(battleHandler);
 		startTurn(model.getBattle().getCurrentArmy());
 	}
 
-	private void endBattle(boolean victory) {
+	public void endBattle(boolean victory) {
 		inputHandlers.removeProcessor(battleHandler);
 		if (victory) {
 			log.push("Victory!");
 		} else {
 			log.push("Defeat...");
 		}
-		
+
 		// This is what should be done, depending on how battle end is rendered
 		// Possibly this should only be done after leaving the victory screen.
-		
 		//setScreen(some other screen);
 		//model.setBattle(null);
 		//tileMap.dispose();
 	}
-	
-	private void startTurn(Army army) {
+
+	public void startTurn(Army army) {
 		if (model.getBattle().getCurrentPlayer() == 0) {
 			model.getBattle().incrementTurn();
 		}
@@ -209,14 +212,24 @@ public class TwoBrothersGame extends Game {
 			}
 		}
 
-		// Select unit (only if player is human, otherwise give control to AI)
-		selectedUnit = -1;
-		nextUnit();
+		// Give control to player or AI
+		if (ai[model.getBattle().getCurrentPlayer()] == null) {
+			selectedUnit = -1;
+			nextUnit();
+			inputHandlers.addProcessor(battleHandler);
+		} else {
+			ai[model.getBattle().getCurrentPlayer()].playTurn(this,
+					model.getBattle().getCurrentPlayer());
+			endTurn();
+		}
 	}
 
 	public void endTurn() {
 		// Finalize turn
 		deselectUnit();
+		if (ai[model.getBattle().getCurrentPlayer()] == null) {
+			inputHandlers.removeProcessor(battleHandler);
+		}
 
 		// Start next player's turn
 		model.getBattle().nextPlayer();
@@ -229,17 +242,15 @@ public class TwoBrothersGame extends Game {
 
 	public void selectUnit(int number) {
 		selectedUnit = number;
-		preparePathFinder();
+		if (ai[model.getBattle().getCurrentPlayer()] == null) {
+			preparePathFinder();
+		}
 	}
 
 	private void preparePathFinder() {
 		Unit u = getSelectedUnit();
-		double maxMoves = u.getMovesRemaining();
-		if (u.mayDash()) {
-			maxMoves += u.getDashDistance();
-		}
 		pathfinder.calculateDistancesFrom(
-				u.getPosition().x, u.getPosition().y, maxMoves);
+				u.getPosition().x, u.getPosition().y, u.getTotalMovesRemaining());
 	}
 
 	public void deselectUnit() {
@@ -291,7 +302,7 @@ public class TwoBrothersGame extends Game {
 		preparePathFinder();
 	}
 
-	public void targetUnit(Unit user, Unit target) {
+	public void targetUnit(Unit user, Unit target, PathFinder pf) {
 		// Check if the unit is allowed to act
 		if (!user.mayAct()) {
 			log.push(user.getName() + " may not act anymore.");
@@ -316,9 +327,9 @@ public class TwoBrothersGame extends Game {
 		if (w instanceof RangedWeapon) {
 			acted = fireRangedWeapon(user, target, w);
 		} else if (w instanceof MeleeWeapon) {
-			acted = charge(user, target, w);
+			acted = charge(user, target, pf);
 		}
-		
+
 		// If the unit has acted, make it unable to act again
 		// TODO depending on exact action performed
 		if (acted) {
@@ -340,36 +351,16 @@ public class TwoBrothersGame extends Game {
 		return true;
 	}
 
-	private boolean charge(Unit user, Unit target, Weapon weapon) {
+	private boolean charge(Unit user, Unit target, PathFinder pf) {
 		int tx = target.getPosition().x;
 		int ty = target.getPosition().y;
-		double nw = pathfinder.getDistanceTo_safe(tx, ty - 1);
-		double ne = pathfinder.getDistanceTo_safe(tx + 1, ty);
-		double se = pathfinder.getDistanceTo_safe(tx, ty + 1);
-		double sw = pathfinder.getDistanceTo_safe(tx - 1, ty);
 
 		// Find best target location
-		int dir = 1;
-		double d = nw;
-		if (ne < d) {
-			dir = 2;
-			d = ne;
-		}
-		if (se < d) {
-			dir = 3;
-			d = se;
-		}
-		if (sw < d) {
-			dir = 4;
-			d = sw;
-		}
+		Direction dir = getChargingDirection(tx, ty, pf);
+		double d = getChargingDistance(tx, ty, pf, dir);
 
 		// Check range
-		double maxMoves = user.getMovesRemaining();
-		if (user.mayDash()) {
-			maxMoves += user.getDashDistance();
-		}
-		if (d > maxMoves) {
+		if (d > user.getTotalMovesRemaining()) {
 			log.push(target.getName() + " is out of charging range for "
 					+ user.getName());
 			return false;
@@ -377,16 +368,16 @@ public class TwoBrothersGame extends Game {
 
 		// In range, so move there
 		switch (dir) {
-			case 1: //nw
+			case NW:
 				actuallyMoveUnit(user, tx, ty - 1);
 				break;
-			case 2: //ne
+			case NE:
 				actuallyMoveUnit(user, tx + 1, ty);
 				break;
-			case 3: //se
+			case SE:
 				actuallyMoveUnit(user, tx, ty + 1);
 				break;
-			case 4: //sw
+			case SW:
 				actuallyMoveUnit(user, tx - 1, ty);
 				break;
 		}
@@ -399,6 +390,49 @@ public class TwoBrothersGame extends Game {
 		return true;
 	}
 
+	public Direction getChargingDirection(int targetX, int targetY, PathFinder pf) {
+		double nw = pf.getDistanceTo_safe(targetX, targetY - 1);
+		double ne = pf.getDistanceTo_safe(targetX + 1, targetY);
+		double se = pf.getDistanceTo_safe(targetX, targetY + 1);
+		double sw = pf.getDistanceTo_safe(targetX - 1, targetY);
+
+		Direction dir = Direction.NW;
+		double d = nw;
+		if (ne < d) {
+			dir = Direction.NE;
+			d = ne;
+		}
+		if (se < d) {
+			dir = Direction.SE;
+			d = se;
+		}
+		if (sw < d) {
+			dir = Direction.SW;
+			d = sw;
+		}
+		return dir;
+	}
+
+	public double getChargingDistance(
+			int targetX, int targetY, PathFinder pf, Direction dir) {
+		double d = 0;
+		switch (dir) {
+			case NW:
+				d = pathfinder.getDistanceTo(targetX, targetY - 1);
+				break;
+			case NE:
+				d = pathfinder.getDistanceTo(targetX + 1, targetY);
+				break;
+			case SE:
+				d = pathfinder.getDistanceTo(targetX, targetY + 1);
+				break;
+			case SW:
+				d = pathfinder.getDistanceTo(targetX - 1, targetY);
+				break;
+		}
+		return d;
+	}
+	
 	private void resolveCombat(Unit attacker, Unit defender) {
 		int min = 3;
 		int max = 5;
@@ -409,11 +443,11 @@ public class TwoBrothersGame extends Game {
 			if (w == null || w instanceof RangedWeapon) {
 				w = unarmed;
 			}
-			
+
 			// Calculate and apply damage
 			double damage = w.getPower();
 			applyDamage(defender, damage);
-			
+
 			// If the blow is fatal, handle the defender's death
 			if (!defender.isAlive()) {
 				log.push(attacker.getName() + " hits " + defender.getName()
@@ -428,7 +462,7 @@ public class TwoBrothersGame extends Game {
 						+ " for " + damage + " damage! (HP left: "
 						+ defender.getCurrentHealth() + ")");
 			}
-			
+
 			// Switch roles of attacker and defender
 			Unit temp = attacker;
 			attacker = defender;
@@ -467,5 +501,10 @@ public class TwoBrothersGame extends Game {
 		font.dispose();
 		battleScreen.dispose();
 		Resources.unload();
+	}
+
+	public enum Direction {
+
+		NW, NE, SE, SW;
 	}
 }

@@ -69,14 +69,11 @@ public class BattleScreen implements Screen {
 
 	@Override
 	public void render(float dt) {
-		handleInput();
-
+		handleCameraControl();
+		
 		// Clear buffers and paint the background dark gray
 		Gdx.gl.glClearColor(0.2f, 0.2f, 0.2f, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
-		// Recalculate camera matrix
-		camera.update();
 
 		// Calculate cursor position
 		vec.x = Gdx.input.getX();
@@ -119,7 +116,7 @@ public class BattleScreen implements Screen {
 		if (u != null) {
 			for (int i = 0; i < game.getModel().getBattle().getBattleMap().getWidth(); i++) {
 				for (int j = 0; j < game.getModel().getBattle().getBattleMap().getHeight(); j++) {
-					double d = game.getPathfinder().getDistanceTo(i, j);
+					double d = game.getPathFinder().getDistanceTo(i, j);
 					if (d == 0) {
 						// Don't draw
 					} else if (d <= u.getMovesRemaining()) {
@@ -218,39 +215,23 @@ public class BattleScreen implements Screen {
 		batch.end();
 	}
 
-	private void handleInput() {
-//		if (Gdx.input.isKeyPressed(Input.Keys.A)) {
-//			camera.zoom += 0.02;
-//			if (camera.zoom > 2) {
-//				camera.zoom = 2;
-//			}
-//		}
-//		if (Gdx.input.isKeyPressed(Input.Keys.Q)) {
-//			camera.zoom -= 0.02;
-//			if (camera.zoom < 1) {
-//				camera.zoom = 1;
-//			}
-//		}
+	private void handleCameraControl() {
+		// Handle input
 		if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-//			if (camera.position.x > WIDTH / 2) {
 			camera.translate(-3, 0, 0);
-//			}
 		}
 		if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-//			if (camera.position.x < 1024 - WIDTH / 2) {
 			camera.translate(3, 0, 0);
-//			}
 		}
 		if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
-//			if (camera.position.y > HEIGHT / 2) {
 			camera.translate(0, -3, 0);
-//			}
 		}
 		if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
-//			if (camera.position.y < 1024 - HEIGHT / 2) {
 			camera.translate(0, 3, 0);
-//			}
 		}
+
+		// Recalculate camera matrix
+		camera.update();
 	}
 
 	public MouseAction getMouseAction(int x, int y) {

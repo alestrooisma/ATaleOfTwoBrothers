@@ -133,6 +133,14 @@ public class Unit extends Element {
 		this.movesRemaining = movesRemaining;
 	}
 
+	public double getTotalMovesRemaining() {
+		double moves = getMovesRemaining();
+		if (mayDash) {
+			moves += getDashDistance();
+		}
+		return moves;
+	}
+
 	public void reduceMoves(double moves) {
 		movesRemaining -= moves;
 	}
