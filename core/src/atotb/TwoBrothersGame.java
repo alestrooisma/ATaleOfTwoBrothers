@@ -29,6 +29,7 @@ public class TwoBrothersGame extends Game {
 	//
 	// View
 	private BattleScreen battleScreen;
+	private TiledMap tileMap;
 	//
 	// Controller
 	private InputMultiplexer inputHandlers;
@@ -141,7 +142,7 @@ public class TwoBrothersGame extends Game {
 		w3.setWeapon(fangs);
 
 		// Load the map
-		TiledMap tileMap = new TmxMapLoader().load("maps/testmap.tmx");
+		tileMap = new TmxMapLoader().load("maps/testmap.tmx");
 		MapProperties prop = tileMap.getProperties();
 		int mapWidth = prop.get("width", Integer.class);
 		int mapHeight = prop.get("height", Integer.class);
@@ -169,13 +170,28 @@ public class TwoBrothersGame extends Game {
 
 		model.setBattle(new Battle(battleMap, model.getPlayerParty(), enemy));
 		pathfinder = new PathFinder(model.getBattle().getBattleMap());
-		selectedUnit = 0;
 		battleScreen.setMap(tileMap);
 		setScreen(battleScreen);
 		inputHandlers.addProcessor(battleHandler);
 		startTurn(model.getBattle().getCurrentArmy());
 	}
 
+	private void endBattle(boolean victory) {
+		inputHandlers.removeProcessor(battleHandler);
+		if (victory) {
+			log.push("Victory!");
+		} else {
+			log.push("Defeat...");
+		}
+		
+		// This is what should be done, depending on how battle end is rendered
+		// Possibly this should only be done after leaving the victory screen.
+		
+		//setScreen(some other screen);
+		//model.setBattle(null);
+		//tileMap.dispose();
+	}
+	
 	private void startTurn(Army army) {
 		if (model.getBattle().getCurrentPlayer() == 0) {
 			model.getBattle().incrementTurn();
@@ -435,12 +451,8 @@ public class TwoBrothersGame extends Game {
 				}
 			}
 			if (!unitsLeft) {
-				inputHandlers.removeProcessor(battleHandler);
-				if (target.getArmy() == model.getPlayerParty()) {
-					log.push("Defeat!");
-				} else {
-					log.push("Victory!");
-				}
+				endBattle(target.getArmy() == model.getPlayerParty());
+				deselectUnit();
 			} else if (target == getSelectedUnit()) {
 				nextUnit();
 			}

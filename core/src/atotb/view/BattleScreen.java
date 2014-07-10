@@ -25,15 +25,17 @@ import com.badlogic.gdx.utils.viewport.Viewport;
  */
 public class BattleScreen implements Screen {
 
+	// Received
 	private final TwoBrothersGame game;
 	private final SpriteBatch batch;
 	private final BitmapFont font;
+	//
+	//Owned
 	private final OrthographicCamera camera;
 	private final OrthographicCamera uiCamera;
 	private final Viewport viewport;
 	private final Viewport uiViewport;
 	private IsometricTiledMapRenderer mapRenderer;
-	private TiledMap map;
 	private final Vector3 vec = new Vector3();
 	private int windowWidth;
 	private int windowHeight;
@@ -55,7 +57,9 @@ public class BattleScreen implements Screen {
 	}
 
 	public void setMap(TiledMap map) {
-		this.map = map;
+		if (mapRenderer != null) {
+			mapRenderer.dispose();
+		}
 		mapRenderer = new IsometricTiledMapRenderer(map, 1, batch);
 	}
 
@@ -66,7 +70,7 @@ public class BattleScreen implements Screen {
 	@Override
 	public void render(float dt) {
 		handleInput();
-		
+
 		// Clear buffers and paint the background dark gray
 		Gdx.gl.glClearColor(0.2f, 0.2f, 0.2f, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
@@ -111,26 +115,26 @@ public class BattleScreen implements Screen {
 		}
 
 		// Draw walk/dash range markers - TODO order
-		for (int i = 0; i < game.getModel().getBattle().getBattleMap().getWidth(); i++) {
-			for (int j = 0; j < game.getModel().getBattle().getBattleMap().getHeight(); j++) {
-				double d = game.getPathfinder().getDistanceTo(i, j);
-				Unit u = game.getSelectedUnit();
-				if (d == 0) {
-					// Don't draw
-				} else if (d <= u.getMovesRemaining()) {
-					tileToScreenCoords(i, j, vec);
-					batch.draw(Resources.walkMarker, vec.x, vec.y);
-				} else if (u.mayDash()
-						&& d <= u.getMovesRemaining() + u.getDashDistance()) {
-					tileToScreenCoords(i, j, vec);
-					batch.draw(Resources.dashMarker, vec.x, vec.y);
-				}
+		Unit u = game.getSelectedUnit();
+		if (u != null) {
+			for (int i = 0; i < game.getModel().getBattle().getBattleMap().getWidth(); i++) {
+				for (int j = 0; j < game.getModel().getBattle().getBattleMap().getHeight(); j++) {
+					double d = game.getPathfinder().getDistanceTo(i, j);
+					if (d == 0) {
+						// Don't draw
+					} else if (d <= u.getMovesRemaining()) {
+						tileToScreenCoords(i, j, vec);
+						batch.draw(Resources.walkMarker, vec.x, vec.y);
+					} else if (u.mayDash()
+							&& d <= u.getMovesRemaining() + u.getDashDistance()) {
+						tileToScreenCoords(i, j, vec);
+						batch.draw(Resources.dashMarker, vec.x, vec.y);
+					}
 //				tileToScreenCoords(i, j, vec);
 //				font.draw(batch, "" + game.getModel().getBattle().getBattleMap().getTile(i, j).getTerrain(),vec.x+32-5,vec.y+16+20);
+				}
 			}
 		}
-
-		Unit u = game.getSelectedUnit();
 
 		// Draw unit selection marker underlayer
 		if (u != null) {
@@ -229,22 +233,22 @@ public class BattleScreen implements Screen {
 //		}
 		if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
 //			if (camera.position.x > WIDTH / 2) {
-				camera.translate(-3, 0, 0);
+			camera.translate(-3, 0, 0);
 //			}
 		}
 		if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
 //			if (camera.position.x < 1024 - WIDTH / 2) {
-				camera.translate(3, 0, 0);
+			camera.translate(3, 0, 0);
 //			}
 		}
 		if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
 //			if (camera.position.y > HEIGHT / 2) {
-				camera.translate(0, -3, 0);
+			camera.translate(0, -3, 0);
 //			}
 		}
 		if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
 //			if (camera.position.y < 1024 - HEIGHT / 2) {
-				camera.translate(0, 3, 0);
+			camera.translate(0, 3, 0);
 //			}
 		}
 	}
@@ -258,7 +262,8 @@ public class BattleScreen implements Screen {
 				if (!u.isEnemy(game.getModel().getBattle().getCurrentArmy())) {
 					// Unit is friendly -> select it
 					return MouseAction.SELECT;
-				} else if (game.getSelectedUnit().mayAct()) {
+				} else if (game.getSelectedUnit() != null 
+						&& game.getSelectedUnit().mayAct()) {
 					// Unit is enemy
 					return MouseAction.TARGET;
 				}
