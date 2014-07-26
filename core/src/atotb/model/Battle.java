@@ -12,10 +12,17 @@ public class Battle {
 	private int turn;
 
 	public Battle(BattleMap battleMap, Army player, Army opponent) {
+		this(battleMap, player, opponent, -1, 0);
+	}
+
+	public Battle(BattleMap battleMap, Army player, Army opponent,
+			int currentPlayer, int turn) {
 		this.battleMap = battleMap;
 		armies = new Army[2];
 		armies[0] = player;
 		armies[1] = opponent;
+		this.currentPlayer = currentPlayer;
+		this.turn = turn;
 	}
 
 	public BattleMap getBattleMap() {
@@ -48,5 +55,18 @@ public class Battle {
 
 	public void incrementTurn() {
 		turn++;
+	}
+
+	public int otherPlayer(Army army) {
+		for (int i = 0; i < armies.length; i++) {
+			if (army != armies[i]) {
+				return i;
+			}
+		}
+		return 0;
+	}
+
+	public int otherPlayer(int player) {
+		return (player + 1) % armies.length;
 	}
 }

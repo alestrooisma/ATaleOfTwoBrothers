@@ -14,9 +14,11 @@ Phase 1 - tRPG gameplay
 - [x] Camera control
 - [ ] Abilities
 - [ ] Basic AI
+- [ ] !!! Revise control flow !!! (multi-threaded?)
 
 Phase 2 - graphics, animation and UI
 ------------------
+- [ ] Add universal tweening engine
 - [ ] Movement (range) indicators
 - [ ] Grid
 - [ ] Death animation

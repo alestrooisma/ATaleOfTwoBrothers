@@ -2,6 +2,7 @@ package atotb.controller;
 
 import atotb.TwoBrothersGame;
 import atotb.model.Unit;
+import atotb.util.Enum.GameState;
 import atotb.view.BattleScreen;
 import atotb.view.BattleScreen.MouseAction;
 import com.badlogic.gdx.Input.Buttons;
@@ -96,7 +97,7 @@ public class BattleInputHandler extends InputAdapter {
 				game.nextUnit();
 				break;
 			case Keys.ENTER:
-				game.endTurn();
+				game.resumeGameCycle(GameState.END_TURN);
 				break;
 		}
 		return false;

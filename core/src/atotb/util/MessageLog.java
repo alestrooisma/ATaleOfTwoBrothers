@@ -23,6 +23,7 @@ public class MessageLog {
 	}
 
 	public void push(String message) {
+		System.out.println("Log: " + message);
 		lastEntry = (lastEntry + 1) % maxSize;
 		log[lastEntry] = message;
 		if (currentSize < maxSize) {

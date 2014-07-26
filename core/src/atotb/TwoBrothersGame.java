@@ -5,6 +5,8 @@ import atotb.controller.ai.ArtificialIntelligence;
 import atotb.controller.ai.WolfAI;
 import atotb.model.*;
 import atotb.model.items.*;
+import atotb.util.Enum.Direction;
+import atotb.util.Enum.GameState;
 import atotb.util.MessageLog;
 import atotb.util.PathFinder;
 import atotb.view.*;
@@ -26,8 +28,9 @@ public class TwoBrothersGame extends Game {
 
 	// Model
 	private Model model;
-	private int selectedUnit = -1;
+	private int selectedUnit;
 	private Weapon unarmed;
+	private boolean battleEnded;
 	//
 	// View
 	private BattleScreen battleScreen;
@@ -171,17 +174,26 @@ public class TwoBrothersGame extends Game {
 		battleMap.addUnit(model.getPlayerParty().getUnits().get(0), 9, 11);
 		battleMap.addUnit(model.getPlayerParty().getUnits().get(1), 6, 14);
 
+		battleEnded = false;
 		model.setBattle(new Battle(battleMap, model.getPlayerParty(), enemy));
 		ai = new ArtificialIntelligence[2];
 		ai[1] = new WolfAI();
 		pathfinder = new PathFinder(model.getBattle().getBattleMap());
 		battleScreen.setMap(tileMap);
 		setScreen(battleScreen);
-		startTurn(model.getBattle().getCurrentArmy());
+		resumeGameCycle(GameState.START_TURN);
 	}
 
-	public void endBattle(boolean victory) {
+	private void endBattle() {
 		inputHandlers.removeProcessor(battleHandler);
+		
+		boolean victory = false;
+		for (Unit u : model.getPlayerParty().getUnits()) {
+			if (u.isAlive()) {
+				victory = true;
+			}
+		}
+		
 		if (victory) {
 			log.push("Victory!");
 		} else {
@@ -195,10 +207,53 @@ public class TwoBrothersGame extends Game {
 		//tileMap.dispose();
 	}
 
-	public void startTurn(Army army) {
+	public void resumeGameCycle(GameState state) {
+
+		switch (state) {
+			case END_TURN: // Reclaim control
+				inputHandlers.removeProcessor(battleHandler);
+				endTurn();
+				break;
+		}
+
+		while (true) {
+			model.getBattle().nextPlayer();
+			startTurn();
+			
+			if (battleEnded) {
+				break;
+			}
+			
+			// Give control to player or AI
+			if (ai[model.getBattle().getCurrentPlayer()] == null) {
+				selectedUnit = -1;
+				nextUnit();
+				// Return control to player
+				inputHandlers.addProcessor(battleHandler);
+				return;
+			} else {
+				ai[model.getBattle().getCurrentPlayer()].playTurn(this,
+						model.getBattle().getCurrentPlayer());
+
+			}
+			
+			if (battleEnded) {
+				break;
+			}
+
+			// Entry point for GameState.END_TURN
+			endTurn();
+		}
+		
+		endBattle();
+	}
+
+	private void startTurn() {
 		if (model.getBattle().getCurrentPlayer() == 0) {
 			model.getBattle().incrementTurn();
 		}
+
+		Army army = model.getBattle().getCurrentArmy();
 
 		// Reset unit turn status
 		for (Unit u : army.getUnits()) {
@@ -209,31 +264,16 @@ public class TwoBrothersGame extends Game {
 		for (Unit u : army.getUnits()) {
 			if (u.isLockedIntoCombat()) {
 				resolveCombat(u, u.getLockedIntoCombat());
+				if (battleEnded) {
+					return;
+				}
 			}
-		}
-
-		// Give control to player or AI
-		if (ai[model.getBattle().getCurrentPlayer()] == null) {
-			selectedUnit = -1;
-			nextUnit();
-			inputHandlers.addProcessor(battleHandler);
-		} else {
-			ai[model.getBattle().getCurrentPlayer()].playTurn(this,
-					model.getBattle().getCurrentPlayer());
-			endTurn();
 		}
 	}
 
-	public void endTurn() {
+	private void endTurn() {
 		// Finalize turn
 		deselectUnit();
-		if (ai[model.getBattle().getCurrentPlayer()] == null) {
-			inputHandlers.removeProcessor(battleHandler);
-		}
-
-		// Start next player's turn
-		model.getBattle().nextPlayer();
-		startTurn(model.getBattle().getCurrentArmy());
 	}
 
 	public void selectUnit(Unit unit) {
@@ -415,24 +455,9 @@ public class TwoBrothersGame extends Game {
 
 	public double getChargingDistance(
 			int targetX, int targetY, PathFinder pf, Direction dir) {
-		double d = 0;
-		switch (dir) {
-			case NW:
-				d = pathfinder.getDistanceTo(targetX, targetY - 1);
-				break;
-			case NE:
-				d = pathfinder.getDistanceTo(targetX + 1, targetY);
-				break;
-			case SE:
-				d = pathfinder.getDistanceTo(targetX, targetY + 1);
-				break;
-			case SW:
-				d = pathfinder.getDistanceTo(targetX - 1, targetY);
-				break;
-		}
-		return d;
+		return pf.getDistanceTo(dir.getX(targetX), dir.getY(targetY));
 	}
-	
+
 	private void resolveCombat(Unit attacker, Unit defender) {
 		int min = 3;
 		int max = 5;
@@ -485,7 +510,7 @@ public class TwoBrothersGame extends Game {
 				}
 			}
 			if (!unitsLeft) {
-				endBattle(target.getArmy() == model.getPlayerParty());
+				battleEnded = true;
 				deselectUnit();
 			} else if (target == getSelectedUnit()) {
 				nextUnit();
@@ -501,10 +526,5 @@ public class TwoBrothersGame extends Game {
 		font.dispose();
 		battleScreen.dispose();
 		Resources.unload();
-	}
-
-	public enum Direction {
-
-		NW, NE, SE, SW;
 	}
 }
