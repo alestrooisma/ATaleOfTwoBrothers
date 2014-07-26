@@ -8,9 +8,9 @@ Phase 1 - tRPG gameplay
   - [x] No ranged weapons in melee
   - [ ] Consolidation
 - [x] Load model information of map from file
-- [ ] Proper pathfinding
+- [x] Proper pathfinding
   - [x] Correct determination of reachable tiles (BFS)
-  - [ ] Obtaining a path to the destination (backtracking)
+  - [x] Obtaining a path to the destination (backtracking)
 - [x] Camera control
 - [ ] Abilities
 - [ ] Basic AI

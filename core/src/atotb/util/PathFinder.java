@@ -1,6 +1,8 @@
 package atotb.util;
 
 import atotb.model.BattleMap;
+import com.badlogic.gdx.utils.Array;
+import java.awt.Point;
 
 /**
  * TODO pooling TODO inaccessible terrain TODO full map
@@ -12,6 +14,8 @@ public class PathFinder {
 	private final BattleMap bmap;
 	private final double[][] map;
 	private final List list;
+	private int xi;
+	private int yi;
 
 	public PathFinder(BattleMap bmap) {
 		this.bmap = bmap;
@@ -31,6 +35,18 @@ public class PathFinder {
 		}
 	}
 
+	public Array<Point> getPathTo(int x, int y) {
+		Array<Point> path = new Array<Point>();
+		Point start = bmap.getTile(xi, yi).getPosition();
+		Point target = bmap.getTile(x, y).getPosition();
+		while (target != start) {
+			if (map[x+1][y-1] < map[x][y]) {
+				
+			}
+		}
+		return path;
+	}
+
 	public void calculateDistancesFrom(int xi, int yi) {
 		calculateDistancesFrom(xi, yi, Double.MAX_VALUE);
 	}
@@ -43,6 +59,9 @@ public class PathFinder {
 			}
 		}
 		list.clear();
+		
+		this.xi = xi;
+		this.yi = yi;
 
 		// Starting point
 		map[xi][yi] = 0;
