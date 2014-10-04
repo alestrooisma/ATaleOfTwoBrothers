@@ -14,7 +14,6 @@ Phase 1 - tRPG gameplay
 - [x] Camera control
 - [ ] Abilities
 - [ ] Basic AI
-- [x] Revise control flow
 
 Phase 2 - graphics, animation and UI
 ------------------

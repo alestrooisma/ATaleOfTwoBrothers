@@ -25,21 +25,21 @@ public class BattleInputHandler extends InputAdapter {
 	@Override
 	public boolean touchDown(int screenX, int screenY, int pointer, int button) {
 		screen.addEvent(new MouseEvent(MouseEvent.Type.PRESSED, 
-				screenX, screenY, pointer, button));
+				screenX, screenY, button));
 		return true;
 	}
 
 	@Override
 	public boolean touchDragged(int screenX, int screenY, int pointer) {
 		screen.addEvent(new MouseEvent(MouseEvent.Type.DRAGGED, 
-				screenX, screenY, pointer, -1));
+				screenX, screenY, -1));
 		return true;
 	}
 
 	@Override
 	public boolean touchUp(int screenX, int screenY, int pointer, int button) {
 		screen.addEvent(new MouseEvent(MouseEvent.Type.RELEASED, 
-				screenX, screenY, pointer, button));
+				screenX, screenY, button));
 		return true;
 	}
 
