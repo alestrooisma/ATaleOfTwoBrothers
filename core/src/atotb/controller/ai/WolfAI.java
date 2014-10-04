@@ -16,13 +16,14 @@ import java.util.logging.Logger;
 public class WolfAI implements ArtificialIntelligence {
 
 	@Override
-	public void playTurn(TwoBrothersGame game, int player) {
+	public void playTurn(TwoBrothersGame game) {
 		System.out.println("Start AI");
 
 		// Getting some useful objects
+		int player = game.getModel().getBattle().getCurrentPlayer();
 		Battle battle = game.getModel().getBattle();
 		Army army = battle.getArmy(player);
-		Army enemyArmy = battle.getArmy((player + 1) % 2); //TODO multiple parties
+		Army enemyArmy = battle.getArmy((player + 1) % 2); //TODO multiple enemy armies
 		PathFinder pf = game.getPathFinder();
 
 		// Iterate over all units
@@ -50,7 +51,7 @@ public class WolfAI implements ArtificialIntelligence {
 
 				if (minDistance <= unit.getTotalMovesRemaining()) {
 					game.targetUnit(unit, nearestEnemy, pf);
-				}
+				} //TODO else move closer
 			}
 		}
 		System.out.println("End AI");

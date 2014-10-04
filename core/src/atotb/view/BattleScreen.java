@@ -197,10 +197,7 @@ public class BattleScreen implements Screen {
 				game.deselectUnit();
 				break;
 			case Keys.ENTER:
-				game.endTurn();
-				game.startTurn();
-				// Select first unit
-				game.nextUnit();
+				game.nextTurn();
 				break;
 		}
 	}

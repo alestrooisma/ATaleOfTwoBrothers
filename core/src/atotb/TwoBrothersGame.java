@@ -131,7 +131,7 @@ public class TwoBrothersGame extends Game {
 	public PathFinder getPathFinder() {
 		return pathfinder;
 	}
-
+	
 	// Game state modifiers
 	//
 	public void startBattle() {
@@ -178,7 +178,7 @@ public class TwoBrothersGame extends Game {
 		battleEnded = false;
 		model.setBattle(new Battle(battleMap, model.getPlayerParty(), enemy));
 		ai = new ArtificialIntelligence[2];
-//		ai[1] = new WolfAI();
+		ai[1] = new WolfAI();
 		pathfinder = new PathFinder(model.getBattle().getBattleMap());
 		battleScreen.setMap(tileMap);
 		setScreen(battleScreen);
@@ -191,14 +191,14 @@ public class TwoBrothersGame extends Game {
 
 	public void endBattle() {
 		inputHandlers.removeProcessor(battleHandler);
-		
+
 		boolean victory = false;
 		for (Unit u : model.getPlayerParty().getUnits()) {
 			if (u.isAlive()) {
 				victory = true;
 			}
 		}
-		
+
 		if (victory) {
 			log.push("Victory!");
 		} else {
@@ -212,15 +212,36 @@ public class TwoBrothersGame extends Game {
 		//tileMap.dispose();
 	}
 
+	public void nextTurn() {
+		// End this turn
+		endTurn();
+		
+		// Start next players turn
+		startTurn();
+		
+		// Handle AI until it's a human player's turn 
+		int player = model.getBattle().getCurrentPlayer();
+		while (ai[player] != null && !battleEnded) {
+			ai[player].playTurn(this);
+			startTurn();
+			player = model.getBattle().getCurrentPlayer();
+		}
+		
+		// Select first unit
+		if (!battleEnded) {
+			nextUnit();
+		}
+	}
+	
 	public void startTurn() {
 		// Hand turn to next player
 		model.getBattle().nextPlayer();
-			
+		int player = model.getBattle().getCurrentPlayer();
+
 		// Increment turn count if first player starts a turn
-		if (model.getBattle().getCurrentPlayer() == 0) {
+		if (player == 0) {
 			model.getBattle().incrementTurn();
 		}
-
 
 		// Reset unit turn status
 		Army army = model.getBattle().getCurrentArmy();
@@ -484,7 +505,7 @@ public class TwoBrothersGame extends Game {
 			}
 		}
 	}
-	
+
 	public boolean isBattleOver() {
 		return battleEnded;
 	}
