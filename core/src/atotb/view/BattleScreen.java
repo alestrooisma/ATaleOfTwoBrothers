@@ -120,17 +120,15 @@ public class BattleScreen implements Screen {
 				switch (me.getType()) {
 					case PRESSED:
 						processMousePressedEvent(
-								me.getScreenX(), me.getScreenY(),
-								me.getPointer(), me.getButton());
+								me.getScreenX(), me.getScreenY(), me.getButton());
 						break;
 					case RELEASED:
 						processMouseReleasedEvent(
-								me.getScreenX(), me.getScreenY(),
-								me.getPointer(), me.getButton());
+								me.getScreenX(), me.getScreenY(), me.getButton());
 						break;
 					case DRAGGED:
 						processMouseDraggedEvent(
-								me.getScreenX(), me.getScreenY(), me.getPointer());
+								me.getScreenX(), me.getScreenY());
 						break;
 				}
 			} else if (event instanceof KeyEvent) {
@@ -140,7 +138,7 @@ public class BattleScreen implements Screen {
 		}
 	}
 
-	private void processMousePressedEvent(int screenX, int screenY, int pointer, int button) {
+	private void processMousePressedEvent(int screenX, int screenY, int button) {
 		if (button == Buttons.LEFT) {
 			vec.x = screenX;
 			vec.y = screenY;
@@ -168,13 +166,13 @@ public class BattleScreen implements Screen {
 		}
 	}
 
-	private void processMouseReleasedEvent(int screenX, int screenY, int pointer, int button) {
+	private void processMouseReleasedEvent(int screenX, int screenY, int button) {
 		if (button == Buttons.RIGHT) {
 			dragging = false;
 		}
 	}
 
-	private void processMouseDraggedEvent(int screenX, int screenY, int pointer) {
+	private void processMouseDraggedEvent(int screenX, int screenY) {
 		if (dragging) {
 			getCamera().translate(startX - screenX, screenY - startY);
 			startX = screenX;

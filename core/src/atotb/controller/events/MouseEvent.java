@@ -10,13 +10,12 @@ package atotb.controller.events;
  */
 public class MouseEvent extends InputEvent {
 	private Type type;
-	private int screenX, screenY, pointer, button;
+	private int screenX, screenY, button;
 
-	public MouseEvent(Type type, int screenX, int screenY, int pointer, int button) {
+	public MouseEvent(Type type, int screenX, int screenY, int button) {
 		this.type = type;
 		this.screenX = screenX;
 		this.screenY = screenY;
-		this.pointer = pointer;
 		this.button = button;
 	}
 
@@ -30,10 +29,6 @@ public class MouseEvent extends InputEvent {
 
 	public int getScreenY() {
 		return screenY;
-	}
-
-	public int getPointer() {
-		return pointer;
 	}
 
 	public int getButton() {
