@@ -484,6 +484,10 @@ public class TwoBrothersGame extends Game {
 			}
 		}
 	}
+	
+	public boolean isBattleOver() {
+		return battleEnded;
+	}
 
 	// The dispose method
 	//

@@ -84,8 +84,12 @@ public class BattleScreen implements Screen {
 
 	@Override
 	public void render(float dt) {
+		boolean wasBattleOver = game.isBattleOver();
 		handleCameraControl();
 		processEvents();
+		if (game.isBattleOver() && !wasBattleOver) {
+			game.endBattle();
+		}
 		draw();
 	}
 
@@ -110,7 +114,7 @@ public class BattleScreen implements Screen {
 
 	private void processEvents() {
 		InputEvent event = events.next();
-		while (event != null) {
+		while (event != null && !game.isBattleOver()) {
 			if (event instanceof MouseEvent) {
 				MouseEvent me = (MouseEvent) event;
 				switch (me.getType()) {

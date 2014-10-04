@@ -43,7 +43,7 @@ public class PathFinder {
 		Point target = bmap.getTile(x, y).getPosition();
 		while (target != start) {
 			if (map[x+1][y-1] < map[x][y]) {
-				
+				//TODO backtracking
 			}
 		}
 		return path;
