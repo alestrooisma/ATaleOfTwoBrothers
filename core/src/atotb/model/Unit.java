@@ -185,7 +185,13 @@ public class Unit extends Element {
 		this.opponent = opponent;
 	}
 
-	public Unit getLockedIntoCombat() {
+	/**
+	 * Returns the opponent with which the unit is locked into combat.
+	 * Returns null if the unit is not locked into combat.
+	 * 
+	 * @return the opponent or null
+	 */
+	public Unit getOpponent() {
 		return opponent;
 	}
 

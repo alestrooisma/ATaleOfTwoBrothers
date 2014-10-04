@@ -27,7 +27,7 @@ public class TwoBrothersGame extends Game {
 
 	// Model
 	private Model model;
-	private int selectedUnit;
+	private int selectedUnit = -1;
 	private Weapon unarmed;
 	private boolean battleEnded;
 	//
@@ -178,15 +178,18 @@ public class TwoBrothersGame extends Game {
 		battleEnded = false;
 		model.setBattle(new Battle(battleMap, model.getPlayerParty(), enemy));
 		ai = new ArtificialIntelligence[2];
-		ai[1] = new WolfAI();
+//		ai[1] = new WolfAI();
 		pathfinder = new PathFinder(model.getBattle().getBattleMap());
 		battleScreen.setMap(tileMap);
 		setScreen(battleScreen);
 		inputHandlers.addProcessor(battleHandler);
 		startTurn();
+		if (ai[model.getBattle().getCurrentPlayer()] == null) {
+			nextUnit();
+		}
 	}
 
-	private void endBattle() {
+	public void endBattle() {
 		inputHandlers.removeProcessor(battleHandler);
 		
 		boolean victory = false;
@@ -209,16 +212,18 @@ public class TwoBrothersGame extends Game {
 		//tileMap.dispose();
 	}
 
-	private void startTurn() {
+	public void startTurn() {
+		// Hand turn to next player
 		model.getBattle().nextPlayer();
 			
+		// Increment turn count if first player starts a turn
 		if (model.getBattle().getCurrentPlayer() == 0) {
 			model.getBattle().incrementTurn();
 		}
 
-		Army army = model.getBattle().getCurrentArmy();
 
 		// Reset unit turn status
+		Army army = model.getBattle().getCurrentArmy();
 		for (Unit u : army.getUnits()) {
 			u.reset();
 		}
@@ -226,7 +231,7 @@ public class TwoBrothersGame extends Game {
 		// Resolve combat
 		for (Unit u : army.getUnits()) {
 			if (u.isLockedIntoCombat()) {
-				resolveCombat(u, u.getLockedIntoCombat());
+				resolveCombat(u, u.getOpponent());
 				if (battleEnded) {
 					return;
 				}
@@ -234,7 +239,7 @@ public class TwoBrothersGame extends Game {
 		}
 	}
 
-	private void endTurn() {
+	public void endTurn() {
 		// Finalize turn
 		deselectUnit();
 	}

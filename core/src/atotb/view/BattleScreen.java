@@ -191,12 +191,18 @@ public class BattleScreen implements Screen {
 			case Keys.N:
 				game.nextUnit();
 				break;
+			case Keys.BACKSPACE:
+				game.deselectUnit();
+				break;
 			case Keys.ENTER:
-				// TODO turn end
+				game.endTurn();
+				game.startTurn();
+				// Select first unit
+				game.nextUnit();
 				break;
 		}
 	}
-	
+
 	private void draw() {
 		// Clear buffers and paint the background dark gray
 		Gdx.gl.glClearColor(0.2f, 0.2f, 0.2f, 1);
