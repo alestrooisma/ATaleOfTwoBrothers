@@ -2,10 +2,16 @@ package atotb.view;
 
 import atotb.TwoBrothersGame;
 import atotb.controller.Resources;
+import atotb.controller.events.InputEvent;
+import atotb.controller.events.KeyEvent;
+import atotb.controller.events.MouseEvent;
 import atotb.model.Army;
 import atotb.model.Unit;
+import atotb.util.Enum.GameState;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.Input.Buttons;
+import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -39,6 +45,12 @@ public class BattleScreen implements Screen {
 	private final Vector3 vec = new Vector3();
 	private int windowWidth;
 	private int windowHeight;
+	//
+	// Event handling
+	private final InputEvent.List events;
+	private boolean dragging = false;
+	private int startX = 0;
+	private int startY = 0;
 
 	public BattleScreen(TwoBrothersGame game, SpriteBatch batch, BitmapFont font) {
 		this.game = game;
@@ -54,6 +66,9 @@ public class BattleScreen implements Screen {
 		// Set up the UI camera
 		uiCamera = new OrthographicCamera();
 		uiViewport = new ScreenViewport(uiCamera);
+
+		// Set up the event handler
+		events = new InputEvent.List();
 	}
 
 	public void setMap(TiledMap map) {
@@ -70,7 +85,119 @@ public class BattleScreen implements Screen {
 	@Override
 	public void render(float dt) {
 		handleCameraControl();
-		
+		processEvents();
+		draw();
+	}
+
+	private void handleCameraControl() {
+		// Handle input
+		if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+			camera.translate(-3, 0, 0);
+		}
+		if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+			camera.translate(3, 0, 0);
+		}
+		if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
+			camera.translate(0, -3, 0);
+		}
+		if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
+			camera.translate(0, 3, 0);
+		}
+
+		// Recalculate camera matrix
+		camera.update();
+	}
+
+	private void processEvents() {
+		InputEvent event = events.next();
+		while (event != null) {
+			if (event instanceof MouseEvent) {
+				MouseEvent me = (MouseEvent) event;
+				switch (me.getType()) {
+					case PRESSED:
+						processMousePressedEvent(
+								me.getScreenX(), me.getScreenY(),
+								me.getPointer(), me.getButton());
+						break;
+					case RELEASED:
+						processMouseReleasedEvent(
+								me.getScreenX(), me.getScreenY(),
+								me.getPointer(), me.getButton());
+						break;
+					case DRAGGED:
+						processMouseDraggedEvent(
+								me.getScreenX(), me.getScreenY(), me.getPointer());
+						break;
+				}
+			} else if (event instanceof KeyEvent) {
+				processKeyEvent(((KeyEvent) event).getKeycode());
+			}
+			event = events.next();
+		}
+	}
+
+	private void processMousePressedEvent(int screenX, int screenY, int pointer, int button) {
+		if (button == Buttons.LEFT) {
+			vec.x = screenX;
+			vec.y = screenY;
+			unproject(vec);
+			screenToTileCoords(vec);
+			int x = (int) vec.x;
+			int y = (int) vec.y;
+			Unit u = game.getModel().getBattle().getBattleMap().getTile(x, y).getUnit();
+			MouseAction ma = getMouseAction(x, y);
+			switch (ma) {
+				case SELECT:
+					game.selectUnit(u);
+					break;
+				case MOVE:
+					game.moveUnit(game.getSelectedUnit(), x, y);
+					break;
+				case TARGET:
+					game.targetUnit(game.getSelectedUnit(), u, game.getPathFinder());
+					break;
+			}
+		} else if (button == Buttons.RIGHT) {
+			dragging = true;
+			startX = screenX;
+			startY = screenY;
+		}
+	}
+
+	private void processMouseReleasedEvent(int screenX, int screenY, int pointer, int button) {
+		if (button == Buttons.RIGHT) {
+			dragging = false;
+		}
+	}
+
+	private void processMouseDraggedEvent(int screenX, int screenY, int pointer) {
+		if (dragging) {
+			getCamera().translate(startX - screenX, screenY - startY);
+			startX = screenX;
+			startY = screenY;
+		}
+	}
+
+	private void processKeyEvent(int keycode) {
+		switch (keycode) {
+			case Keys.R: //TODO temp
+				getCamera().zoom = 1;
+				getCamera().position.x = 640;
+				getCamera().position.y = 16;
+				break;
+			case Keys.B:
+				game.previousUnit();
+				break;
+			case Keys.N:
+				game.nextUnit();
+				break;
+			case Keys.ENTER:
+				// TODO turn end
+				break;
+		}
+	}
+	
+	private void draw() {
 		// Clear buffers and paint the background dark gray
 		Gdx.gl.glClearColor(0.2f, 0.2f, 0.2f, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
@@ -215,25 +342,6 @@ public class BattleScreen implements Screen {
 		batch.end();
 	}
 
-	private void handleCameraControl() {
-		// Handle input
-		if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-			camera.translate(-3, 0, 0);
-		}
-		if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-			camera.translate(3, 0, 0);
-		}
-		if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
-			camera.translate(0, -3, 0);
-		}
-		if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
-			camera.translate(0, 3, 0);
-		}
-
-		// Recalculate camera matrix
-		camera.update();
-	}
-
 	public MouseAction getMouseAction(int x, int y) {
 		if (game.getModel().getBattle().getBattleMap().contains(x, y)) {
 			// Clicked on a tile
@@ -243,7 +351,7 @@ public class BattleScreen implements Screen {
 				if (!u.isEnemy(game.getModel().getBattle().getCurrentArmy())) {
 					// Unit is friendly -> select it
 					return MouseAction.SELECT;
-				} else if (game.getSelectedUnit() != null 
+				} else if (game.getSelectedUnit() != null
 						&& game.getSelectedUnit().mayAct()) {
 					// Unit is enemy
 					return MouseAction.TARGET;
@@ -255,6 +363,10 @@ public class BattleScreen implements Screen {
 			return MouseAction.OUT_OF_BOUNDS;
 		}
 		return MouseAction.NOTHING;
+	}
+
+	public void addEvent(InputEvent event) {
+		events.add(event);
 	}
 
 	@Override

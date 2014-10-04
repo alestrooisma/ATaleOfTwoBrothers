@@ -6,7 +6,6 @@ import atotb.controller.ai.WolfAI;
 import atotb.model.*;
 import atotb.model.items.*;
 import atotb.util.Enum.Direction;
-import atotb.util.Enum.GameState;
 import atotb.util.MessageLog;
 import atotb.util.PathFinder;
 import atotb.view.*;
@@ -168,12 +167,14 @@ public class TwoBrothersGame extends Game {
 			}
 		}
 
+		// Add armies to map
 		battleMap.addUnit(w1, 4, 9);
 		battleMap.addUnit(w2, 11, 2);
 		battleMap.addUnit(w3, 13, 5);
 		battleMap.addUnit(model.getPlayerParty().getUnits().get(0), 9, 11);
 		battleMap.addUnit(model.getPlayerParty().getUnits().get(1), 6, 14);
 
+		// Prepare stuff
 		battleEnded = false;
 		model.setBattle(new Battle(battleMap, model.getPlayerParty(), enemy));
 		ai = new ArtificialIntelligence[2];
@@ -181,7 +182,8 @@ public class TwoBrothersGame extends Game {
 		pathfinder = new PathFinder(model.getBattle().getBattleMap());
 		battleScreen.setMap(tileMap);
 		setScreen(battleScreen);
-		resumeGameCycle(GameState.START_TURN);
+		inputHandlers.addProcessor(battleHandler);
+		startTurn();
 	}
 
 	private void endBattle() {
@@ -207,48 +209,9 @@ public class TwoBrothersGame extends Game {
 		//tileMap.dispose();
 	}
 
-	public void resumeGameCycle(GameState state) {
-
-		switch (state) {
-			case END_TURN: // Reclaim control
-				inputHandlers.removeProcessor(battleHandler);
-				endTurn();
-				break;
-		}
-
-		while (true) {
-			model.getBattle().nextPlayer();
-			startTurn();
-			
-			if (battleEnded) {
-				break;
-			}
-			
-			// Give control to player or AI
-			if (ai[model.getBattle().getCurrentPlayer()] == null) {
-				selectedUnit = -1;
-				nextUnit();
-				// Return control to player
-				inputHandlers.addProcessor(battleHandler);
-				return;
-			} else {
-				ai[model.getBattle().getCurrentPlayer()].playTurn(this,
-						model.getBattle().getCurrentPlayer());
-
-			}
-			
-			if (battleEnded) {
-				break;
-			}
-
-			// Entry point for GameState.END_TURN
-			endTurn();
-		}
-		
-		endBattle();
-	}
-
 	private void startTurn() {
+		model.getBattle().nextPlayer();
+			
 		if (model.getBattle().getCurrentPlayer() == 0) {
 			model.getBattle().incrementTurn();
 		}
@@ -448,7 +411,6 @@ public class TwoBrothersGame extends Game {
 		}
 		if (sw < d) {
 			dir = Direction.SW;
-			d = sw;
 		}
 		return dir;
 	}

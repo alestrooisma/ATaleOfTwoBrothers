@@ -5,7 +5,9 @@ import com.badlogic.gdx.utils.Array;
 import java.awt.Point;
 
 /**
- * TODO pooling TODO inaccessible terrain TODO full map
+ * @TODO pooling 
+ * @TODO inaccessible terrain 
+ * @TODO full map
  *
  * @author Ale Strooisma
  */
