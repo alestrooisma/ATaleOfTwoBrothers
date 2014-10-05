@@ -8,5 +8,5 @@ import atotb.model.Army;
  * @author Ale Strooisma
  */
 public interface ArtificialIntelligence {
-	public void playTurn(TwoBrothersGame game, int player);
+	public void playTurn(TwoBrothersGame game);
 }

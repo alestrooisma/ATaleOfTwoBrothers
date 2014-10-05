@@ -7,7 +7,6 @@ import atotb.controller.events.KeyEvent;
 import atotb.controller.events.MouseEvent;
 import atotb.model.Army;
 import atotb.model.Unit;
-import atotb.util.Enum.GameState;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Input.Buttons;
@@ -146,16 +145,18 @@ public class BattleScreen implements Screen {
 			screenToTileCoords(vec);
 			int x = (int) vec.x;
 			int y = (int) vec.y;
-			Unit u = game.getModel().getBattle().getBattleMap().getTile(x, y).getUnit();
 			MouseAction ma = getMouseAction(x, y);
+			Unit u;
 			switch (ma) {
 				case SELECT:
+					u = game.getModel().getBattle().getBattleMap().getTile(x, y).getUnit();
 					game.selectUnit(u);
 					break;
 				case MOVE:
 					game.moveUnit(game.getSelectedUnit(), x, y);
 					break;
 				case TARGET:
+					u = game.getModel().getBattle().getBattleMap().getTile(x, y).getUnit();
 					game.targetUnit(game.getSelectedUnit(), u, game.getPathFinder());
 					break;
 			}
@@ -197,10 +198,7 @@ public class BattleScreen implements Screen {
 				game.deselectUnit();
 				break;
 			case Keys.ENTER:
-				game.endTurn();
-				game.startTurn();
-				// Select first unit
-				game.nextUnit();
+				game.nextTurn();
 				break;
 		}
 	}
