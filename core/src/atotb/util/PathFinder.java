@@ -41,7 +41,12 @@ public class PathFinder {
 	}
 
 	public Array<Point> getPathTo(int x, int y) {
+		return getPathTo(x, y, INACCESSIBLE);
+	}
+
+	public Array<Point> getPathTo(int x, int y, double maxDistance) {
 		if (map[x][y] == INACCESSIBLE) {
+			System.out.println("Inaccessible");
 			return null;
 		}
 		Array<Point> path = new Array<Point>((int) map[x][y]);
@@ -63,7 +68,9 @@ public class PathFinder {
 				dir = nextDir(dir);
 			} while (dir != null);
 
-			path.add(target);
+			if (map[x][y] <= maxDistance) {
+				path.add(target);
+			}
 			x = bestDir.getX(x);
 			y = bestDir.getY(y);
 			target = new Point(x, y);

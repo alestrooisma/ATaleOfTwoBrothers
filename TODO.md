@@ -13,9 +13,9 @@ Phase 1 - tRPG gameplay
   - [x] Obtaining a shortest path to the destination (backtracking)
 - [x] Camera control
 - [ ] Abilities
-- [ ] AI
+- [x] AI
   - [x] AI Support
-  - [ ] Semi-proper wolf AI
+  - [x] Semi-proper wolf AI
 
 Phase 2 - graphics, animation and UI
 ------------------

@@ -223,6 +223,7 @@ public class TwoBrothersGame extends Game {
 		int player = model.getBattle().getCurrentPlayer();
 		while (ai[player] != null && !battleEnded) {
 			ai[player].playTurn(this);
+			endTurn();
 			startTurn();
 			player = model.getBattle().getCurrentPlayer();
 		}
@@ -386,6 +387,10 @@ public class TwoBrothersGame extends Game {
 
 		// Find best target location
 		Direction dir = getChargingDirection(tx, ty, pf);
+		if (dir == null) {
+			log.push("There's no room next to " + target.getName() + "!");
+			return false;
+		}
 		double d = getChargingDistance(tx, ty, pf, dir);
 
 		// Check range
@@ -437,6 +442,9 @@ public class TwoBrothersGame extends Game {
 		}
 		if (sw < d) {
 			dir = Direction.SW;
+		}
+		if (d == PathFinder.INACCESSIBLE) {
+			return null;
 		}
 		return dir;
 	}
