@@ -8,7 +8,7 @@ public class Unit extends Element {
 
 	// Core fields
 	private Army army;
-	private Point position;
+	private final Point position = new Point();;
 	//
 	// Stats
 	private int maxHealth;
@@ -49,12 +49,13 @@ public class Unit extends Element {
 		return army;
 	}
 
-	public Point getPosition() {
+	public final Point getPosition() {
 		return position;
 	}
 
 	public void setPosition(Point position) {
-		this.position = position;
+		this.position.x = position.x;
+		this.position.y = position.y;
 	}
 
 	public void setPosition(int x, int y) {

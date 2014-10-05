@@ -1,18 +1,21 @@
 package atotb.util;
 
 import atotb.model.BattleMap;
+import atotb.util.Enum.Direction;
+import static atotb.util.Enum.Direction.*;
 import com.badlogic.gdx.utils.Array;
 import java.awt.Point;
 
 /**
- * @TODO pooling 
- * @TODO inaccessible terrain 
+ * @TODO pooling
+ * @TODO inaccessible terrain
  * @TODO full map
  *
  * @author Ale Strooisma
  */
 public class PathFinder {
 
+	public final static double INACCESSIBLE = Double.MAX_VALUE;
 	private final BattleMap bmap;
 	private final double[][] map;
 	private final List list;
@@ -33,35 +36,80 @@ public class PathFinder {
 		if (bmap.contains(x, y)) {
 			return getDistanceTo(x, y);
 		} else {
-			return Double.MAX_VALUE;
+			return INACCESSIBLE;
 		}
 	}
 
 	public Array<Point> getPathTo(int x, int y) {
-		Array<Point> path = new Array<Point>();
+		if (map[x][y] == INACCESSIBLE) {
+			return null;
+		}
+		Array<Point> path = new Array<Point>((int) map[x][y]);
 		Point start = bmap.getTile(xi, yi).getPosition();
 		Point target = bmap.getTile(x, y).getPosition();
-		while (target != start) {
-			if (map[x+1][y-1] < map[x][y]) {
-				//TODO backtracking
-			}
+		Direction dir, bestDir;
+		double dist, bestDist;
+		while (!target.equals(start)) {
+			dir = N;
+			bestDir = dir;
+			bestDist = map[dir.getX(x)][dir.getY(y)];
+			dir = nextDir(dir);
+			do {
+				dist = map[dir.getX(x)][dir.getY(y)];
+				if (dist < bestDist) {
+					bestDir = dir;
+					bestDist = dist;
+				}
+				dir = nextDir(dir);
+			} while (dir != null);
+
+			path.add(target);
+			x = bestDir.getX(x);
+			y = bestDir.getY(y);
+			target = new Point(x, y);
 		}
 		return path;
 	}
 
+	private Direction nextDir(Direction dir) {
+		switch (dir) {
+			case N:
+				return E;
+			case E:
+				return S;
+			case S:
+				return W;
+			case W:
+				return NE;
+			case NE:
+				return SE;
+			case SE:
+				return SW;
+			case SW:
+				return NW;
+			default: // NW
+				/* If this is reached, range numbering has gone wrong, because 
+				 * an accessible, non-zero spot does not have neighbours closer
+				 * to the starting point, that is no neighbours a lower number.
+				 */
+//				throw new RuntimeException("Impossible pathfinding error!");
+				return null;
+		}
+	}
+
 	public void calculateDistancesFrom(int xi, int yi) {
-		calculateDistancesFrom(xi, yi, Double.MAX_VALUE);
+		calculateDistancesFrom(xi, yi, INACCESSIBLE);
 	}
 
 	public void calculateDistancesFrom(int xi, int yi, double limit) {
 		// Reset fields
 		for (int i = 0; i < bmap.getWidth(); i++) {
 			for (int j = 0; j < bmap.getHeight(); j++) {
-				map[i][j] = Double.MAX_VALUE;
+				map[i][j] = INACCESSIBLE;
 			}
 		}
 		list.clear();
-		
+
 		this.xi = xi;
 		this.yi = yi;
 
@@ -98,7 +146,7 @@ public class PathFinder {
 
 	private void explore(int x, int y, double c) {
 		if (x >= 0 && x < bmap.getWidth() && y >= 0 && y < bmap.getHeight()
-				&& map[x][y] == Double.MAX_VALUE
+				&& map[x][y] == INACCESSIBLE
 				&& bmap.getTile(x, y).isAccessible()) {
 			map[x][y] = c;
 			list.add(x, y);

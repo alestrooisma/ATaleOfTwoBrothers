@@ -500,9 +500,10 @@ public class TwoBrothersGame extends Game {
 			if (!unitsLeft) {
 				battleEnded = true;
 				deselectUnit();
-			} else if (target == getSelectedUnit()) {
-				nextUnit();
 			}
+//			else if (target == getSelectedUnit()) {
+//				nextUnit();
+//			}
 		}
 	}
 

@@ -8,12 +8,14 @@ Phase 1 - tRPG gameplay
   - [x] No ranged weapons in melee
   - [ ] Consolidation
 - [x] Load model information of map from file
-- [ ] Proper pathfinding
+- [x] Pathfinding
   - [x] Correct determination of reachable tiles (BFS)
-  - [ ] Obtaining a path to the destination (backtracking)
+  - [x] Obtaining a shortest path to the destination (backtracking)
 - [x] Camera control
 - [ ] Abilities
-- [ ] Basic AI
+- [ ] AI
+  - [x] AI Support
+  - [ ] Semi-proper wolf AI
 
 Phase 2 - graphics, animation and UI
 ------------------
@@ -39,11 +41,17 @@ Phase 3 - combat model
   - [ ] Option to disengage
   - [ ] Bonus/malus
 
-Phase 4 - overworld
+Phase 4 - arena mode
+------------------
+*The arena mode is a game mode where a player encounters random battles of increasing difficulty while improving his party in the meanwhile.*
+*This mode is designed such that many features can be developed before creating a real overworld.*
+- [ ] Rethink order of Phase 2&3 parts with respect to Phase 4
+
+Phase 5 - overworld
 ------------------
 - [ ] central overworld class - member of model class
 
-Phase 5 - content and polish
+Phase 6 - content and polish
 ------------------
 - [ ] Original art
 - [ ] Many items

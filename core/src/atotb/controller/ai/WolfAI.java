@@ -6,8 +6,8 @@ import atotb.model.Battle;
 import atotb.model.Unit;
 import atotb.util.Enum.Direction;
 import atotb.util.PathFinder;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import com.badlogic.gdx.utils.Array;
+import java.awt.Point;
 
 /**
  *
@@ -49,6 +49,7 @@ public class WolfAI implements ArtificialIntelligence {
 					}
 				}
 
+				// Charge at nearest enemy
 				if (minDistance <= unit.getTotalMovesRemaining()) {
 					game.targetUnit(unit, nearestEnemy, pf);
 				} //TODO else move closer
