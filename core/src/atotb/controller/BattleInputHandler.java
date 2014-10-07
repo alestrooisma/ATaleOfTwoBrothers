@@ -1,11 +1,9 @@
 package atotb.controller;
 
-import atotb.TwoBrothersGame;
 import atotb.controller.events.KeyEvent;
 import atotb.controller.events.MouseEvent;
 import atotb.view.BattleScreen;
 import com.badlogic.gdx.InputAdapter;
-import com.badlogic.gdx.math.Vector3;
 
 /**
  *
@@ -13,12 +11,9 @@ import com.badlogic.gdx.math.Vector3;
  */
 public class BattleInputHandler extends InputAdapter {
 
-	private final TwoBrothersGame game;
 	private final BattleScreen screen;
-	private final Vector3 vec = new Vector3();
 
-	public BattleInputHandler(TwoBrothersGame game, BattleScreen screen) {
-		this.game = game;
+	public BattleInputHandler(BattleScreen screen) {
 		this.screen = screen;
 	}
 

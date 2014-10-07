@@ -32,7 +32,7 @@ public class TwoBrothersGame extends Game {
 	private boolean battleEnded;
 	//
 	// View
-	private BattleScreen battleScreen;
+	private BattleController battleController;
 	private TiledMap tileMap;
 	//
 	// Controller
@@ -97,7 +97,7 @@ public class TwoBrothersGame extends Game {
 		Resources.loadResources();
 
 		// Create and set the battle screen
-		battleScreen = new BattleScreen(this, batch, font);
+		battleController = new BattleController(this, batch, font);
 	}
 
 	private void setUpController() {
@@ -108,7 +108,7 @@ public class TwoBrothersGame extends Game {
 		inputHandlers = new InputMultiplexer();
 		inputHandlers.addProcessor(new MainInputHandler(this));
 		Gdx.input.setInputProcessor(inputHandlers);
-		battleHandler = new BattleInputHandler(this, battleScreen);
+		battleHandler = new BattleInputHandler((BattleScreen) battleController.getView());
 	}
 
 	// Getters
@@ -180,8 +180,8 @@ public class TwoBrothersGame extends Game {
 		ai = new ArtificialIntelligence[2];
 		ai[1] = new WolfAI();
 		pathfinder = new PathFinder(model.getBattle().getBattleMap());
-		battleScreen.setMap(tileMap);
-		setScreen(battleScreen);
+		((BattleScreen) battleController.getView()).setMap(tileMap);
+		setScreen((BattleScreen) battleController.getView());
 		inputHandlers.addProcessor(battleHandler);
 		startTurn();
 		if (ai[model.getBattle().getCurrentPlayer()] == null) {
@@ -508,10 +508,9 @@ public class TwoBrothersGame extends Game {
 			if (!unitsLeft) {
 				battleEnded = true;
 				deselectUnit();
+			} else if (target == getSelectedUnit()) {
+				deselectUnit();
 			}
-//			else if (target == getSelectedUnit()) {
-//				nextUnit();
-//			}
 		}
 	}
 
@@ -525,7 +524,7 @@ public class TwoBrothersGame extends Game {
 	public void dispose() {
 		batch.dispose();
 		font.dispose();
-		battleScreen.dispose();
+		battleController.dispose();
 		Resources.unload();
 	}
 }

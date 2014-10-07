@@ -13,9 +13,10 @@ Phase 1 - tRPG gameplay
   - [x] Obtaining a shortest path to the destination (backtracking)
 - [x] Camera control
 - [ ] Abilities
-- [x] AI
-  - [x] AI Support
-  - [x] Semi-proper wolf AI
+- [x] Basic AI
+- Code cleanup
+  - [ ] Rearrange code to keep files smaller and more readable
+  - [ ] Change how the selected unit is used
 
 Phase 2 - graphics, animation and UI
 ------------------
