@@ -11,9 +11,9 @@ import com.badlogic.gdx.InputAdapter;
  */
 public class BattleInputHandler extends InputAdapter {
 
-	private final BattleScreen screen;
+	private final BattleController screen;
 
-	public BattleInputHandler(BattleScreen screen) {
+	public BattleInputHandler(BattleController screen) {
 		this.screen = screen;
 	}
 

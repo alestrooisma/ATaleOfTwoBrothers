@@ -8,7 +8,7 @@ import atotb.model.items.*;
 import atotb.util.Enum.Direction;
 import atotb.util.MessageLog;
 import atotb.util.PathFinder;
-import atotb.view.*;
+import atotb.view.BattleScreen;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputAdapter;
@@ -97,7 +97,8 @@ public class TwoBrothersGame extends Game {
 		Resources.loadResources();
 
 		// Create and set the battle screen
-		battleController = new BattleController(this, batch, font);
+		battleController = new BattleController(this);
+		battleController.setView(new BattleScreen(this, battleController, batch, font));
 	}
 
 	private void setUpController() {
@@ -108,7 +109,7 @@ public class TwoBrothersGame extends Game {
 		inputHandlers = new InputMultiplexer();
 		inputHandlers.addProcessor(new MainInputHandler(this));
 		Gdx.input.setInputProcessor(inputHandlers);
-		battleHandler = new BattleInputHandler((BattleScreen) battleController.getView());
+		battleHandler = new BattleInputHandler(battleController);
 	}
 
 	// Getters
@@ -180,8 +181,8 @@ public class TwoBrothersGame extends Game {
 		ai = new ArtificialIntelligence[2];
 		ai[1] = new WolfAI();
 		pathfinder = new PathFinder(model.getBattle().getBattleMap());
-		((BattleScreen) battleController.getView()).setMap(tileMap);
-		setScreen((BattleScreen) battleController.getView());
+		battleController.getView().setMap(tileMap);
+		setScreen(battleController);
 		inputHandlers.addProcessor(battleHandler);
 		startTurn();
 		if (ai[model.getBattle().getCurrentPlayer()] == null) {

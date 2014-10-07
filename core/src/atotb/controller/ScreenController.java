@@ -5,19 +5,26 @@ import com.badlogic.gdx.Screen;
 /**
  *
  * @author ale
+ * @param <ViewScreen> TODO javadoc
  */
-public abstract class ScreenController implements Screen {
+public abstract class ScreenController<ViewScreen extends Screen> implements Screen {
 
-	private final Screen view;
-
-	public ScreenController(Screen view) {
-		this.view = view;
-	}
-
+	private ViewScreen view;
+	
 	public abstract void update(float f);
 
-	public Screen getView() {
+	public ViewScreen getView() {
 		return view;
+	}
+
+	/**
+	 * Sets the view managed by this controller.
+	 * Must be called before calling setting this ScreenController as an active 
+	 * screen by calling Game.setScreen.
+	 * @param view 
+	 */
+	public void setView(ViewScreen view) {
+		this.view = view;
 	}
 	
 	@Override
