@@ -1,6 +1,7 @@
 package atotb.controller.ai;
 
 import atotb.TwoBrothersGame;
+import atotb.controller.BattleController;
 import atotb.model.Army;
 import atotb.model.Battle;
 import atotb.model.Unit;
@@ -19,47 +20,46 @@ import java.awt.Point;
 public class WolfAI implements ArtificialIntelligence {
 
 	@Override
-	public void playTurn(TwoBrothersGame game) {
+	public void playTurn(BattleController controller) {
 		System.out.println("Start AI");
 
 		// Getting some useful objects
-		int player = game.getModel().getBattle().getCurrentPlayer();
-		Battle battle = game.getModel().getBattle();
+		Battle battle = controller.getBattle();
+		int player = battle.getCurrentPlayer();
 		Army army = battle.getArmy(player);
 		Army enemyArmy = battle.getArmy((player + 1) % 2); //TODO multiple enemy armies
-		PathFinder pf = game.getPathFinder();
+		PathFinder pf = controller.getPathFinder();
 
 		// Iterate over all units
 		for (Unit unit : army.getUnits()) {
 			if (unit.isAlive()) {
-				game.selectUnit(unit);
 				pf.calculateDistancesFrom(
 						unit.getPosition().x, unit.getPosition().y);
 
 				// Get nearest enemy
 				boolean charge = true;
-				Unit nearestEnemy = getNearestEnemy(game, enemyArmy, pf, charge);
+				Unit nearestEnemy = getNearestEnemy(controller, enemyArmy, pf, charge);
 				if (nearestEnemy == null) {
 					charge = false;
-					nearestEnemy = getNearestEnemy(game, enemyArmy, pf, charge);
+					nearestEnemy = getNearestEnemy(controller, enemyArmy, pf, charge);
 				}
 
 				// Act
 				if (nearestEnemy != null) {
 					int tx = nearestEnemy.getPosition().x;
 					int ty = nearestEnemy.getPosition().y;
-					Direction dir = game.getChargingDirection(tx, ty, pf);
-					double d = game.getChargingDistance(tx, ty, pf, dir);
+					Direction dir = controller.getChargingDirection(tx, ty, pf);
+					double d = controller.getChargingDistance(tx, ty, pf, dir);
 
 					if (charge && d <= unit.getTotalMovesRemaining()) {
-						game.targetUnit(unit, nearestEnemy, pf);
+						controller.targetUnit(unit, nearestEnemy, pf);
 					} else {
 						Array<Point> path = pf.getPathTo(
 								dir.getX(tx),
 								dir.getY(ty),
 								unit.getTotalMovesRemaining());
-						if (path.first() != null) {
-							game.moveUnit(unit, path.first().x, path.first().y);
+						if (path.size != 0) {
+							controller.moveUnit(unit, path.first().x, path.first().y, pf);
 						}
 					}
 					System.out.println("Targeting " + nearestEnemy.getName());
@@ -71,16 +71,16 @@ public class WolfAI implements ArtificialIntelligence {
 		System.out.println("End AI");
 	}
 
-	private Unit getNearestEnemy(TwoBrothersGame game, Army enemyArmy, PathFinder pf, boolean charge) {
+	private Unit getNearestEnemy(BattleController controller, Army enemyArmy, PathFinder pf, boolean charge) {
 		Unit nearestEnemy = null;
 		double minDistance = Double.MAX_VALUE;
 		for (Unit enemyUnit : enemyArmy.getUnits()) {
 			if (enemyUnit.isAlive() && !(charge && enemyUnit.isLockedIntoCombat())) {
 				int tx = enemyUnit.getPosition().x;
 				int ty = enemyUnit.getPosition().y;
-				Direction dir = game.getChargingDirection(tx, ty, pf);
+				Direction dir = controller.getChargingDirection(tx, ty, pf);
 				if (dir != null) {
-					double d = game.getChargingDistance(tx, ty, pf, dir);
+					double d = controller.getChargingDistance(tx, ty, pf, dir);
 					if (d < minDistance) {
 						nearestEnemy = enemyUnit;
 						minDistance = d;

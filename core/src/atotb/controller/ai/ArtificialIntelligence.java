@@ -1,12 +1,11 @@
 package atotb.controller.ai;
 
-import atotb.TwoBrothersGame;
-import atotb.model.Army;
+import atotb.controller.BattleController;
 
 /**
  *
  * @author Ale Strooisma
  */
 public interface ArtificialIntelligence {
-	public void playTurn(TwoBrothersGame game);
+	public void playTurn(BattleController controller);
 }

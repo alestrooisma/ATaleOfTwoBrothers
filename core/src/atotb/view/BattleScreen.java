@@ -113,11 +113,11 @@ public class BattleScreen implements Screen {
 		}
 
 		// Draw walk/dash range markers - TODO order
-		Unit u = game.getSelectedUnit();
+		Unit u = controller.getSelectedUnit();
 		if (u != null) {
 			for (int i = 0; i < game.getModel().getBattle().getBattleMap().getWidth(); i++) {
 				for (int j = 0; j < game.getModel().getBattle().getBattleMap().getHeight(); j++) {
-					double d = game.getPathFinder().getDistanceTo(i, j);
+					double d = controller.getPathFinder().getDistanceTo(i, j);
 					if (d == 0) {
 						// Don't draw
 					} else if (d <= u.getMovesRemaining()) {
