@@ -21,6 +21,7 @@ import atotb.util.PathFinder;
 import atotb.view.BattleScreen;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import java.util.ArrayList;
@@ -34,12 +35,12 @@ public class BattleController extends ScreenController<BattleScreen> {
 	// Received
 	private final TwoBrothersGame game;
 	private Battle battle;
+	private ArtificialIntelligence[] ai;
 	//
 	// Controller
 	private boolean battleEnded;
-	private int selectedUnit = -1;
+	private int selectedUnit;
 	private PathFinder pathfinder;
-	private ArtificialIntelligence[] ai;
 	//
 	// Event handling
 	private final InputEvent.List events;
@@ -69,14 +70,18 @@ public class BattleController extends ScreenController<BattleScreen> {
 		handleCameraControl();
 	}
 
-	public void startBattle(Battle battle, ArtificialIntelligence[] ai) {
+	public void initBattle(Battle battle, TiledMap tileMap, ArtificialIntelligence[] ai) {
 		this.battle = battle;
 		this.ai = ai;
+		getView().setMap(tileMap);
 
 		// Prepare gamestate
 		battleEnded = false;
+		selectedUnit = -1;
 		pathfinder = new PathFinder(battle.getBattleMap());
-
+	}
+	
+	public void startBattle() {
 		// Kick it off
 		startTurn();
 		if (ai[battle.getCurrentPlayer()] == null) {

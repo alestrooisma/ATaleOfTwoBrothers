@@ -160,14 +160,18 @@ public class TwoBrothersGame extends Game {
 		battleMap.addUnit(model.getPlayerParty().getUnits().get(0), 9, 11);
 		battleMap.addUnit(model.getPlayerParty().getUnits().get(1), 6, 14);
 
-		// Prepare stuff
-		model.setBattle(new Battle(battleMap, model.getPlayerParty(), enemy));
+		// Create the AI
 		ArtificialIntelligence[] ai = new ArtificialIntelligence[2];
 		ai[1] = new WolfAI();
-		battleController.getView().setMap(tileMap);
+		
+		// Set the battle part of the model
+		model.setBattle(new Battle(battleMap, model.getPlayerParty(), enemy));
+		
+		// Start the battle
+		battleController.initBattle(model.getBattle(), tileMap, ai);
 		setScreen(battleController);
 		inputHandlers.addProcessor(battleHandler);
-		battleController.startBattle(model.getBattle(), ai);
+		battleController.startBattle();
 	}
 
 	public void endBattle() {
