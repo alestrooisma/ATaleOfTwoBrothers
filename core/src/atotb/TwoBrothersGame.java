@@ -19,6 +19,13 @@ import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import java.awt.Point;
 
+/**
+ * The main controller class of "A Tale of Two Brothers".
+ * This class is responsible for switching between various states of the game 
+ * (in battle, in menu, on overworld, etc) and keep track of shared resources.
+ * 
+ * @author Ale Strooisma
+ */
 public class TwoBrothersGame extends Game {
 
 	// Model
@@ -174,6 +181,9 @@ public class TwoBrothersGame extends Game {
 		battleController.startBattle();
 	}
 
+	/**
+	 * Must be called when a battle ends, so TwoBrotherGame can progress the game.
+	 */
 	public void endBattle() {
 		inputHandlers.removeProcessor(battleHandler);
 		

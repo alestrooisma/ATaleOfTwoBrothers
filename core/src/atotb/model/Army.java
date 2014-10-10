@@ -2,6 +2,11 @@ package atotb.model;
 
 import java.util.ArrayList;
 
+/**
+ * An army is a collection of units and often represents a player as a whole.
+ * 
+ * @author Ale Strooisma
+ */
 public class Army extends Element {
 
 	private final ArrayList<Unit> units = new ArrayList<Unit>();

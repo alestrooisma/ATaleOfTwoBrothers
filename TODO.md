@@ -14,9 +14,7 @@ Phase 1 - tRPG gameplay
 - [x] Camera control
 - [ ] Abilities
 - [x] Basic AI
-- Code cleanup
-  - [ ] Rearrange code to keep files smaller and more readable
-  - [ ] Change how the selected unit is used
+- [x] Code cleanup
 
 Phase 2 - graphics, animation and UI
 ------------------

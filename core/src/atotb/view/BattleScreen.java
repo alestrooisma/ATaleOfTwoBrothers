@@ -21,7 +21,9 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 /**
- *
+ * The view component for battles. 
+ * Only responsibility is rendering the game screen.
+ * 
  * @author Ale Strooisma
  */
 public class BattleScreen implements Screen {
@@ -59,6 +61,11 @@ public class BattleScreen implements Screen {
 		uiViewport = new ScreenViewport(uiCamera);
 	}
 
+	/**
+	 * Sets the graphical representation of the map that must be rendered.
+	 * This must be set before this screen is set active.
+	 * @param map the map to be rendered
+	 */
 	public void setMap(TiledMap map) {
 		if (mapRenderer != null) {
 			mapRenderer.dispose();
@@ -117,7 +124,7 @@ public class BattleScreen implements Screen {
 		if (u != null) {
 			for (int i = 0; i < game.getModel().getBattle().getBattleMap().getWidth(); i++) {
 				for (int j = 0; j < game.getModel().getBattle().getBattleMap().getHeight(); j++) {
-					double d = controller.getPathFinder().getDistanceTo(i, j);
+					double d = controller.getPathFinder().getDistanceToWithoutCheck(i, j);
 					if (d == 0) {
 						// Don't draw
 					} else if (d <= u.getMovesRemaining()) {
@@ -243,7 +250,9 @@ public class BattleScreen implements Screen {
 
 	@Override
 	public void dispose() {
-		mapRenderer.dispose();
+		if (mapRenderer != null) {
+			mapRenderer.dispose();
+		}
 	}
 
 	public Vector3 unproject(Vector3 vec) {

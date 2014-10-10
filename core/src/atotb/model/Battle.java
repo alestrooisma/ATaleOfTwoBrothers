@@ -1,7 +1,9 @@
 package atotb.model;
 
 /**
- *
+ * The model component that represents the part of the game state that is needed 
+ * during a battle.
+ * 
  * @author Ale Strooisma
  */
 public class Battle {

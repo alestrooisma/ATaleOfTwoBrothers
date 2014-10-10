@@ -1,6 +1,5 @@
 package atotb.controller.ai;
 
-import atotb.TwoBrothersGame;
 import atotb.controller.BattleController;
 import atotb.model.Army;
 import atotb.model.Battle;
@@ -27,7 +26,7 @@ public class WolfAI implements ArtificialIntelligence {
 		Battle battle = controller.getBattle();
 		int player = battle.getCurrentPlayer();
 		Army army = battle.getArmy(player);
-		Army enemyArmy = battle.getArmy((player + 1) % 2); //TODO multiple enemy armies
+		Army enemyArmy = battle.getArmy(battle.otherPlayer(player)); //TODO multiple enemy armies
 		PathFinder pf = controller.getPathFinder();
 
 		// Iterate over all units

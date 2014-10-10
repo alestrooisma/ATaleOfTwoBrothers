@@ -1,9 +1,9 @@
 package atotb.model;
 
 import java.awt.Point;
-import java.util.LinkedList;
 
 /**
+ * Represents one tile of a battle map.
  * 
  * @author Ale Strooisma
  */

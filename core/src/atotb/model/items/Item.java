@@ -1,16 +1,11 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package atotb.model.items;
 
 import atotb.model.Element;
 
 /**
- *
- * @author ale
+ * Base class for all items. That is weapons, armor, quest items etc.
+ * 
+ * @author Ale Strooisma
  */
 public abstract class Item extends Element {
 

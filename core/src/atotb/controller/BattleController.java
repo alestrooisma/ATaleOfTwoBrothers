@@ -27,8 +27,9 @@ import com.badlogic.gdx.math.Vector3;
 import java.util.ArrayList;
 
 /**
- *
- * @author ale
+ * The controller component for battles. Manages the game state during battles.
+ * 
+ * @author Ale Strooisma
  */
 public class BattleController extends ScreenController<BattleScreen> {
 
@@ -70,6 +71,13 @@ public class BattleController extends ScreenController<BattleScreen> {
 		handleCameraControl();
 	}
 
+	/**
+	 * Sets the game state for the next battle. Does not start the battle.
+	 * 
+	 * @param battle the model component representing the battle
+	 * @param tileMap the graphical representation of the map on which the battle is played
+	 * @param ai the AIs used for the various players
+	 */
 	public void initBattle(Battle battle, TiledMap tileMap, ArtificialIntelligence[] ai) {
 		this.battle = battle;
 		this.ai = ai;
@@ -81,6 +89,10 @@ public class BattleController extends ScreenController<BattleScreen> {
 		pathfinder = new PathFinder(battle.getBattleMap());
 	}
 	
+	/**
+	 * Called to start the battle. 
+	 * Main functionality is starting the first turn.
+	 */
 	public void startBattle() {
 		// Kick it off
 		startTurn();
@@ -89,6 +101,9 @@ public class BattleController extends ScreenController<BattleScreen> {
 		}
 	}
 
+	/**
+	 * Called when the battle has ended.
+	 */
 	public void endBattle() {
 		boolean victory = false;
 		for (Unit u : game.getModel().getPlayerParty().getUnits()) {
@@ -196,7 +211,7 @@ public class BattleController extends ScreenController<BattleScreen> {
 		cycleUnit(1);
 	}
 
-	public void cycleUnit(int step) {
+	private void cycleUnit(int step) {
 		ArrayList<Unit> units = battle.getCurrentArmy().getUnits();
 		int unit = selectedUnit;
 		do {
@@ -220,7 +235,7 @@ public class BattleController extends ScreenController<BattleScreen> {
 	//
 	public void moveUnit(Unit u, int destX, int destY, PathFinder pf) {
 		// Calculate distance
-		double distance = pf.getDistanceTo_safe(destX, destY);
+		double distance = pf.getDistanceTo(destX, destY);
 
 		// Check range and move if possible
 		if (distance <= u.getMovesRemaining()) {
@@ -340,10 +355,10 @@ public class BattleController extends ScreenController<BattleScreen> {
 	}
 
 	public Direction getChargingDirection(int targetX, int targetY, PathFinder pf) {
-		double nw = pf.getDistanceTo_safe(targetX, targetY - 1);
-		double ne = pf.getDistanceTo_safe(targetX + 1, targetY);
-		double se = pf.getDistanceTo_safe(targetX, targetY + 1);
-		double sw = pf.getDistanceTo_safe(targetX - 1, targetY);
+		double nw = pf.getDistanceTo(targetX, targetY - 1);
+		double ne = pf.getDistanceTo(targetX + 1, targetY);
+		double se = pf.getDistanceTo(targetX, targetY + 1);
+		double sw = pf.getDistanceTo(targetX - 1, targetY);
 
 		Direction dir = Direction.NW;
 		double d = nw;
@@ -366,7 +381,7 @@ public class BattleController extends ScreenController<BattleScreen> {
 
 	public double getChargingDistance(
 			int targetX, int targetY, PathFinder pf, Direction dir) {
-		return pf.getDistanceTo(dir.getX(targetX), dir.getY(targetY));
+		return pf.getDistanceToWithoutCheck(dir.getX(targetX), dir.getY(targetY));
 	}
 
 	private void resolveCombat(Unit attacker, Unit defender) {

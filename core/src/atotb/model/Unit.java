@@ -4,6 +4,11 @@ import atotb.model.items.Weapon;
 import java.awt.Point;
 import java.util.ArrayList;
 
+/**
+ * Represents a unit (soldier) and all of its abilities and equipment.
+ * 
+ * @author Ale Strooisma
+ */
 public class Unit extends Element {
 
 	// Core fields

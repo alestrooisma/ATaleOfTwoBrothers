@@ -1,7 +1,8 @@
 package atotb.util;
 
 /**
- *
+ * Used to log messages to standard out and to the screen.
+ * 
  * @author Ale Strooisma
  */
 public class MessageLog {

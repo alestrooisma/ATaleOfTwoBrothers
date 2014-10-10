@@ -4,7 +4,7 @@ import java.awt.Point;
 import java.awt.geom.Point2D;
 
 /**
- * An implementation of Map, being tiled map.
+ * The part of the model representing the game map of a battle.
  * 
  * @author Ale Strooisma
  */
@@ -13,8 +13,7 @@ public class BattleMap {
 	private final Tile[][] tiles;
 
 	/**
-	 * Creates a new instance of map with the given dimension and tiles.
-	 * Requires: tiles.length >= (maxX-minX+1)*(maxY-minY)+(maxX-minX)
+	 * Creates a new instance of BattleMap with the given tiles.
 	 *
 	 * @param tiles the tiles to be on the map
 	 */
@@ -23,7 +22,7 @@ public class BattleMap {
 	}
 
 	/**
-	 * Creates an empty map of the given dimensions.
+	 * Creates an empty BattleMap of the given dimensions.
 	 *
 	 * @param width the width of the map
 	 * @param height the height of the map

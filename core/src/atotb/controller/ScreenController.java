@@ -3,9 +3,12 @@ package atotb.controller;
 import com.badlogic.gdx.Screen;
 
 /**
+ * An implementation of this abstract class can be used by an implementation of 
+ * Game as if it were a screen, but actually renders a different screen, and is 
+ * intended to be used as a controller component.
  *
- * @author ale
- * @param <ViewScreen> TODO javadoc
+ * @author Ale Strooisma
+ * @param <ViewScreen> The type of the view that is controlled by this class
  */
 public abstract class ScreenController<ViewScreen extends Screen> implements Screen {
 
