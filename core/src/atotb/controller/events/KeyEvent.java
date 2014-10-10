@@ -1,7 +1,7 @@
 package atotb.controller.events;
 
 /**
- * An event class used to delay mouse events such that they can be processed in 
+ * An event class used to delay keyboard events such that they can be processed in 
  * the game loop.
  * 
  * @author Ale Strooisma

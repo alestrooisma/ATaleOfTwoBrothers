@@ -7,6 +7,9 @@ import com.badlogic.gdx.utils.Array;
 import java.awt.Point;
 
 /**
+ * A utility for determining the reachable tiles for a unit and the shortest 
+ * path to them.
+ * 
  * @TODO pooling
  * @TODO inaccessible terrain
  * @TODO full map
@@ -28,22 +31,60 @@ public class PathFinder {
 		list = new List();
 	}
 
-	public double getDistanceTo(int x, int y) {
+	/**
+	 * Returns the distance from the origin to the given point. The origin is 
+	 * the point passed with the last call to calculateDistancesFrom
+	 * 
+	 * This works the same as getDistanceTo, but does not check whether the
+	 * given point is on the map.
+	 * 
+	 * @param x the x-coordinate of the point to determine the distance to
+	 * @param y the y-coordinate of the point to determine the distance to
+	 * @return the distance between the origin and the given point
+	 */
+	public double getDistanceToWithoutCheck(int x, int y) {
 		return map[x][y];
 	}
 
-	public double getDistanceTo_safe(int x, int y) {
+	/**
+	 * Returns the distance from the origin to the given point. The origin is 
+	 * the point passed with the last call to calculateDistancesFrom
+	 * 
+	 * This works the same as getDistanceToWithoutCheck, but checks whether the 
+	 * given point is on the map.
+	 * 
+	 * @param x the x-coordinate of the point to determine the distance to
+	 * @param y the y-coordinate of the point to determine the distance to
+	 * @return the distance between the origin and the given point
+	 */
+	public double getDistanceTo(int x, int y) {
 		if (bmap.contains(x, y)) {
-			return getDistanceTo(x, y);
+			return getDistanceToWithoutCheck(x, y);
 		} else {
 			return INACCESSIBLE;
 		}
 	}
 
+	/**
+	 * Returns the shortest path from the origin to the given point.
+	 * 
+	 * @param x the x-coordinate of the point to find a path to
+	 * @param y the y-coordinate of the point to find a path to
+	 * @return an array of points which has to be traveled through
+	 */
 	public Array<Point> getPathTo(int x, int y) {
 		return getPathTo(x, y, INACCESSIBLE);
 	}
 
+	/**
+	 * Returns the shortest path from the origin to the given point or the 
+	 * path to the farthest point on that path within the range specified.
+	 * 
+	 * @param x the x-coordinate of the point to find a path to
+	 * @param y the y-coordinate of the point to find a path to
+	 * @param maxDistance the maximal length of the returned path
+	 * @return an array of points which has to be traveled through
+	 */
 	public Array<Point> getPathTo(int x, int y, double maxDistance) {
 		if (map[x][y] == INACCESSIBLE) {
 			System.out.println("Inaccessible");
@@ -104,10 +145,25 @@ public class PathFinder {
 		}
 	}
 
+	/**
+	 * Sets the origin of the path finder and calculates the distance to the 
+	 * origin for all points on the map.
+	 * 
+	 * @param xi the x-coordinate of the origin
+	 * @param yi the y-coordinate of the origin
+	 */
 	public void calculateDistancesFrom(int xi, int yi) {
 		calculateDistancesFrom(xi, yi, INACCESSIBLE);
 	}
 
+	/**
+	 * Sets the origin of the path finder and calculates the distance to the 
+	 * origin for all points within the given range.
+	 * 
+	 * @param xi the x-coordinate of the origin
+	 * @param yi the y-coordinate of the origin
+	 * @param limit the range within which to calculate the distances
+	 */
 	public void calculateDistancesFrom(int xi, int yi, double limit) {
 		// Reset fields
 		for (int i = 0; i < bmap.getWidth(); i++) {

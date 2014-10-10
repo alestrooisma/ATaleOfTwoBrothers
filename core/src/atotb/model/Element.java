@@ -7,10 +7,17 @@ package atotb.model;
  * @author Ale Strooisma
  */
 public abstract class Element {
-	private String name;
-	private String summary;
-	private String description;
+	private final String name;
+	private final String summary;
+	private final String description;
 
+	/**
+	 * Creates a new element.
+	 * 
+	 * @param name The name of the element
+	 * @param summary A one-line summary of the description
+	 * @param description A full description of the element
+	 */
 	public Element(String name, String summary, String description) {
 		this.name = name;
 		this.summary = summary;

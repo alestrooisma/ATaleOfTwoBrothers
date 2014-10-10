@@ -1,11 +1,15 @@
 package atotb.util;
 
 /**
- *
+ * Contains all commonly-used enumerations.
+ * 
  * @author Ale Strooisma
  */
 public interface Enum {
 	
+	/**
+	 * Is used to specify adjacent tiles by their relative position.
+	 */
 	public enum Direction {
 
 		N(1, -1), NE(1, 0), E(1, 1), SE(0, 1),
