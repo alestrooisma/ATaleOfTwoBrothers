@@ -5,6 +5,7 @@ import atotb.controller.ai.ArtificialIntelligence;
 import atotb.controller.ai.WolfAI;
 import atotb.model.*;
 import atotb.model.actions.HealAction;
+import atotb.model.actions.HealAction2;
 import atotb.model.items.*;
 import atotb.util.MessageLog;
 import atotb.view.BattleScreen;
@@ -66,6 +67,7 @@ public class TwoBrothersGame extends Game {
 		u.addAction(new HealAction(4));
 		u = Unit.createUnit("Harryn", "The younger of the two brothers.", "Harryn is decent with a bow.", player, 10, 3.5);
 		u.setWeapon(new RangedWeapon("Old hunting bow", "", "", 6));
+		u.addAction(new HealAction2(4));
 
 		unarmed = new MeleeWeapon("Unarmed", "Lacking a melee weapon",
 				"This unit does not have a melee weapon, so it has to fight unarmed in hand-to-hand combat.",

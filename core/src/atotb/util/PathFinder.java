@@ -87,7 +87,6 @@ public class PathFinder {
 	 */
 	public Array<Point> getPathTo(int x, int y, double maxDistance) {
 		if (map[x][y] == INACCESSIBLE) {
-			System.out.println("Inaccessible");
 			return null;
 		}
 		Array<Point> path = new Array<Point>((int) map[x][y]);

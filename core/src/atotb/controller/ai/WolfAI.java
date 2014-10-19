@@ -20,7 +20,6 @@ public class WolfAI implements ArtificialIntelligence {
 
 	@Override
 	public void playTurn(BattleController controller) {
-		System.out.println("Start AI");
 
 		// Getting some useful objects
 		Battle battle = controller.getBattle();
@@ -51,7 +50,7 @@ public class WolfAI implements ArtificialIntelligence {
 					double d = controller.getChargingDistance(tx, ty, pf, dir);
 
 					if (charge && d <= unit.getTotalMovesRemaining()) {
-						controller.targetUnit(unit, nearestEnemy, pf);
+						controller.targetUnit(unit, nearestEnemy, null, pf);
 					} else {
 						Array<Point> path = pf.getPathTo(
 								dir.getX(tx),
@@ -61,13 +60,9 @@ public class WolfAI implements ArtificialIntelligence {
 							controller.moveUnit(unit, path.first().x, path.first().y, pf);
 						}
 					}
-					System.out.println("Targeting " + nearestEnemy.getName());
-				} else {
-					System.out.println("Targeting no-one!");
 				}
 			}
 		}
-		System.out.println("End AI");
 	}
 
 	private Unit getNearestEnemy(BattleController controller, Army enemyArmy, PathFinder pf, boolean charge) {

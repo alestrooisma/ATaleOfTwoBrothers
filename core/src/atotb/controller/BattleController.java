@@ -252,16 +252,11 @@ public class BattleController extends ScreenController<BattleScreen> {
 		}
 
 		Status status = action.select(getSelectedUnit());
-		switch (status) {
-			case DONE:
-			case NOT_ALLOWED:
-				if (action.getMessage() != null) {
-					game.getLog().push(action.getMessage());
-				}
-				break;
-			case WAITING_FOR_TARGET:
-				selectedAction = number;
-				break;
+		if (action.getMessage() != null) {
+			game.getLog().push(action.getMessage());
+		}
+		if (status == Status.WAITING_FOR_TARGET) {
+			selectedAction = number;
 		}
 	}
 
@@ -312,32 +307,46 @@ public class BattleController extends ScreenController<BattleScreen> {
 				u.getPosition().x, u.getPosition().y, u.getTotalMovesRemaining());
 	}
 
-	public void targetUnit(Unit user, Unit target, PathFinder pf) {
+	public void targetUnit(Unit user, Unit target, Action action, PathFinder pf) {
 		// Check if the unit is allowed to act
 		if (!user.mayAct()) {
 			game.getLog().push(user.getName() + " may not act anymore.");
 			return;
 		}
 
-		// Check if target can be attacked
-		if (target.isLockedIntoCombat()) {
-			game.getLog().push(target.getName() + " is locked into combat - can't attack.");
-			return;
-		}
-
-		// Get the weapon
-		//TODO check for action, otherwise use main weapon.
-		Weapon w = user.getWeapon();
-		if (w == null) {
-			w = game.getUnarmed();
-		}
-
-		// Execute action, depending on weapon type
 		boolean acted = false;
-		if (w instanceof RangedWeapon) {
-			acted = fireRangedWeapon(user, target, w);
-		} else if (w instanceof MeleeWeapon) {
-			acted = charge(user, target, pf);
+
+		// Execute action
+		if (action != null) {
+			Status status = action.target(user, target);
+			if (action.getMessage() != null) {
+				game.getLog().push(action.getMessage());
+			}
+			if (status == Status.DONE) {
+				deselectAction();
+				acted = true;
+			}
+		} else {
+			// Perform default attack
+
+			// Check if target can be attacked
+			if (target.isLockedIntoCombat()) {
+				game.getLog().push(target.getName() + " is locked into combat - can't attack.");
+				return;
+			}
+
+			// Get the weapon
+			Weapon w = user.getWeapon();
+			if (w == null) {
+				w = game.getUnarmed();
+			}
+
+			// Execute action, depending on weapon type
+			if (w instanceof RangedWeapon) {
+				acted = fireRangedWeapon(user, target, w);
+			} else if (w instanceof MeleeWeapon) {
+				acted = charge(user, target, pf);
+			}
 		}
 
 		// If the unit has acted, make it unable to act again
@@ -561,7 +570,7 @@ public class BattleController extends ScreenController<BattleScreen> {
 					break;
 				case TARGET:
 					u = game.getModel().getBattle().getBattleMap().getTile(x, y).getUnit();
-					targetUnit(getSelectedUnit(), u, getPathFinder());
+					targetUnit(getSelectedUnit(), u, getSelectedAction(), getPathFinder());
 					break;
 			}
 		} else if (button == Input.Buttons.RIGHT) {

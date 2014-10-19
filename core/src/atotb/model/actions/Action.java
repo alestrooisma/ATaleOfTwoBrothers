@@ -17,6 +17,7 @@ public abstract class Action extends Element {
 
 	public Status select(Unit unit) {
 		if (isAllowed(unit)) {
+			message = null;
 			return uponSelection(unit);
 		} else {
 			message = getFailMessage(unit);
@@ -26,6 +27,7 @@ public abstract class Action extends Element {
 
 	public Status target(Unit actor, Unit target) {
 		if (isAllowed(actor)) {
+			message = null;
 			return uponTargeting(actor, target);
 		} else {
 			message = getTargetFailMessage(actor, target);
@@ -37,10 +39,6 @@ public abstract class Action extends Element {
 	
 	protected abstract Status uponTargeting(Unit actor, Unit target);
 
-	public boolean isSelfTargetingOnly() {
-		return SELF == targetType;
-	}
-
 	public boolean isApplicableTarget(byte type) {
 		return (type & targetType) != 0;
 	}
@@ -48,7 +46,7 @@ public abstract class Action extends Element {
 	public boolean isApplicableTarget(Unit actor, Unit target, boolean friendly) {
 		return (actor == target && (SELF & targetType) != 0)
 				|| (friendly && (FRIENDLY & targetType) != 0)
-				|| (actor == target && (ENEMY & targetType) != 0);
+				|| (!friendly && (ENEMY & targetType) != 0);
 	}
 	
 	public boolean isAllowed(Unit actor) {
