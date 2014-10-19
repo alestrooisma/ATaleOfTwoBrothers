@@ -13,6 +13,7 @@ import atotb.model.Army;
 import atotb.model.Battle;
 import atotb.model.BattleMap;
 import atotb.model.Unit;
+import atotb.model.actions.Action.Status;
 import atotb.model.items.MeleeWeapon;
 import atotb.model.items.RangedWeapon;
 import atotb.model.items.Weapon;
@@ -241,8 +242,26 @@ public class BattleController extends ScreenController<BattleScreen> {
 	// Selected action management
 	//
 	public void selectAction(int number) {
-		if (getSelectedUnit().getAction(number) != null) {
-			selectedAction = number;
+		if (getSelectedUnit() == null) {
+			return;
+		}
+
+		Action action = getSelectedUnit().getAction(number);
+		if (action == null) {
+			return;
+		}
+
+		Status status = action.select(getSelectedUnit());
+		switch (status) {
+			case DONE:
+			case NOT_ALLOWED:
+				if (action.getMessage() != null) {
+					game.getLog().push(action.getMessage());
+				}
+				break;
+			case WAITING_FOR_TARGET:
+				selectedAction = number;
+				break;
 		}
 	}
 

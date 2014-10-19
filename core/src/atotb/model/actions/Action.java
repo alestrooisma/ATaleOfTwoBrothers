@@ -8,6 +8,7 @@ public abstract class Action extends Element {
 	public static final byte FRIENDLY = 2;
 	public static final byte ENEMY = 4;
 	private final byte targetType;
+	private String message = null;
 
 	public Action(String name, String summary, String description, byte targetType) {
 		super(name, summary, description);
@@ -18,6 +19,7 @@ public abstract class Action extends Element {
 		if (isAllowed(unit)) {
 			return uponSelection(unit);
 		} else {
+			message = getFailMessage(unit);
 			return Status.NOT_ALLOWED;
 		}
 	}
@@ -26,6 +28,7 @@ public abstract class Action extends Element {
 		if (isAllowed(actor)) {
 			return uponTargeting(actor, target);
 		} else {
+			message = getTargetFailMessage(actor, target);
 			return Status.NOT_ALLOWED;
 		}
 	}
@@ -55,6 +58,23 @@ public abstract class Action extends Element {
 	public boolean isAllowed(Unit actor, Unit target) {
 		return isAllowed(actor);
 	}
+
+	protected String getFailMessage(Unit actor) {
+		return actor.getName() + " can't perform action \"" + getName() + "\".";
+	}
+
+	protected String getTargetFailMessage(Unit actor, Unit target) {
+		return target.getName() + " is not an appropriate target.";
+	}
+	
+	public String getMessage() {
+		return message;
+	}
+
+	public void setMessage(String message) {
+		this.message = message;
+	}
+
 	
 	public enum Status {
 		NOT_ALLOWED, WAITING_FOR_TARGET, DONE;

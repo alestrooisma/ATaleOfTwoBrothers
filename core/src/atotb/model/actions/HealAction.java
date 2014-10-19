@@ -20,7 +20,17 @@ public class HealAction extends Action {
 
 	@Override
 	protected Status uponSelection(Unit actor) {
-		actor.setCurrentHealth(actor.getCurrentHealth() + amount);
+		double actualAmount = amount;
+		if (actor.getCurrentHealth() >= actor.getMaxHealth()) {
+			setMessage(actor.getName() + " is already at full health.");
+			return Status.NOT_ALLOWED;
+		} else if (actor.getCurrentHealth() + actualAmount > actor.getMaxHealth()) {
+			actor.setCurrentHealth(actor.getMaxHealth());
+			actualAmount = actor.getMaxHealth() - actor.getCurrentHealth();
+		} else {
+			actor.setCurrentHealth(actor.getCurrentHealth() + actualAmount);
+		}
+		setMessage(actor.getName() + " healed " + actualAmount + " HP.");
 		return Status.DONE;
 	}
 

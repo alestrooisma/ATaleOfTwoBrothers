@@ -13,6 +13,9 @@ Phase 1 - tRPG gameplay
   - [x] Obtaining a shortest path to the destination (backtracking)
 - [x] Camera control
 - [ ] Abilities
+  - [x] Action selection
+  - [ ] Action execution
+  - [ ] Non-immediate action effects
 - [x] Basic AI
 - [x] Code cleanup
 
