@@ -97,7 +97,7 @@ public class Unit extends Element {
 	}
 
 	public Action getAction(int i) {
-		if (i > actions.size()) {
+		if (i < 1 || i > actions.size()) {
 			return null;
 		}
 		return actions.get(i - 1);

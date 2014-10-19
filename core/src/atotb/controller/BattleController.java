@@ -8,6 +8,7 @@ import atotb.controller.ai.ArtificialIntelligence;
 import atotb.controller.events.InputEvent;
 import atotb.controller.events.KeyEvent;
 import atotb.controller.events.MouseEvent;
+import atotb.model.Action;
 import atotb.model.Army;
 import atotb.model.Battle;
 import atotb.model.BattleMap;
@@ -28,7 +29,7 @@ import java.util.ArrayList;
 
 /**
  * The controller component for battles. Manages the game state during battles.
- * 
+ *
  * @author Ale Strooisma
  */
 public class BattleController extends ScreenController<BattleScreen> {
@@ -41,6 +42,7 @@ public class BattleController extends ScreenController<BattleScreen> {
 	// Controller
 	private boolean battleEnded;
 	private int selectedUnit;
+	private int selectedAction;
 	private PathFinder pathfinder;
 	//
 	// Event handling
@@ -73,9 +75,10 @@ public class BattleController extends ScreenController<BattleScreen> {
 
 	/**
 	 * Sets the game state for the next battle. Does not start the battle.
-	 * 
+	 *
 	 * @param battle the model component representing the battle
-	 * @param tileMap the graphical representation of the map on which the battle is played
+	 * @param tileMap the graphical representation of the map on which the
+	 * battle is played
 	 * @param ai the AIs used for the various players
 	 */
 	public void initBattle(Battle battle, TiledMap tileMap, ArtificialIntelligence[] ai) {
@@ -85,13 +88,13 @@ public class BattleController extends ScreenController<BattleScreen> {
 
 		// Prepare gamestate
 		battleEnded = false;
-		selectedUnit = -1;
+		deselectUnit();
 		pathfinder = new PathFinder(battle.getBattleMap());
 	}
-	
+
 	/**
-	 * Called to start the battle. 
-	 * Main functionality is starting the first turn.
+	 * Called to start the battle. Main functionality is starting the first
+	 * turn.
 	 */
 	public void startBattle() {
 		// Kick it off
@@ -201,6 +204,7 @@ public class BattleController extends ScreenController<BattleScreen> {
 
 	public void deselectUnit() {
 		selectedUnit = -1;
+		deselectAction();
 	}
 
 	public void previousUnit() {
@@ -229,6 +233,30 @@ public class BattleController extends ScreenController<BattleScreen> {
 
 	public PathFinder getPathFinder() {
 		return pathfinder;
+	}
+
+	// Selected action management
+	//
+	public void selectAction(int number) {
+		if (getSelectedUnit().getAction(number) != null) {
+			selectedAction = number;
+		}
+	}
+
+	public void deselectAction() {
+		selectedAction = -1;
+	}
+
+	public int getSelectedActionNumber() {
+		return selectedAction;
+	}
+
+	public Action getSelectedAction() {
+		if (getSelectedUnit() == null) {
+			return null;
+		} else {
+			return getSelectedUnit().getAction(getSelectedActionNumber());
+		}
 	}
 
 	// Game state modifiers
@@ -542,6 +570,33 @@ public class BattleController extends ScreenController<BattleScreen> {
 				getView().getCamera().position.x = 640;
 				getView().getCamera().position.y = 16;
 				break;
+			case Input.Keys.NUM_1:
+				selectAction(1);
+				break;
+			case Input.Keys.NUM_2:
+				selectAction(2);
+				break;
+			case Input.Keys.NUM_3:
+				selectAction(3);
+				break;
+			case Input.Keys.NUM_4:
+				selectAction(4);
+				break;
+			case Input.Keys.NUM_5:
+				selectAction(5);
+				break;
+			case Input.Keys.NUM_6:
+				selectAction(6);
+				break;
+			case Input.Keys.NUM_7:
+				selectAction(7);
+				break;
+			case Input.Keys.NUM_8:
+				selectAction(8);
+				break;
+			case Input.Keys.NUM_9:
+				selectAction(9);
+				break;
 			case Input.Keys.B:
 				previousUnit();
 				break;
@@ -549,7 +604,11 @@ public class BattleController extends ScreenController<BattleScreen> {
 				nextUnit();
 				break;
 			case Input.Keys.BACKSPACE:
-				deselectUnit();
+				if (getSelectedAction() != null) {
+					deselectAction();
+				} else {
+					deselectUnit();
+				}
 				break;
 			case Input.Keys.ENTER:
 				nextTurn();
@@ -562,24 +621,24 @@ public class BattleController extends ScreenController<BattleScreen> {
 	}
 
 	public MouseAction getMouseAction(int x, int y) {
-		if (game.getModel().getBattle().getBattleMap().contains(x, y)) {
-			// Clicked on a tile
-			Unit u = game.getModel().getBattle().getBattleMap().getTile(x, y).getUnit();
-			if (u != null) {
-				// There is a unit on the tile
-				if (!u.isEnemy(game.getModel().getBattle().getCurrentArmy())) {
-					// Unit is friendly -> select it
-					return MouseAction.SELECT;
-				} else if (getSelectedUnit() != null
-						&& getSelectedUnit().mayAct()) {
-					// Unit is enemy
-					return MouseAction.TARGET;
-				}
-			} else {
-				return MouseAction.MOVE;
-			}
-		} else {
+		if (!game.getModel().getBattle().getBattleMap().contains(x, y)) {
 			return MouseAction.OUT_OF_BOUNDS;
+		}
+
+		// Clicked on a tile
+		Unit u = game.getModel().getBattle().getBattleMap().getTile(x, y).getUnit();
+		if (u != null) {
+			// There is a unit on the tile
+			if (u.getArmy() == game.getModel().getBattle().getCurrentArmy()) {
+				// Unit is friendly -> select it
+				return MouseAction.SELECT;
+			} else if (getSelectedUnit() != null
+					&& getSelectedUnit().mayAct()) {
+				// Unit is enemy
+				return MouseAction.TARGET;
+			}
+		} else if (getSelectedUnit() != null) {
+			return MouseAction.MOVE;
 		}
 		return MouseAction.NOTHING;
 	}

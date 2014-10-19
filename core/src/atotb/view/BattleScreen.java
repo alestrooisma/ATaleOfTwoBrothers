@@ -211,6 +211,10 @@ public class BattleScreen implements Screen {
 			font.draw(batch,
 					"May act: " + (u.mayAct() ? "yes" : "false"),
 					10, windowHeight - 70);
+			int a = controller.getSelectedActionNumber();
+			font.draw(batch,
+					"Selected ability: " + (a == -1 ? "none" : "#" + a + " - " + u.getAction(a).getName()),
+					10, windowHeight - 90);
 		}
 
 		// Message log

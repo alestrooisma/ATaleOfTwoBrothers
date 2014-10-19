@@ -14,8 +14,8 @@ allprojects {
     version = '1.0'
     ext {
         appName = 'atotb'
-        gdxVersion = '1.2.0'
-        roboVMVersion = '0.0.13'
+        gdxVersion = '1.4.1'
+        roboVMVersion = '1.0.0-alpha-04'
     }
 
     repositories {
