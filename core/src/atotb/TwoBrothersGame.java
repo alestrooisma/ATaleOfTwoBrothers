@@ -4,6 +4,7 @@ import atotb.controller.*;
 import atotb.controller.ai.ArtificialIntelligence;
 import atotb.controller.ai.WolfAI;
 import atotb.model.*;
+import atotb.model.actions.HealAction;
 import atotb.model.items.*;
 import atotb.util.MessageLog;
 import atotb.view.BattleScreen;
@@ -58,23 +59,11 @@ public class TwoBrothersGame extends Game {
 
 	private void setUpModel() {
 		Unit u;
-		Action defense = new Action("Defensive stance", "", "") {
-
-			@Override
-			protected Action.Status uponSelection(Unit actor) {
-				return Action.Status.DONE;
-			}
-
-			@Override
-			protected Action.Status uponTargeting(Unit actor, Unit target) {
-				return Action.Status.NOT_ALLOWED;
-			}
-		};
 
 		Army player = new Army("player1", "Your army.", "The army you command.");
 		u = Unit.createUnit("Dale", "The oldest of the two brothers.", "Dale picked up a pitchfork, lacking a better weapon.", player, 10, 3.5);
 		u.setWeapon(new MeleeWeapon("Pitchfork", "", "", 2));
-		u.addAction(defense);
+		u.addAction(new HealAction(4));
 		u = Unit.createUnit("Harryn", "The younger of the two brothers.", "Harryn is decent with a bow.", player, 10, 3.5);
 		u.setWeapon(new RangedWeapon("Old hunting bow", "", "", 6));
 

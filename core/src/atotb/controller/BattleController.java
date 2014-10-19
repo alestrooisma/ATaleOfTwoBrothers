@@ -8,7 +8,7 @@ import atotb.controller.ai.ArtificialIntelligence;
 import atotb.controller.events.InputEvent;
 import atotb.controller.events.KeyEvent;
 import atotb.controller.events.MouseEvent;
-import atotb.model.Action;
+import atotb.model.actions.Action;
 import atotb.model.Army;
 import atotb.model.Battle;
 import atotb.model.BattleMap;
@@ -33,6 +33,8 @@ import java.util.ArrayList;
  * @author Ale Strooisma
  */
 public class BattleController extends ScreenController<BattleScreen> {
+
+	public static final int NONE_SELECTED = -1;
 
 	// Received
 	private final TwoBrothersGame game;
@@ -68,7 +70,7 @@ public class BattleController extends ScreenController<BattleScreen> {
 		boolean wasBattleOver = isBattleOver();
 		processEvents();
 		if (isBattleOver() && !wasBattleOver) {
-			game.endBattle();
+			endBattle();
 		}
 		handleCameraControl();
 	}
@@ -196,6 +198,7 @@ public class BattleController extends ScreenController<BattleScreen> {
 	}
 
 	public void selectUnit(int number) {
+		deselectAction();
 		selectedUnit = number;
 		Unit u = getSelectedUnit();
 		pathfinder.calculateDistancesFrom(
@@ -203,7 +206,7 @@ public class BattleController extends ScreenController<BattleScreen> {
 	}
 
 	public void deselectUnit() {
-		selectedUnit = -1;
+		selectedUnit = NONE_SELECTED;
 		deselectAction();
 	}
 
@@ -244,7 +247,7 @@ public class BattleController extends ScreenController<BattleScreen> {
 	}
 
 	public void deselectAction() {
-		selectedAction = -1;
+		selectedAction = NONE_SELECTED;
 	}
 
 	public int getSelectedActionNumber() {
@@ -626,16 +629,26 @@ public class BattleController extends ScreenController<BattleScreen> {
 		}
 
 		// Clicked on a tile
-		Unit u = game.getModel().getBattle().getBattleMap().getTile(x, y).getUnit();
-		if (u != null) {
+		Unit target = game.getModel().getBattle().getBattleMap().getTile(x, y).getUnit();
+		if (target != null) {
 			// There is a unit on the tile
-			if (u.getArmy() == game.getModel().getBattle().getCurrentArmy()) {
-				// Unit is friendly -> select it
-				return MouseAction.SELECT;
-			} else if (getSelectedUnit() != null
-					&& getSelectedUnit().mayAct()) {
-				// Unit is enemy
+			boolean friendly = (target.getArmy() == game.getModel().getBattle().getCurrentArmy());
+			Action action = getSelectedAction();
+			if (action == null) {
+				if (friendly) {
+					// Unit is friendly -> select it
+					return MouseAction.SELECT;
+				} else if (getSelectedUnit() != null
+						&& getSelectedUnit().mayAct()) {
+					// Unit is enemy -> default attack
+					return MouseAction.TARGET;
+				}
+			} else if (action.isApplicableTarget(getSelectedUnit(), target, friendly)) {
+				// Unit is applicable target -> execute action
 				return MouseAction.TARGET;
+			} else {
+				// No applicable target
+				return MouseAction.NO_TARGET;
 			}
 		} else if (getSelectedUnit() != null) {
 			return MouseAction.MOVE;
@@ -645,6 +658,6 @@ public class BattleController extends ScreenController<BattleScreen> {
 
 	public enum MouseAction {
 
-		SELECT, MOVE, TARGET, NOTHING, OUT_OF_BOUNDS;
+		SELECT, MOVE, TARGET, NO_TARGET, NOTHING, OUT_OF_BOUNDS;
 	}
 }

@@ -1,9 +1,11 @@
-package atotb.model;
+package atotb.model.actions;
+
+import atotb.model.Unit;
 
 public class FireAction extends Action {
 
 	public FireAction() {
-		super("Fire", "Fire main weapon.", "The character fires its main weapon.");
+		super("Fire", "Fire main weapon.", "The character fires its main weapon.", ENEMY);
 	}
 
 	@Override

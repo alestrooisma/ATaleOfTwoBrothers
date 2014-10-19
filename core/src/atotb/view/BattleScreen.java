@@ -111,7 +111,8 @@ public class BattleScreen implements Screen {
 			case TARGET:
 				batch.draw(Resources.targetMarkerUnder, vec.x - 4, vec.y + 16);
 				break;
-			case MOVE:
+			case MOVE: //TODO custom cursor
+			case NO_TARGET: //TODO custom cursor
 			case NOTHING:
 				batch.draw(Resources.cursor, vec.x, vec.y);
 				break;

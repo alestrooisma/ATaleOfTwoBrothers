@@ -1,5 +1,6 @@
 package atotb.model;
 
+import atotb.model.actions.Action;
 import atotb.model.items.Weapon;
 import java.awt.Point;
 import java.util.ArrayList;
