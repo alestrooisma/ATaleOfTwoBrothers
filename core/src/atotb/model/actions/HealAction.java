@@ -17,26 +17,21 @@ public class HealAction extends Action {
 		this.amount = amount;
 	}
 
-
 	@Override
-	protected Status uponSelection(Unit actor) {
+	public void execute(Unit actor, Unit target) {
 		double actualAmount = amount;
-		if (actor.getCurrentHealth() >= actor.getMaxHealth()) {
-			setMessage(actor.getName() + " is already at full health.");
-			return Status.NOT_ALLOWED;
-		} else if (actor.getCurrentHealth() + actualAmount > actor.getMaxHealth()) {
+		if (actor.getCurrentHealth() + actualAmount > actor.getMaxHealth()) {
 			actor.setCurrentHealth(actor.getMaxHealth());
 			actualAmount = actor.getMaxHealth() - actor.getCurrentHealth();
 		} else {
 			actor.setCurrentHealth(actor.getCurrentHealth() + actualAmount);
 		}
 		setMessage(actor.getName() + " healed " + actualAmount + " HP.");
-		return Status.DONE;
 	}
 
 	@Override
-	protected Status uponTargeting(Unit actor, Unit target) {
-		return Status.NOT_ALLOWED;
+	public boolean isAllowed(Unit actor) {
+		return super.isAllowed(actor) && actor.getCurrentHealth() < actor.getMaxHealth();
 	}
 	
 }

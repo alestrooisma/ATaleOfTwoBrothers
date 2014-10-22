@@ -14,39 +14,22 @@ public abstract class Action extends Element {
 		super(name, summary, description);
 		this.targetType = targetType;
 	}
-
-	public Status select(Unit unit) {
-		if (isAllowed(unit)) {
-			message = null;
-			return uponSelection(unit);
-		} else {
-			message = getFailMessage(unit);
-			return Status.NOT_ALLOWED;
-		}
-	}
-
-	public Status target(Unit actor, Unit target) {
-		if (isAllowed(actor)) {
-			message = null;
-			return uponTargeting(actor, target);
-		} else {
-			message = getTargetFailMessage(actor, target);
-			return Status.NOT_ALLOWED;
-		}
+	
+	public void execute(Unit actor) {
+		execute(actor, actor);
 	}
 	
-	protected abstract Status uponSelection(Unit actor);
-	
-	protected abstract Status uponTargeting(Unit actor, Unit target);
+	public abstract void execute(Unit actor, Unit target);
 
 	public boolean isApplicableTarget(byte type) {
 		return (type & targetType) != 0;
 	}
 
-	public boolean isApplicableTarget(Unit actor, Unit target, boolean friendly) {
+	public boolean isApplicableTarget(Unit actor, Unit target) {
+		boolean enemy = actor.isEnemy(target);
 		return (actor == target && (SELF & targetType) != 0)
-				|| (friendly && (FRIENDLY & targetType) != 0)
-				|| (!friendly && (ENEMY & targetType) != 0);
+				|| (!enemy && (FRIENDLY & targetType) != 0)
+				|| (enemy && (ENEMY & targetType) != 0);
 	}
 	
 	public boolean isAllowed(Unit actor) {
@@ -54,15 +37,15 @@ public abstract class Action extends Element {
 	}
 	
 	public boolean isAllowed(Unit actor, Unit target) {
-		return isAllowed(actor);
+		return isAllowed(actor) && isApplicableTarget(actor, target);
 	}
 
-	protected String getFailMessage(Unit actor) {
-		return actor.getName() + " can't perform action \"" + getName() + "\".";
+	public boolean isImmediate() {
+		return targetType == SELF;
 	}
-
-	protected String getTargetFailMessage(Unit actor, Unit target) {
-		return target.getName() + " is not an appropriate target.";
+	
+	public String getSelectMessage(Unit actor) {
+		return "Please select a target.";
 	}
 	
 	public String getMessage() {
@@ -71,10 +54,5 @@ public abstract class Action extends Element {
 
 	public void setMessage(String message) {
 		this.message = message;
-	}
-
-	
-	public enum Status {
-		NOT_ALLOWED, WAITING_FOR_TARGET, DONE;
 	}
 }

@@ -13,7 +13,6 @@ import atotb.model.Army;
 import atotb.model.Battle;
 import atotb.model.BattleMap;
 import atotb.model.Unit;
-import atotb.model.actions.Action.Status;
 import atotb.model.items.MeleeWeapon;
 import atotb.model.items.RangedWeapon;
 import atotb.model.items.Weapon;
@@ -242,21 +241,22 @@ public class BattleController extends ScreenController<BattleScreen> {
 	// Selected action management
 	//
 	public void selectAction(int number) {
-		if (getSelectedUnit() == null) {
+		Unit unit = getSelectedUnit();
+		if (unit == null) {
 			return;
 		}
 
-		Action action = getSelectedUnit().getAction(number);
-		if (action == null) {
-			return;
-		}
-
-		Status status = action.select(getSelectedUnit());
-		if (action.getMessage() != null) {
-			game.getLog().push(action.getMessage());
-		}
-		if (status == Status.WAITING_FOR_TARGET) {
-			selectedAction = number;
+		Action action = unit.getAction(number);
+		if (action != null && action.isAllowed(unit)) {
+			if (action.isImmediate()) {
+				action.execute(unit);
+				if (action.getMessage() != null) {
+					game.getLog().push(action.getMessage());
+				}
+			} else {
+				selectedAction = number;
+				game.getLog().push(action.getSelectMessage(unit));
+			}
 		}
 	}
 
@@ -317,15 +317,13 @@ public class BattleController extends ScreenController<BattleScreen> {
 		boolean acted = false;
 
 		// Execute action
-		if (action != null) {
-			Status status = action.target(user, target);
+		if (action != null && action.isAllowed(user, target)) {
+			action.execute(user, target);
 			if (action.getMessage() != null) {
 				game.getLog().push(action.getMessage());
 			}
-			if (status == Status.DONE) {
-				deselectAction();
-				acted = true;
-			}
+			deselectAction();
+			acted = true;
 		} else {
 			// Perform default attack
 
@@ -671,7 +669,7 @@ public class BattleController extends ScreenController<BattleScreen> {
 					// Unit is enemy -> default attack
 					return MouseAction.TARGET;
 				}
-			} else if (action.isApplicableTarget(getSelectedUnit(), target, friendly)) {
+			} else if (action.isApplicableTarget(getSelectedUnit(), target)) {
 				// Unit is applicable target -> execute action
 				return MouseAction.TARGET;
 			} else {
