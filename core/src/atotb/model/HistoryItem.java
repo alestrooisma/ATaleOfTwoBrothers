@@ -27,6 +27,9 @@ public interface HistoryItem {
 	public static class Charge implements HistoryItem {
 	}
 
+	public static class Fire implements HistoryItem {
+	}
+
 	public static class Ability implements HistoryItem {
 		private final Action action;
 

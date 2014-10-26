@@ -219,6 +219,8 @@ public class BattleScreen implements Screen {
 					h = drawString("    Dashed", h);
 				} else if (item instanceof HistoryItem.Charge) {
 					h = drawString("    Charged", h);
+				} else if (item instanceof HistoryItem.Fire) {
+					h = drawString("    Fired", h);
 				} else {
 					h = drawString("    Performed " + ((HistoryItem.Ability)item).getAction().getName(), h);
 				}

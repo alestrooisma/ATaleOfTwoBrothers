@@ -16,6 +16,14 @@ Phase 1 - tRPG gameplay
   - [x] Action selection
   - [ ] Action execution
   - [ ] Non-immediate action effects
+- [ ] Better checking if actions are allowed
+  - [x] Add history list
+  - [ ] Clear expired items from list at end/start of turn (currently clearing everthing each turn)
+  - [ ] Base permission checks on history list
+    - [x] Movement
+    - [x] Dashing
+    - [ ] Charging
+    - [ ] Abilities
 - [x] Basic AI
 - [x] Code cleanup
 

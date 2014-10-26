@@ -30,8 +30,6 @@ public class Unit extends Element {
 	// Current status
 	private PooledLinkedList<HistoryItem> history;
 	private double currentHealth;
-	private double movesRemaining;
-	private boolean mayDash;
 	private boolean mayAct;
 	private Unit opponent = null;
 
@@ -136,35 +134,40 @@ public class Unit extends Element {
 	}
 
 	public double getMovesRemaining() {
-		return movesRemaining;
-	}
-
-	public void setMovesRemaining(double movesRemaining) {
-		this.movesRemaining = movesRemaining;
+		HistoryItem item;
+		double moves = getSpeed();
+		history.iter();
+		while ((item = history.next()) != null) {
+			if (item instanceof HistoryItem.Move) {
+				moves -= ((HistoryItem.Move) item).getDistance();
+			} else if (item instanceof HistoryItem.Dash) {
+				moves = 0;
+			}
+		}
+		return moves;
 	}
 
 	public double getTotalMovesRemaining() {
 		double moves = getMovesRemaining();
-		if (mayDash) {
+		if (mayDash()) {
 			moves += getDashDistance();
 		}
 		return moves;
 	}
 
-	public void reduceMoves(double moves) {
-		movesRemaining -= moves;
-	}
-
 	public boolean mayDash() {
-		return mayDash;
-	}
-
-	public void setMayDash(boolean mayDash) {
-		this.mayDash = mayDash;
-	}
-
-	public void setHasDashed() {
-		setMayDash(false);
+		HistoryItem item;
+		boolean allowed = !isLockedIntoCombat();
+		history.iter();
+		while (allowed && (item = history.next()) != null) {
+			if (item instanceof HistoryItem.Dash
+					|| item instanceof HistoryItem.Charge
+					|| item instanceof HistoryItem.Fire
+					|| item instanceof HistoryItem.Ability) {
+				allowed = false;
+			}
+		}
+		return allowed;
 	}
 
 	public boolean mayAct() {
@@ -181,12 +184,8 @@ public class Unit extends Element {
 
 	public void reset() {
 		if (!isLockedIntoCombat()) {
-			movesRemaining = speed;
-			mayDash = true;
 			mayAct = true;
 		} else {
-			movesRemaining = 0;
-			mayDash = false;
 			mayAct = false;
 		}
 		history.clear();

@@ -288,13 +288,10 @@ public class BattleController extends ScreenController<BattleScreen> {
 		if (distance <= u.getMovesRemaining()) {
 			actuallyMoveUnit(u, destX, destY, pf);
 			u.addHistoryItem(new HistoryItem.Move(distance));
-			u.reduceMoves(distance);
 		} else if (u.mayDash()
 				&& distance <= u.getMovesRemaining() + u.getDashDistance()) {
 			actuallyMoveUnit(u, destX, destY, pf);
 			u.addHistoryItem(new HistoryItem.Dash());
-			u.setMovesRemaining(0);
-			u.setHasDashed();
 			u.setMayAct(false); //TODO temp
 			game.getLog().push("Dashing!");
 		}
@@ -357,9 +354,7 @@ public class BattleController extends ScreenController<BattleScreen> {
 		// If the unit has acted, make it unable to act again
 		// TODO depending on exact action performed
 		if (acted) {
-			user.setMovesRemaining(0);
 			user.setMayAct(false);
-			user.setMayDash(false);
 		}
 	}
 
@@ -372,6 +367,7 @@ public class BattleController extends ScreenController<BattleScreen> {
 			game.getLog().push(user.getName() + " killed " + target.getName() + "!");
 			battle.getBattleMap().getTile(target.getPosition()).removeUnit();
 		}
+		user.addHistoryItem(new HistoryItem.Fire());
 		return true;
 	}
 
@@ -410,7 +406,7 @@ public class BattleController extends ScreenController<BattleScreen> {
 				break;
 		}
 		user.addHistoryItem(new HistoryItem.Charge());
-		
+
 		// Set locked into combat
 		user.setLockedIntoCombat(target);
 		target.setLockedIntoCombat(user);
