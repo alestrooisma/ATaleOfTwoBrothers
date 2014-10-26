@@ -2,6 +2,7 @@ package atotb.model;
 
 import atotb.model.actions.Action;
 import atotb.model.items.Weapon;
+import com.badlogic.gdx.utils.PooledLinkedList;
 import java.awt.Point;
 import java.util.ArrayList;
 
@@ -27,6 +28,7 @@ public class Unit extends Element {
 	private Weapon weapon;
 	//
 	// Current status
+	private PooledLinkedList<HistoryItem> history;
 	private double currentHealth;
 	private double movesRemaining;
 	private boolean mayDash;
@@ -47,6 +49,7 @@ public class Unit extends Element {
 		this.maxHealth = maxHealth;
 		this.speed = speed;
 		this.actions = actions;
+		history = new PooledLinkedList<HistoryItem>(5);
 	}
 
 	// Basic getters and setters
@@ -186,6 +189,15 @@ public class Unit extends Element {
 			mayDash = false;
 			mayAct = false;
 		}
+		history.clear();
+	}
+	
+	public void addHistoryItem(HistoryItem item) {
+		history.add(item);
+	}
+
+	public PooledLinkedList<HistoryItem> getHistory() {
+		return history;
 	}
 
 	public void setLockedIntoCombat(Unit opponent) {

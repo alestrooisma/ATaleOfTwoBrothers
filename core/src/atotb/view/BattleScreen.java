@@ -5,6 +5,7 @@ import atotb.controller.BattleController;
 import atotb.controller.BattleController.MouseAction;
 import atotb.controller.Resources;
 import atotb.model.Army;
+import atotb.model.HistoryItem;
 import atotb.model.Unit;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
@@ -21,9 +22,9 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 /**
- * The view component for battles. 
- * Only responsibility is rendering the game screen.
- * 
+ * The view component for battles. Only responsibility is rendering the game
+ * screen.
+ *
  * @author Ale Strooisma
  */
 public class BattleScreen implements Screen {
@@ -62,8 +63,9 @@ public class BattleScreen implements Screen {
 	}
 
 	/**
-	 * Sets the graphical representation of the map that must be rendered.
-	 * This must be set before this screen is set active.
+	 * Sets the graphical representation of the map that must be rendered. This
+	 * must be set before this screen is set active.
+	 *
 	 * @param map the map to be rendered
 	 */
 	public void setMap(TiledMap map) {
@@ -200,22 +202,27 @@ public class BattleScreen implements Screen {
 		// Selected unit information
 		if (u != null) {
 			double dash = u.mayDash() ? u.getDashDistance() : 0;
-			font.draw(batch,
-					u.getName(),
-					10, windowHeight - 10);
-			font.draw(batch,
-					"HP: " + u.getCurrentHealth() + "\\" + u.getMaxHealth(),
-					10, windowHeight - 30);
-			font.draw(batch,
-					"Moves remaining: " + u.getMovesRemaining() + "+" + dash,
-					10, windowHeight - 50);
-			font.draw(batch,
-					"May act: " + (u.mayAct() ? "yes" : "false"),
-					10, windowHeight - 70);
+			int h = 0;
+			h = drawString(u.getName(), h);
+			h = drawString("HP: " + u.getCurrentHealth() + "\\" + u.getMaxHealth(), h);
+			h = drawString("Moves remaining: " + u.getMovesRemaining() + "+" + dash, h);
+			h = drawString("May act: " + (u.mayAct() ? "yes" : "false"), h);
 			int a = controller.getSelectedActionNumber();
-			font.draw(batch,
-					"Selected ability: " + (a == -1 ? "none" : "#" + a + " - " + u.getAction(a).getName()),
-					10, windowHeight - 90);
+			h = drawString("Selected ability: " + (a == -1 ? "none" : "#" + a + " - " + u.getAction(a).getName()), h);
+			h = drawString("History:", h);
+			u.getHistory().iter();
+			HistoryItem item;
+			while ((item = u.getHistory().next()) != null) {
+				if (item instanceof HistoryItem.Move) {
+					h = drawString("    Moved a distance of " + ((HistoryItem.Move)item).getDistance(), h);
+				} else if (item instanceof HistoryItem.Dash) {
+					h = drawString("    Dashed", h);
+				} else if (item instanceof HistoryItem.Charge) {
+					h = drawString("    Charged", h);
+				} else {
+					h = drawString("    Performed " + ((HistoryItem.Ability)item).getAction().getName(), h);
+				}
+			}
 		}
 
 		// Message log
@@ -226,6 +233,11 @@ public class BattleScreen implements Screen {
 
 		// Finish UI drawing
 		batch.end();
+	}
+
+	private int drawString(String str, int h) {
+		font.draw(batch, str, 10, windowHeight - 10 - h);
+		return h + 20;
 	}
 
 	@Override

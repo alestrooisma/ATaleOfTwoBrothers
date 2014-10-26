@@ -12,6 +12,7 @@ import atotb.model.actions.Action;
 import atotb.model.Army;
 import atotb.model.Battle;
 import atotb.model.BattleMap;
+import atotb.model.HistoryItem;
 import atotb.model.Unit;
 import atotb.model.items.MeleeWeapon;
 import atotb.model.items.RangedWeapon;
@@ -253,6 +254,7 @@ public class BattleController extends ScreenController<BattleScreen> {
 				if (action.getMessage() != null) {
 					game.getLog().push(action.getMessage());
 				}
+				unit.addHistoryItem(new HistoryItem.Ability(action));
 			} else {
 				selectedAction = number;
 				game.getLog().push(action.getSelectMessage(unit));
@@ -285,10 +287,12 @@ public class BattleController extends ScreenController<BattleScreen> {
 		// Check range and move if possible
 		if (distance <= u.getMovesRemaining()) {
 			actuallyMoveUnit(u, destX, destY, pf);
+			u.addHistoryItem(new HistoryItem.Move(distance));
 			u.reduceMoves(distance);
 		} else if (u.mayDash()
 				&& distance <= u.getMovesRemaining() + u.getDashDistance()) {
 			actuallyMoveUnit(u, destX, destY, pf);
+			u.addHistoryItem(new HistoryItem.Dash());
 			u.setMovesRemaining(0);
 			u.setHasDashed();
 			u.setMayAct(false); //TODO temp
@@ -317,13 +321,16 @@ public class BattleController extends ScreenController<BattleScreen> {
 		boolean acted = false;
 
 		// Execute action
-		if (action != null && action.isAllowed(user, target)) {
-			action.execute(user, target);
-			if (action.getMessage() != null) {
-				game.getLog().push(action.getMessage());
+		if (action != null) {
+			if (action.isAllowed(user, target)) {
+				action.execute(user, target);
+				if (action.getMessage() != null) {
+					game.getLog().push(action.getMessage());
+				}
+				deselectAction();
+				acted = true;
+				user.addHistoryItem(new HistoryItem.Ability(action));
 			}
-			deselectAction();
-			acted = true;
 		} else {
 			// Perform default attack
 
@@ -402,7 +409,8 @@ public class BattleController extends ScreenController<BattleScreen> {
 				actuallyMoveUnit(user, tx - 1, ty, pf);
 				break;
 		}
-
+		user.addHistoryItem(new HistoryItem.Charge());
+		
 		// Set locked into combat
 		user.setLockedIntoCombat(target);
 		target.setLockedIntoCombat(user);
