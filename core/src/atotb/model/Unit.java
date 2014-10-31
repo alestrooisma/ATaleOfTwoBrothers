@@ -8,14 +8,14 @@ import java.util.ArrayList;
 
 /**
  * Represents a unit (soldier) and all of its abilities and equipment.
- * 
+ *
  * @author Ale Strooisma
  */
 public class Unit extends Element {
 
 	// Core fields
 	private Army army;
-	private final Point position = new Point();;
+	private final Point position = new Point();
 	//
 	// Stats
 	private int maxHealth;
@@ -140,7 +140,9 @@ public class Unit extends Element {
 		while ((item = history.next()) != null) {
 			if (item instanceof HistoryItem.Move) {
 				moves -= ((HistoryItem.Move) item).getDistance();
-			} else if (item instanceof HistoryItem.Dash) {
+			} else if (item instanceof HistoryItem.Dash 
+					|| item instanceof HistoryItem.Charge
+					|| item instanceof HistoryItem.Fire) {
 				moves = 0;
 			}
 		}
@@ -178,19 +180,11 @@ public class Unit extends Element {
 		this.mayAct = mayAct;
 	}
 
-	public void setHasActed() {
-		setMayAct(false);
-	}
-
 	public void reset() {
-		if (!isLockedIntoCombat()) {
-			mayAct = true;
-		} else {
-			mayAct = false;
-		}
+		mayAct = !isLockedIntoCombat();
 		history.clear();
 	}
-	
+
 	public void addHistoryItem(HistoryItem item) {
 		history.add(item);
 	}
@@ -204,9 +198,9 @@ public class Unit extends Element {
 	}
 
 	/**
-	 * Returns the opponent with which the unit is locked into combat.
-	 * Returns null if the unit is not locked into combat.
-	 * 
+	 * Returns the opponent with which the unit is locked into combat. Returns
+	 * null if the unit is not locked into combat.
+	 *
 	 * @return the opponent or null
 	 */
 	public Unit getOpponent() {

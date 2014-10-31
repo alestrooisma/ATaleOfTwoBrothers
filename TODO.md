@@ -12,10 +12,10 @@ Phase 1 - tRPG gameplay
   - [x] Correct determination of reachable tiles (BFS)
   - [x] Obtaining a shortest path to the destination (backtracking)
 - [x] Camera control
-- [ ] Abilities
+- [x] Abilities
   - [x] Action selection
-  - [ ] Action execution
-  - [ ] Non-immediate action effects
+  - [x] Action execution
+  - [x] Non-immediate action effects
 - [ ] Better checking if actions are allowed
   - [x] Add history list
   - [ ] Clear expired items from list at end/start of turn (currently clearing everthing each turn)
