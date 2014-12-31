@@ -681,7 +681,11 @@ public class BattleController extends ScreenController<BattleScreen> {
 				return MouseAction.NO_TARGET;
 			}
 		} else if (getSelectedUnit() != null) {
-			return MouseAction.MOVE;
+			if (getSelectedAction() != null) {
+				return MouseAction.NO_TARGET;
+			} else {
+				return MouseAction.MOVE;
+			}
 		}
 		return MouseAction.NOTHING;
 	}
