@@ -292,7 +292,6 @@ public class BattleController extends ScreenController<BattleScreen> {
 				&& distance <= u.getMovesRemaining() + u.getDashDistance()) {
 			actuallyMoveUnit(u, destX, destY, pf);
 			u.addHistoryItem(new HistoryItem.Dash());
-			u.setMayAct(false); //TODO temp
 			game.getLog().push("Dashing!");
 		}
 	}
@@ -309,13 +308,6 @@ public class BattleController extends ScreenController<BattleScreen> {
 	}
 
 	public void targetUnit(Unit user, Unit target, Action action, PathFinder pf) {
-		// Check if the unit is allowed to act
-		if (!user.mayAct()) {
-			game.getLog().push(user.getName() + " may not act anymore.");
-			return;
-		}
-
-		boolean acted = false;
 
 		// Execute action
 		if (action != null) {
@@ -325,10 +317,9 @@ public class BattleController extends ScreenController<BattleScreen> {
 					game.getLog().push(action.getMessage());
 				}
 				deselectAction();
-				acted = true;
 				user.addHistoryItem(new HistoryItem.Ability(action));
 			}
-		} else {
+		} else if (user.mayAttack()) {
 			// Perform default attack
 
 			// Check if target can be attacked
@@ -345,16 +336,10 @@ public class BattleController extends ScreenController<BattleScreen> {
 
 			// Execute action, depending on weapon type
 			if (w instanceof RangedWeapon) {
-				acted = fireRangedWeapon(user, target, w);
+				fireRangedWeapon(user, target, w);
 			} else if (w instanceof MeleeWeapon) {
-				acted = charge(user, target, pf);
+				charge(user, target, pf);
 			}
-		}
-
-		// If the unit has acted, make it unable to act again
-		// TODO depending on exact action performed
-		if (acted) {
-			user.setMayAct(false);
 		}
 	}
 
@@ -669,7 +654,7 @@ public class BattleController extends ScreenController<BattleScreen> {
 					// Unit is friendly -> select it
 					return MouseAction.SELECT;
 				} else if (getSelectedUnit() != null
-						&& getSelectedUnit().mayAct()) {
+						&& getSelectedUnit().mayAttack()) {
 					// Unit is enemy -> default attack
 					return MouseAction.TARGET;
 				}

@@ -30,7 +30,6 @@ public class Unit extends Element {
 	// Current status
 	private PooledLinkedList<HistoryItem> history;
 	private double currentHealth;
-	private boolean mayAct;
 	private Unit opponent = null;
 
 	public Unit(String name, String summary, String description,
@@ -140,9 +139,10 @@ public class Unit extends Element {
 		while ((item = history.next()) != null) {
 			if (item instanceof HistoryItem.Move) {
 				moves -= ((HistoryItem.Move) item).getDistance();
-			} else if (item instanceof HistoryItem.Dash 
+			} else if (item instanceof HistoryItem.Dash
 					|| item instanceof HistoryItem.Charge
-					|| item instanceof HistoryItem.Fire) {
+					|| item instanceof HistoryItem.Fire
+					|| item instanceof HistoryItem.Ability) {
 				moves = 0;
 			}
 		}
@@ -162,26 +162,26 @@ public class Unit extends Element {
 		boolean allowed = !isLockedIntoCombat();
 		history.iter();
 		while (allowed && (item = history.next()) != null) {
-			if (item instanceof HistoryItem.Dash
-					|| item instanceof HistoryItem.Charge
-					|| item instanceof HistoryItem.Fire
-					|| item instanceof HistoryItem.Ability) {
-				allowed = false;
-			}
+			// Not allowed after dashing, charging, firing or performing an 
+			// action, so only if history item signifies moving.
+			allowed = item instanceof HistoryItem.Move;
 		}
 		return allowed;
 	}
 
-	public boolean mayAct() {
-		return mayAct;
-	}
-
-	public void setMayAct(boolean mayAct) {
-		this.mayAct = mayAct;
+	public boolean mayAttack() {
+		HistoryItem item;
+		boolean allowed = !isLockedIntoCombat();
+		history.iter();
+		while (allowed && (item = history.next()) != null) {
+			// Not allowed after dashing, charging, firing or performing an 
+			// action, so only if history item signifies moving.
+			allowed = item instanceof HistoryItem.Move; 
+		}
+		return allowed;
 	}
 
 	public void reset() {
-		mayAct = !isLockedIntoCombat();
 		history.clear();
 	}
 

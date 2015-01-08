@@ -206,7 +206,7 @@ public class BattleScreen implements Screen {
 			h = drawString(u.getName(), h);
 			h = drawString("HP: " + u.getCurrentHealth() + "\\" + u.getMaxHealth(), h);
 			h = drawString("Moves remaining: " + u.getMovesRemaining() + "+" + dash, h);
-			h = drawString("May act: " + (u.mayAct() ? "yes" : "false"), h);
+			h = drawString("May attack: " + (u.mayAttack() ? "yes" : "false"), h);
 			int a = controller.getSelectedActionNumber();
 			h = drawString("Selected ability: " + (a == -1 ? "none" : "#" + a + " - " + u.getAction(a).getName()), h);
 			h = drawString("History:", h);
