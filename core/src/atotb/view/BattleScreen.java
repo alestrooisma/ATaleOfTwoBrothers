@@ -7,6 +7,7 @@ import atotb.controller.Resources;
 import atotb.model.Army;
 import atotb.model.HistoryItem;
 import atotb.model.Unit;
+import aurelienribon.tweenengine.TweenManager;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
@@ -44,13 +45,14 @@ public class BattleScreen implements Screen {
 	private final Vector3 vec = new Vector3();
 	private int windowWidth;
 	private int windowHeight;
+	private final TweenManager manager = new TweenManager();
 
 	public BattleScreen(TwoBrothersGame game, BattleController controller, SpriteBatch batch, BitmapFont font) {
 		this.game = game;
 		this.controller = controller;
 		this.batch = batch;
 		this.font = font;
-
+		
 		// Set up the main camera
 		camera = new OrthographicCamera();
 //		camera.translate(480, 16);
@@ -85,6 +87,9 @@ public class BattleScreen implements Screen {
 		Gdx.gl.glClearColor(0.2f, 0.2f, 0.2f, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
+		// Update the tweens
+		manager.update(dt);
+		
 		// Calculate cursor position
 		vec.x = Gdx.input.getX();
 		vec.y = Gdx.input.getY();
@@ -214,7 +219,7 @@ public class BattleScreen implements Screen {
 			HistoryItem item;
 			while ((item = u.getHistory().next()) != null) {
 				if (item instanceof HistoryItem.Move) {
-					h = drawString("    Moved a distance of " + ((HistoryItem.Move)item).getDistance(), h);
+					h = drawString("    Moved a distance of " + ((HistoryItem.Move) item).getDistance(), h);
 				} else if (item instanceof HistoryItem.Dash) {
 					h = drawString("    Dashed", h);
 				} else if (item instanceof HistoryItem.Charge) {
@@ -222,7 +227,7 @@ public class BattleScreen implements Screen {
 				} else if (item instanceof HistoryItem.Fire) {
 					h = drawString("    Fired", h);
 				} else {
-					h = drawString("    Performed " + ((HistoryItem.Ability)item).getAction().getName(), h);
+					h = drawString("    Performed " + ((HistoryItem.Ability) item).getAction().getName(), h);
 				}
 			}
 		}

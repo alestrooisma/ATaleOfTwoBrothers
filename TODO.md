@@ -21,9 +21,9 @@ Phase 1 - tRPG gameplay
   - [x] Base permission checks on history list
     - [x] Movement
     - [x] Dashing
-    - [ ] Charging
-    - [ ] Firing
-    - [ ] Abilities (delegate to ability)
+    - [x] Charging
+    - [x] Firing
+    - [x] Abilities (delegate to ability)
 - [x] Basic AI
 - [x] Code cleanup
 
