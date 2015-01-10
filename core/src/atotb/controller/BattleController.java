@@ -8,9 +8,11 @@ import atotb.controller.ai.ArtificialIntelligence;
 import atotb.controller.events.InputEvent;
 import atotb.controller.events.KeyEvent;
 import atotb.controller.events.MouseEvent;
+import atotb.model.actions.Action;
 import atotb.model.Army;
 import atotb.model.Battle;
 import atotb.model.BattleMap;
+import atotb.model.HistoryItem;
 import atotb.model.Unit;
 import atotb.model.items.MeleeWeapon;
 import atotb.model.items.RangedWeapon;
@@ -28,10 +30,12 @@ import java.util.ArrayList;
 
 /**
  * The controller component for battles. Manages the game state during battles.
- * 
+ *
  * @author Ale Strooisma
  */
 public class BattleController extends ScreenController<BattleScreen> {
+
+	public static final int NONE_SELECTED = -1;
 
 	// Received
 	private final TwoBrothersGame game;
@@ -41,6 +45,7 @@ public class BattleController extends ScreenController<BattleScreen> {
 	// Controller
 	private boolean battleEnded;
 	private int selectedUnit;
+	private int selectedAction;
 	private PathFinder pathfinder;
 	//
 	// Event handling
@@ -66,16 +71,17 @@ public class BattleController extends ScreenController<BattleScreen> {
 		boolean wasBattleOver = isBattleOver();
 		processEvents();
 		if (isBattleOver() && !wasBattleOver) {
-			game.endBattle();
+			endBattle();
 		}
 		handleCameraControl();
 	}
 
 	/**
 	 * Sets the game state for the next battle. Does not start the battle.
-	 * 
+	 *
 	 * @param battle the model component representing the battle
-	 * @param tileMap the graphical representation of the map on which the battle is played
+	 * @param tileMap the graphical representation of the map on which the
+	 * battle is played
 	 * @param ai the AIs used for the various players
 	 */
 	public void initBattle(Battle battle, TiledMap tileMap, ArtificialIntelligence[] ai) {
@@ -85,13 +91,13 @@ public class BattleController extends ScreenController<BattleScreen> {
 
 		// Prepare gamestate
 		battleEnded = false;
-		selectedUnit = -1;
+		deselectUnit();
 		pathfinder = new PathFinder(battle.getBattleMap());
 	}
-	
+
 	/**
-	 * Called to start the battle. 
-	 * Main functionality is starting the first turn.
+	 * Called to start the battle. Main functionality is starting the first
+	 * turn.
 	 */
 	public void startBattle() {
 		// Kick it off
@@ -193,6 +199,7 @@ public class BattleController extends ScreenController<BattleScreen> {
 	}
 
 	public void selectUnit(int number) {
+		deselectAction();
 		selectedUnit = number;
 		Unit u = getSelectedUnit();
 		pathfinder.calculateDistancesFrom(
@@ -200,7 +207,8 @@ public class BattleController extends ScreenController<BattleScreen> {
 	}
 
 	public void deselectUnit() {
-		selectedUnit = -1;
+		selectedUnit = NONE_SELECTED;
+		deselectAction();
 	}
 
 	public void previousUnit() {
@@ -231,6 +239,45 @@ public class BattleController extends ScreenController<BattleScreen> {
 		return pathfinder;
 	}
 
+	// Selected action management
+	//
+	public void selectAction(int number) {
+		Unit unit = getSelectedUnit();
+		if (unit == null) {
+			return;
+		}
+
+		Action action = unit.getAction(number);
+		if (action != null && action.isAllowed(unit)) {
+			if (action.isImmediate()) {
+				action.execute(unit);
+				if (action.getMessage() != null) {
+					game.getLog().push(action.getMessage());
+				}
+				unit.addHistoryItem(new HistoryItem.Ability(action));
+			} else {
+				selectedAction = number;
+				game.getLog().push(action.getSelectMessage(unit));
+			}
+		}
+	}
+
+	public void deselectAction() {
+		selectedAction = NONE_SELECTED;
+	}
+
+	public int getSelectedActionNumber() {
+		return selectedAction;
+	}
+
+	public Action getSelectedAction() {
+		if (getSelectedUnit() == null) {
+			return null;
+		} else {
+			return getSelectedUnit().getAction(getSelectedActionNumber());
+		}
+	}
+
 	// Game state modifiers
 	//
 	public void moveUnit(Unit u, int destX, int destY, PathFinder pf) {
@@ -240,13 +287,11 @@ public class BattleController extends ScreenController<BattleScreen> {
 		// Check range and move if possible
 		if (distance <= u.getMovesRemaining()) {
 			actuallyMoveUnit(u, destX, destY, pf);
-			u.reduceMoves(distance);
+			u.addHistoryItem(new HistoryItem.Move(distance));
 		} else if (u.mayDash()
 				&& distance <= u.getMovesRemaining() + u.getDashDistance()) {
 			actuallyMoveUnit(u, destX, destY, pf);
-			u.setMovesRemaining(0);
-			u.setHasDashed();
-			u.setMayAct(false); //TODO temp
+			u.addHistoryItem(new HistoryItem.Dash());
 			game.getLog().push("Dashing!");
 		}
 	}
@@ -262,40 +307,39 @@ public class BattleController extends ScreenController<BattleScreen> {
 				u.getPosition().x, u.getPosition().y, u.getTotalMovesRemaining());
 	}
 
-	public void targetUnit(Unit user, Unit target, PathFinder pf) {
-		// Check if the unit is allowed to act
-		if (!user.mayAct()) {
-			game.getLog().push(user.getName() + " may not act anymore.");
-			return;
-		}
+	public void targetUnit(Unit user, Unit target, Action action, PathFinder pf) {
 
-		// Check if target can be attacked
-		if (target.isLockedIntoCombat()) {
-			game.getLog().push(target.getName() + " is locked into combat - can't attack.");
-			return;
-		}
+		// Execute action
+		if (action != null) {
+			if (action.isAllowed(user, target)) {
+				action.execute(user, target);
+				if (action.getMessage() != null) {
+					game.getLog().push(action.getMessage());
+				}
+				deselectAction();
+				user.addHistoryItem(new HistoryItem.Ability(action));
+			}
+		} else if (user.mayAttack()) {
+			// Perform default attack
 
-		// Get the weapon
-		//TODO check for action, otherwise use main weapon.
-		Weapon w = user.getWeapon();
-		if (w == null) {
-			w = game.getUnarmed();
-		}
+			// Check if target can be attacked
+			if (target.isLockedIntoCombat()) {
+				game.getLog().push(target.getName() + " is locked into combat - can't attack.");
+				return;
+			}
 
-		// Execute action, depending on weapon type
-		boolean acted = false;
-		if (w instanceof RangedWeapon) {
-			acted = fireRangedWeapon(user, target, w);
-		} else if (w instanceof MeleeWeapon) {
-			acted = charge(user, target, pf);
-		}
+			// Get the weapon
+			Weapon w = user.getWeapon();
+			if (w == null) {
+				w = game.getUnarmed();
+			}
 
-		// If the unit has acted, make it unable to act again
-		// TODO depending on exact action performed
-		if (acted) {
-			user.setMovesRemaining(0);
-			user.setMayAct(false);
-			user.setMayDash(false);
+			// Execute action, depending on weapon type
+			if (w instanceof RangedWeapon) {
+				fireRangedWeapon(user, target, w);
+			} else if (w instanceof MeleeWeapon) {
+				charge(user, target, pf);
+			}
 		}
 	}
 
@@ -308,6 +352,7 @@ public class BattleController extends ScreenController<BattleScreen> {
 			game.getLog().push(user.getName() + " killed " + target.getName() + "!");
 			battle.getBattleMap().getTile(target.getPosition()).removeUnit();
 		}
+		user.addHistoryItem(new HistoryItem.Fire());
 		return true;
 	}
 
@@ -345,6 +390,7 @@ public class BattleController extends ScreenController<BattleScreen> {
 				actuallyMoveUnit(user, tx - 1, ty, pf);
 				break;
 		}
+		user.addHistoryItem(new HistoryItem.Charge());
 
 		// Set locked into combat
 		user.setLockedIntoCombat(target);
@@ -511,7 +557,7 @@ public class BattleController extends ScreenController<BattleScreen> {
 					break;
 				case TARGET:
 					u = game.getModel().getBattle().getBattleMap().getTile(x, y).getUnit();
-					targetUnit(getSelectedUnit(), u, getPathFinder());
+					targetUnit(getSelectedUnit(), u, getSelectedAction(), getPathFinder());
 					break;
 			}
 		} else if (button == Input.Buttons.RIGHT) {
@@ -542,6 +588,33 @@ public class BattleController extends ScreenController<BattleScreen> {
 				getView().getCamera().position.x = 640;
 				getView().getCamera().position.y = 16;
 				break;
+			case Input.Keys.NUM_1:
+				selectAction(1);
+				break;
+			case Input.Keys.NUM_2:
+				selectAction(2);
+				break;
+			case Input.Keys.NUM_3:
+				selectAction(3);
+				break;
+			case Input.Keys.NUM_4:
+				selectAction(4);
+				break;
+			case Input.Keys.NUM_5:
+				selectAction(5);
+				break;
+			case Input.Keys.NUM_6:
+				selectAction(6);
+				break;
+			case Input.Keys.NUM_7:
+				selectAction(7);
+				break;
+			case Input.Keys.NUM_8:
+				selectAction(8);
+				break;
+			case Input.Keys.NUM_9:
+				selectAction(9);
+				break;
 			case Input.Keys.B:
 				previousUnit();
 				break;
@@ -549,7 +622,11 @@ public class BattleController extends ScreenController<BattleScreen> {
 				nextUnit();
 				break;
 			case Input.Keys.BACKSPACE:
-				deselectUnit();
+				if (getSelectedAction() != null) {
+					deselectAction();
+				} else {
+					deselectUnit();
+				}
 				break;
 			case Input.Keys.ENTER:
 				nextTurn();
@@ -562,30 +639,44 @@ public class BattleController extends ScreenController<BattleScreen> {
 	}
 
 	public MouseAction getMouseAction(int x, int y) {
-		if (game.getModel().getBattle().getBattleMap().contains(x, y)) {
-			// Clicked on a tile
-			Unit u = game.getModel().getBattle().getBattleMap().getTile(x, y).getUnit();
-			if (u != null) {
-				// There is a unit on the tile
-				if (!u.isEnemy(game.getModel().getBattle().getCurrentArmy())) {
+		if (!game.getModel().getBattle().getBattleMap().contains(x, y)) {
+			return MouseAction.OUT_OF_BOUNDS;
+		}
+
+		// Clicked on a tile
+		Unit target = game.getModel().getBattle().getBattleMap().getTile(x, y).getUnit();
+		if (target != null) {
+			// There is a unit on the tile
+			boolean friendly = (target.getArmy() == game.getModel().getBattle().getCurrentArmy());
+			Action action = getSelectedAction();
+			if (action == null) {
+				if (friendly) {
 					// Unit is friendly -> select it
 					return MouseAction.SELECT;
 				} else if (getSelectedUnit() != null
-						&& getSelectedUnit().mayAct()) {
-					// Unit is enemy
+						&& getSelectedUnit().mayAttack()) {
+					// Unit is enemy -> default attack
 					return MouseAction.TARGET;
 				}
+			} else if (action.isApplicableTarget(getSelectedUnit(), target)) {
+				// Unit is applicable target -> execute action
+				return MouseAction.TARGET;
+			} else {
+				// No applicable target
+				return MouseAction.NO_TARGET;
+			}
+		} else if (getSelectedUnit() != null) {
+			if (getSelectedAction() != null) {
+				return MouseAction.NO_TARGET;
 			} else {
 				return MouseAction.MOVE;
 			}
-		} else {
-			return MouseAction.OUT_OF_BOUNDS;
 		}
 		return MouseAction.NOTHING;
 	}
 
 	public enum MouseAction {
 
-		SELECT, MOVE, TARGET, NOTHING, OUT_OF_BOUNDS;
+		SELECT, MOVE, TARGET, NO_TARGET, NOTHING, OUT_OF_BOUNDS;
 	}
 }

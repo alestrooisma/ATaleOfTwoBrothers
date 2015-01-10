@@ -1,19 +1,21 @@
 package atotb.model;
 
+import atotb.model.actions.Action;
 import atotb.model.items.Weapon;
+import com.badlogic.gdx.utils.PooledLinkedList;
 import java.awt.Point;
 import java.util.ArrayList;
 
 /**
  * Represents a unit (soldier) and all of its abilities and equipment.
- * 
+ *
  * @author Ale Strooisma
  */
 public class Unit extends Element {
 
 	// Core fields
 	private Army army;
-	private final Point position = new Point();;
+	private final Point position = new Point();
 	//
 	// Stats
 	private int maxHealth;
@@ -26,10 +28,8 @@ public class Unit extends Element {
 	private Weapon weapon;
 	//
 	// Current status
+	private PooledLinkedList<HistoryItem> history;
 	private double currentHealth;
-	private double movesRemaining;
-	private boolean mayDash;
-	private boolean mayAct;
 	private Unit opponent = null;
 
 	public Unit(String name, String summary, String description,
@@ -46,6 +46,7 @@ public class Unit extends Element {
 		this.maxHealth = maxHealth;
 		this.speed = speed;
 		this.actions = actions;
+		history = new PooledLinkedList<HistoryItem>(5);
 	}
 
 	// Basic getters and setters
@@ -97,7 +98,7 @@ public class Unit extends Element {
 	}
 
 	public Action getAction(int i) {
-		if (i > actions.size()) {
+		if (i < 1 || i > actions.size()) {
 			return null;
 		}
 		return actions.get(i - 1);
@@ -132,59 +133,64 @@ public class Unit extends Element {
 	}
 
 	public double getMovesRemaining() {
-		return movesRemaining;
-	}
-
-	public void setMovesRemaining(double movesRemaining) {
-		this.movesRemaining = movesRemaining;
+		HistoryItem item;
+		double moves = getSpeed();
+		history.iter();
+		while ((item = history.next()) != null) {
+			if (item instanceof HistoryItem.Move) {
+				moves -= ((HistoryItem.Move) item).getDistance();
+			} else if (item instanceof HistoryItem.Dash
+					|| item instanceof HistoryItem.Charge
+					|| item instanceof HistoryItem.Fire
+					|| item instanceof HistoryItem.Ability) {
+				moves = 0;
+			}
+		}
+		return moves;
 	}
 
 	public double getTotalMovesRemaining() {
 		double moves = getMovesRemaining();
-		if (mayDash) {
+		if (mayDash()) {
 			moves += getDashDistance();
 		}
 		return moves;
 	}
 
-	public void reduceMoves(double moves) {
-		movesRemaining -= moves;
-	}
-
 	public boolean mayDash() {
-		return mayDash;
+		HistoryItem item;
+		boolean allowed = !isLockedIntoCombat();
+		history.iter();
+		while (allowed && (item = history.next()) != null) {
+			// Not allowed after dashing, charging, firing or performing an 
+			// action, so only if history item signifies moving.
+			allowed = item instanceof HistoryItem.Move;
+		}
+		return allowed;
 	}
 
-	public void setMayDash(boolean mayDash) {
-		this.mayDash = mayDash;
-	}
-
-	public void setHasDashed() {
-		setMayDash(false);
-	}
-
-	public boolean mayAct() {
-		return mayAct;
-	}
-
-	public void setMayAct(boolean mayAct) {
-		this.mayAct = mayAct;
-	}
-
-	public void setHasActed() {
-		setMayAct(false);
+	public boolean mayAttack() {
+		HistoryItem item;
+		boolean allowed = !isLockedIntoCombat();
+		history.iter();
+		while (allowed && (item = history.next()) != null) {
+			// Not allowed after dashing, charging, firing or performing an 
+			// action, so only if history item signifies moving.
+			allowed = item instanceof HistoryItem.Move; 
+		}
+		return allowed;
 	}
 
 	public void reset() {
-		if (!isLockedIntoCombat()) {
-			movesRemaining = speed;
-			mayDash = true;
-			mayAct = true;
-		} else {
-			movesRemaining = 0;
-			mayDash = false;
-			mayAct = false;
-		}
+		history.clear();
+	}
+
+	public void addHistoryItem(HistoryItem item) {
+		history.add(item);
+	}
+
+	public PooledLinkedList<HistoryItem> getHistory() {
+		return history;
 	}
 
 	public void setLockedIntoCombat(Unit opponent) {
@@ -192,9 +198,9 @@ public class Unit extends Element {
 	}
 
 	/**
-	 * Returns the opponent with which the unit is locked into combat.
-	 * Returns null if the unit is not locked into combat.
-	 * 
+	 * Returns the opponent with which the unit is locked into combat. Returns
+	 * null if the unit is not locked into combat.
+	 *
 	 * @return the opponent or null
 	 */
 	public Unit getOpponent() {
