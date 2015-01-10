@@ -4,7 +4,7 @@ import atotb.TwoBrothersGame;
 import atotb.controller.BattleController;
 import atotb.controller.BattleController.MouseAction;
 import atotb.controller.Resources;
-import atotb.model.Army;
+import atotb.model.Battle;
 import atotb.model.HistoryItem;
 import atotb.model.Unit;
 import aurelienribon.tweenengine.TweenManager;
@@ -21,6 +21,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import java.util.ArrayList;
 
 /**
  * The view component for battles. Only responsibility is rendering the game
@@ -46,13 +47,14 @@ public class BattleScreen implements Screen {
 	private int windowWidth;
 	private int windowHeight;
 	private final TweenManager manager = new TweenManager();
+	private UnitAppearance[][] appearances;
 
 	public BattleScreen(TwoBrothersGame game, BattleController controller, SpriteBatch batch, BitmapFont font) {
 		this.game = game;
 		this.controller = controller;
 		this.batch = batch;
 		this.font = font;
-		
+
 		// Set up the main camera
 		camera = new OrthographicCamera();
 //		camera.translate(480, 16);
@@ -62,6 +64,31 @@ public class BattleScreen implements Screen {
 		// Set up the UI camera
 		uiCamera = new OrthographicCamera();
 		uiViewport = new ScreenViewport(uiCamera);
+	}
+
+	public void initBattle(Battle battle) {
+		// Populate appearance list
+		int numberOfArmies = battle.getArmies().length;
+		appearances = new UnitAppearance[numberOfArmies][];
+		for (int i = 0; i < numberOfArmies; i++) {
+			ArrayList<Unit> units = battle.getArmy(i).getUnits();
+			appearances[i] = new UnitAppearance[units.size()];
+			for (int j = 0; j < units.size(); j++) {
+				Texture t;
+				if (units.get(j).getName().equals("Dale")) {
+					t = Resources.dale;
+				} else if (units.get(j).getName().equals("Harryn")) {
+					t = Resources.harryn;
+				} else if (units.get(j).getName().equals("Wolf")) {
+					t = Resources.wolf;
+				} else {
+					System.err.println("Unknown unit!");
+					t = null;
+				}
+				appearances[i][j] = new UnitAppearance(units.get(j));
+				appearances[i][j].setSprite(t);
+			}
+		}
 	}
 
 	/**
@@ -89,7 +116,7 @@ public class BattleScreen implements Screen {
 
 		// Update the tweens
 		manager.update(dt);
-		
+
 		// Calculate cursor position
 		vec.x = Gdx.input.getX();
 		vec.y = Gdx.input.getY();
@@ -156,23 +183,9 @@ public class BattleScreen implements Screen {
 			batch.draw(Resources.selectionMarkerUnder, vec.x - 4, vec.y + 16);
 		}
 
-		// Render units on map - TODO order
-		for (Army army : game.getModel().getBattle().getArmies()) {
-			for (Unit unit : army.getUnits()) {
-				if (unit.isAlive()) {
-					Texture t;
-					if (unit.getName().equals("Dale")) {
-						t = Resources.dale;
-					} else if (unit.getName().equals("Harryn")) {
-						t = Resources.harryn;
-					} else if (unit.getName().equals("Wolf")) {
-						t = Resources.wolf;
-					} else {
-						continue;
-					}
-					tileToScreenCoords(unit.getPosition().x, unit.getPosition().y, vec);
-					batch.draw(t, vec.x - 4, vec.y + 16);
-				}
+		for (UnitAppearance[] appearanceArray : appearances) {
+			for (UnitAppearance appearance : appearanceArray) {
+				appearance.draw(this, batch, vec);
 			}
 		}
 

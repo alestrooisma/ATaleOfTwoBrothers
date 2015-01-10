@@ -28,7 +28,7 @@ public class BattleMap {
 	 * @param height the height of the map
 	 */
 	public BattleMap(int width, int height) {
-		this.tiles = new Tile[width][height]; //TODO mins!
+		this.tiles = new Tile[width][height];
 	}
 	
 	/**

@@ -87,8 +87,11 @@ public class BattleController extends ScreenController<BattleScreen> {
 	public void initBattle(Battle battle, TiledMap tileMap, ArtificialIntelligence[] ai) {
 		this.battle = battle;
 		this.ai = ai;
-		getView().setMap(tileMap);
 
+		// Prepare view
+		getView().setMap(tileMap);
+		getView().initBattle(battle);
+		
 		// Prepare gamestate
 		battleEnded = false;
 		deselectUnit();
