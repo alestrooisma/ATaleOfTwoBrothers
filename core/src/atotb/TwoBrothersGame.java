@@ -9,6 +9,9 @@ import atotb.model.actions.HealAction2;
 import atotb.model.items.*;
 import atotb.util.MessageLog;
 import atotb.view.BattleScreen;
+import atotb.view.UnitAppearance;
+import atotb.view.tween.UnitAppearanceAccessor;
+import aurelienribon.tweenengine.Tween;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputAdapter;
@@ -78,6 +81,7 @@ public class TwoBrothersGame extends Game {
 
 	private void setUpView() {
 		Gdx.graphics.setVSync(true);
+		
 		// Create one sprite batch and bitmap font to be used throughout the 
 		// entire program.
 		batch = new SpriteBatch();
@@ -85,6 +89,9 @@ public class TwoBrothersGame extends Game {
 
 		// Load resources
 		Resources.loadResources();
+		
+		// Prepare Univeral Tween Engine
+		Tween.registerAccessor(UnitAppearance.class, new UnitAppearanceAccessor());
 
 		// Create and set the battle screen
 		battleController = new BattleController(this);

@@ -108,6 +108,10 @@ public class BattleScreen implements Screen {
 		return camera;
 	}
 
+	public TweenManager getTweenManager() {
+		return manager;
+	}
+
 	@Override
 	public void render(float dt) {
 		// Clear buffers and paint the background dark gray
@@ -183,6 +187,7 @@ public class BattleScreen implements Screen {
 			batch.draw(Resources.selectionMarkerUnder, vec.x - 4, vec.y + 16);
 		}
 
+		// Draw units (TODO overlapping?)
 		for (UnitAppearance[] appearanceArray : appearances) {
 			for (UnitAppearance appearance : appearanceArray) {
 				appearance.draw(this, batch, vec);

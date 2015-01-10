@@ -1,38 +1,14 @@
-Phase 1 - tRPG gameplay
+Bugs
 ------------------
-- [x] Melee combat
-  - [x] Charging
-  - [x] Locked in combat
-  - [x] Resolve combat
-  - [x] Resolve all combat each turn
-  - [x] No ranged weapons in melee
-- [x] Load model information of map from file
-- [x] Pathfinding
-  - [x] Correct determination of reachable tiles (BFS)
-  - [x] Obtaining a shortest path to the destination (backtracking)
-- [x] Camera control
-- [x] Abilities
-  - [x] Action selection
-  - [x] Action execution
-  - [x] Non-immediate action effects
-- [x] Better checking if actions are allowed
-  - [x] Add history list
-  - [x] Clear expired items from list at end/start of turn
-  - [x] Base permission checks on history list
-    - [x] Movement
-    - [x] Dashing
-    - [x] Charging
-    - [x] Firing
-    - [x] Abilities (delegate to ability)
-- [x] Basic AI
-- [x] Code cleanup
+- Can select ability even if it is not allowed regardless of target!
 
 Phase 2 - graphics, animation and UI
 ------------------
-- [ ] Add universal tweening engine
+- [x] Add universal tweening engine
+- [x] Death animation (fade)
+- [ ] Movement animation (slide)
 - [ ] Movement (range) indicators
 - [ ] Toggleable grid
-- [ ] Death animation (fade)
 - [ ] Projectile animation
 - [ ] Mouse cursor messages (dashing, charging, fire)
 - [ ] Result messages on target position (damage, miss)
