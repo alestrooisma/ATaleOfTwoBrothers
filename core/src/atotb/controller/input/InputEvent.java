@@ -1,4 +1,4 @@
-package atotb.controller.events;
+package atotb.controller.input;
 
 /**
  * An abstract class for abstracting various types of input events and using 

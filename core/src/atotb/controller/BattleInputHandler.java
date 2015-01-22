@@ -1,7 +1,7 @@
 package atotb.controller;
 
-import atotb.controller.events.KeyEvent;
-import atotb.controller.events.MouseEvent;
+import atotb.controller.input.KeyEvent;
+import atotb.controller.input.MouseEvent;
 import com.badlogic.gdx.InputAdapter;
 
 /**

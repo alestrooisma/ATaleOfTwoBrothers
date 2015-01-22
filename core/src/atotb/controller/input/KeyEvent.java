@@ -1,4 +1,4 @@
-package atotb.controller.events;
+package atotb.controller.input;
 
 /**
  * An event class used to delay keyboard events such that they can be processed in 
