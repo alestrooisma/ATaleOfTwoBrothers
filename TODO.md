@@ -6,8 +6,9 @@ Phase 2 - graphics, animation and UI
 ------------------
 - [x] Add universal tweening engine
 - [x] Death animation (fade)
-- [ ] Movement animation (slide)
-- [ ] Movement (range) indicators
+- [x] Movement animation (slide)
+- [ ] Movement path indicators
+- [ ] Movement range indicators
 - [ ] Toggleable grid
 - [ ] Projectile animation
 - [ ] Mouse cursor messages (dashing, charging, fire)
