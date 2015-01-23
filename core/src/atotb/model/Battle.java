@@ -21,8 +21,10 @@ public class Battle {
 			int currentPlayer, int turn) {
 		this.battleMap = battleMap;
 		armies = new Army[2];
-		armies[0] = player;
-		armies[1] = opponent;
+		player.setIndex(0);
+		armies[player.getIndex()] = player;
+		opponent.setIndex(1);
+		armies[opponent.getIndex()] = opponent;
 		this.currentPlayer = currentPlayer;
 		this.turn = turn;
 	}

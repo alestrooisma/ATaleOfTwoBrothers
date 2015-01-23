@@ -30,4 +30,12 @@ public interface Enum {
 			return y + dy;
 		}
 	}
+	
+	/**
+	 * Denotes a specific kind of movement.
+	 */
+	public enum MovementType {
+
+		MOVE, DASH, CHARGE;
+	}
 }

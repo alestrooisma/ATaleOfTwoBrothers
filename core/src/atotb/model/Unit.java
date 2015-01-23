@@ -16,6 +16,7 @@ public class Unit extends Element {
 	// Core fields
 	private Army army;
 	private final Point position = new Point();
+	private int index;
 	//
 	// Stats
 	private int maxHealth;
@@ -223,6 +224,16 @@ public class Unit extends Element {
 
 	public boolean isAlive() {
 		return currentHealth > 0;
+	}
+
+	// Index getter and setter
+	//
+	public int getIndex() {
+		return index;
+	}
+
+	public void setIndex(int index) {
+		this.index = index;
 	}
 
 	// Factory functions

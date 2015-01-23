@@ -5,9 +5,9 @@ Bugs
 Phase 2 - graphics, animation and UI
 ------------------
 - [x] Add universal tweening engine
-- [ ] Advanced event logging
-- [ ] Death animation (fade)
-- [ ] Movement animation (slide)
+- [x] Advanced event logging
+- [x] Death animation (fade)
+- [x] Movement animation (slide)
 - [ ] Movement path indicators
 - [ ] Movement range indicators
 - [ ] Toggleable grid

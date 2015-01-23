@@ -3,6 +3,8 @@ package atotb;
 import atotb.controller.*;
 import atotb.controller.ai.ArtificialIntelligence;
 import atotb.controller.ai.WolfAI;
+import atotb.controller.log.Event;
+import atotb.controller.log.EventLog;
 import atotb.model.*;
 import atotb.model.actions.HealAction;
 import atotb.model.actions.HealAction2;
@@ -25,10 +27,10 @@ import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import java.awt.Point;
 
 /**
- * The main controller class of "A Tale of Two Brothers".
- * This class is responsible for switching between various states of the game 
- * (in battle, in menu, on overworld, etc) and keep track of shared resources.
- * 
+ * The main controller class of "A Tale of Two Brothers". This class is
+ * responsible for switching between various states of the game (in battle, in
+ * menu, on overworld, etc) and keep track of shared resources.
+ *
  * @author Ale Strooisma
  */
 public class TwoBrothersGame extends Game {
@@ -45,6 +47,7 @@ public class TwoBrothersGame extends Game {
 	private InputMultiplexer inputHandlers;
 	private InputAdapter battleHandler;
 	private MessageLog log;
+	private EventLog eventLog;
 	//
 	// Shared resources
 	private SpriteBatch batch;
@@ -54,6 +57,11 @@ public class TwoBrothersGame extends Game {
 	//
 	@Override
 	public void create() {
+		// Create logs
+		log = new MessageLog(10);
+		eventLog = new EventLog();
+		
+		// Initialize components
 		setUpModel();
 		setUpView();
 		setUpController();
@@ -81,7 +89,7 @@ public class TwoBrothersGame extends Game {
 
 	private void setUpView() {
 		Gdx.graphics.setVSync(true);
-		
+
 		// Create one sprite batch and bitmap font to be used throughout the 
 		// entire program.
 		batch = new SpriteBatch();
@@ -89,7 +97,7 @@ public class TwoBrothersGame extends Game {
 
 		// Load resources
 		Resources.loadResources();
-		
+
 		// Prepare Univeral Tween Engine
 		Tween.registerAccessor(UnitAppearance.class, new UnitAppearanceAccessor());
 
@@ -99,9 +107,6 @@ public class TwoBrothersGame extends Game {
 	}
 
 	private void setUpController() {
-		// Create message log
-		log = new MessageLog(10);
-
 		// Set up input listeners
 		inputHandlers = new InputMultiplexer();
 		inputHandlers.addProcessor(new MainInputHandler(this));
@@ -119,10 +124,14 @@ public class TwoBrothersGame extends Game {
 		return log;
 	}
 
+	public EventLog getEventLog() {
+		return eventLog;
+	}
+
 	public Weapon getUnarmed() {
 		return unarmed;
 	}
-	
+
 	// Game state modifiers
 	//
 	public void startBattle() {
@@ -168,10 +177,10 @@ public class TwoBrothersGame extends Game {
 		// Create the AI
 		ArtificialIntelligence[] ai = new ArtificialIntelligence[2];
 		ai[1] = new WolfAI();
-		
+
 		// Set the battle part of the model
 		model.setBattle(new Battle(battleMap, model.getPlayerParty(), enemy));
-		
+
 		// Start the battle
 		battleController.initBattle(model.getBattle(), tileMap, ai);
 		setScreen(battleController);
@@ -180,18 +189,19 @@ public class TwoBrothersGame extends Game {
 	}
 
 	/**
-	 * Must be called when a battle ends, so TwoBrotherGame can progress the game.
+	 * Must be called when a battle ends, so TwoBrotherGame can progress the
+	 * game.
 	 */
 	public void endBattle() {
 		inputHandlers.removeProcessor(battleHandler);
-		
+
 		// This is what should be done, depending on how battle end is rendered
 		// Possibly this should only be done after leaving the victory screen.
 		//setScreen(some other screen);
 		//model.setBattle(null);
 		//tileMap.dispose();
 	}
-	
+
 	// The dispose method
 	//
 	@Override

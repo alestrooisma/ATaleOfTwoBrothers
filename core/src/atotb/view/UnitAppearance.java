@@ -53,9 +53,7 @@ public class UnitAppearance {
 	}
 
 	public void draw(BattleScreen screen, SpriteBatch batch, Vector3 vec) {
-		x = unit.getPosition().x;
-		y = unit.getPosition().y;
-		if (unit.isAlive()) {
+		if (opacity > 0) {
 			batch.setColor(1, 1, 1, opacity);
 			screen.tileToScreenCoords(x, y, vec);
 			batch.draw(sprite, vec.x - 4, vec.y + 16); //TODO hardcoded

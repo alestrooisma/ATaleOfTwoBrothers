@@ -4,10 +4,21 @@ import atotb.TwoBrothersGame;
 import atotb.controller.BattleController;
 import atotb.controller.BattleController.MouseAction;
 import atotb.controller.Resources;
+import atotb.controller.log.AbstractMoveEvent;
+import atotb.controller.log.ChargeEvent;
+import atotb.controller.log.DashEvent;
+import atotb.controller.log.DeathEvent;
+import atotb.controller.log.Event;
+import atotb.controller.log.EventLog;
+import atotb.controller.log.EventVisitor;
+import atotb.controller.log.MoveEvent;
 import atotb.model.Battle;
 import atotb.model.HistoryItem;
 import atotb.model.Unit;
+import atotb.view.tween.UnitAppearanceAccessor;
+import aurelienribon.tweenengine.Tween;
 import aurelienribon.tweenengine.TweenManager;
+import aurelienribon.tweenengine.equations.Linear;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
@@ -29,7 +40,7 @@ import java.util.ArrayList;
  *
  * @author Ale Strooisma
  */
-public class BattleScreen implements Screen {
+public class BattleScreen implements Screen, EventVisitor {
 
 	// Received
 	private final TwoBrothersGame game;
@@ -37,7 +48,7 @@ public class BattleScreen implements Screen {
 	private final SpriteBatch batch;
 	private final BitmapFont font;
 	//
-	//Owned
+	// Owned
 	private final OrthographicCamera camera;
 	private final OrthographicCamera uiCamera;
 	private final Viewport viewport;
@@ -46,8 +57,16 @@ public class BattleScreen implements Screen {
 	private final Vector3 vec = new Vector3();
 	private int windowWidth;
 	private int windowHeight;
-	private final TweenManager manager = new TweenManager();
+	//
+	// Animation
+	public static final float DEATH_ANIMATION_DURATION = 1;
+	public static final float MOVE_ANIMATION_DURATION = 0.2f;
+	public static final float DASH_ANIMATION_DURATION = 0.1f;
+	public static final float CHARGE_ANIMATION_DURATION = DASH_ANIMATION_DURATION;
 	private UnitAppearance[][] appearances;
+	private final TweenManager manager = new TweenManager();
+	private final EventLog events;
+	private float animationDelay = 0;
 
 	public BattleScreen(TwoBrothersGame game, BattleController controller, SpriteBatch batch, BitmapFont font) {
 		this.game = game;
@@ -64,6 +83,10 @@ public class BattleScreen implements Screen {
 		// Set up the UI camera
 		uiCamera = new OrthographicCamera();
 		uiViewport = new ScreenViewport(uiCamera);
+
+		// Set up the event log
+		events = new EventLog();
+		game.getEventLog().register(events);
 	}
 
 	public void initBattle(Battle battle) {
@@ -120,6 +143,17 @@ public class BattleScreen implements Screen {
 
 		// Update the tweens
 		manager.update(dt);
+		if (animationDelay < dt) {
+			animationDelay = 0;
+		} else {
+			animationDelay -= dt;
+		}
+
+		// Process events
+		while (!events.isEmpty()) {
+			Event e = events.pull();
+			e.visit(this);
+		}
 
 		// Calculate cursor position
 		vec.x = Gdx.input.getX();
@@ -342,4 +376,46 @@ public class BattleScreen implements Screen {
 		out.y = MathUtils.floor(yIn);
 		return out;
 	}
+
+	@Override
+	public void visitDeathEvent(DeathEvent event) {
+		Unit u = event.getUnit();
+		Tween.to(appearances[u.getArmy().getIndex()][u.getIndex()],
+				UnitAppearanceAccessor.OPACITY, DEATH_ANIMATION_DURATION)
+				.target(0)
+				.ease(Linear.INOUT)
+				.delay(animationDelay)
+				.start(manager);
+		animationDelay += DEATH_ANIMATION_DURATION;
+	}
+
+	@Override
+	public void visitMoveEvent(MoveEvent event) {
+		animateAbstractMoveEvent(event, MOVE_ANIMATION_DURATION);
+	}
+
+	@Override
+	public void visitDashEvent(DashEvent event) {
+		animateAbstractMoveEvent(event, DASH_ANIMATION_DURATION);
+	}
+
+	@Override
+	public void visitChargeEvent(ChargeEvent event) {
+		animateAbstractMoveEvent(event, CHARGE_ANIMATION_DURATION);
+	}
+
+	public void animateAbstractMoveEvent(AbstractMoveEvent event, float timePerStep) {
+		Unit u = event.getUnit();
+		float dx = event.getDestX() - event.getFromX();
+		float dy = event.getDestY() - event.getFromY();
+		float distance = (float) Math.sqrt(dx * dx + dy * dy);
+		Tween.to(appearances[u.getArmy().getIndex()][u.getIndex()], 
+				UnitAppearanceAccessor.POSITION, distance * timePerStep)
+				.target(u.getPosition().x, u.getPosition().y)
+				.ease(Linear.INOUT)
+				.delay(animationDelay)
+				.start(manager);
+		animationDelay += distance * timePerStep;
+	}
+
 }

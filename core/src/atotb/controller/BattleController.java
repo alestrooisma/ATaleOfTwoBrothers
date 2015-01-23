@@ -8,6 +8,10 @@ import atotb.controller.ai.ArtificialIntelligence;
 import atotb.controller.input.InputEvent;
 import atotb.controller.input.KeyEvent;
 import atotb.controller.input.MouseEvent;
+import atotb.controller.log.ChargeEvent;
+import atotb.controller.log.DashEvent;
+import atotb.controller.log.DeathEvent;
+import atotb.controller.log.MoveEvent;
 import atotb.model.actions.Action;
 import atotb.model.Army;
 import atotb.model.Battle;
@@ -19,6 +23,7 @@ import atotb.model.items.RangedWeapon;
 import atotb.model.items.Weapon;
 import atotb.util.Enum.Direction;
 import static atotb.util.Enum.Direction.*;
+import atotb.util.Enum.MovementType;
 import atotb.util.PathFinder;
 import atotb.view.BattleScreen;
 import com.badlogic.gdx.Gdx;
@@ -91,7 +96,7 @@ public class BattleController extends ScreenController<BattleScreen> {
 		// Prepare view
 		getView().setMap(tileMap);
 		getView().initBattle(battle);
-		
+
 		// Prepare gamestate
 		battleEnded = false;
 		deselectUnit();
@@ -289,17 +294,35 @@ public class BattleController extends ScreenController<BattleScreen> {
 
 		// Check range and move if possible
 		if (distance <= u.getMovesRemaining()) {
-			actuallyMoveUnit(u, destX, destY, pf);
-			u.addHistoryItem(new HistoryItem.Move(distance));
+			actuallyMoveUnit(u, MovementType.MOVE, destX, destY, distance, pf);
 		} else if (u.mayDash()
 				&& distance <= u.getMovesRemaining() + u.getDashDistance()) {
-			actuallyMoveUnit(u, destX, destY, pf);
-			u.addHistoryItem(new HistoryItem.Dash());
+			actuallyMoveUnit(u, MovementType.DASH, destX, destY, distance, pf);
 			game.getLog().push("Dashing!");
 		}
 	}
 
-	public void actuallyMoveUnit(Unit u, int destX, int destY, PathFinder pf) {
+	public void actuallyMoveUnit(Unit u, MovementType type, int destX, int destY, double distance, PathFinder pf) {
+		// Log the movement
+		switch (type) {
+			case MOVE:
+				game.getEventLog().push(new MoveEvent(u,
+						u.getPosition().x, u.getPosition().y, destX, destY));
+				u.addHistoryItem(new HistoryItem.Move(distance));
+				break;
+			case DASH:
+				game.getEventLog().push(new DashEvent(u,
+						u.getPosition().x, u.getPosition().y, destX, destY));
+				u.addHistoryItem(new HistoryItem.Dash());
+				break;
+			case CHARGE:
+				game.getEventLog().push(new ChargeEvent(u,
+						u.getPosition().x, u.getPosition().y, destX, destY));
+				u.addHistoryItem(new HistoryItem.Charge());
+				break;
+		}
+
+		// Actually move the unit
 		BattleMap map = battle.getBattleMap();
 		map.getTile(u.getPosition()).removeUnit();
 		map.getTile(destX, destY).setUnit(u);
@@ -381,19 +404,18 @@ public class BattleController extends ScreenController<BattleScreen> {
 		// In range, so move there
 		switch (dir) {
 			case NW:
-				actuallyMoveUnit(user, tx, ty - 1, pf);
+				actuallyMoveUnit(user, MovementType.CHARGE, tx, ty - 1, d, pf);
 				break;
 			case NE:
-				actuallyMoveUnit(user, tx + 1, ty, pf);
+				actuallyMoveUnit(user, MovementType.CHARGE, tx + 1, ty, d, pf);
 				break;
 			case SE:
-				actuallyMoveUnit(user, tx, ty + 1, pf);
+				actuallyMoveUnit(user, MovementType.CHARGE, tx, ty + 1, d, pf);
 				break;
 			case SW:
-				actuallyMoveUnit(user, tx - 1, ty, pf);
+				actuallyMoveUnit(user, MovementType.CHARGE, tx - 1, ty, d, pf);
 				break;
 		}
-		user.addHistoryItem(new HistoryItem.Charge());
 
 		// Set locked into combat
 		user.setLockedIntoCombat(target);
@@ -490,6 +512,7 @@ public class BattleController extends ScreenController<BattleScreen> {
 			} else if (target == getSelectedUnit()) {
 				deselectUnit();
 			}
+			game.getEventLog().push(new DeathEvent(target));
 		}
 	}
 
