@@ -5,6 +5,7 @@ import atotb.controller.BattleController;
 import atotb.controller.BattleController.MouseAction;
 import atotb.controller.Resources;
 import atotb.controller.log.AbstractMoveEvent;
+import atotb.controller.log.DamageEvent;
 import atotb.controller.log.ChargeEvent;
 import atotb.controller.log.DashEvent;
 import atotb.controller.log.DeathEvent;
@@ -15,10 +16,11 @@ import atotb.controller.log.MoveEvent;
 import atotb.model.Battle;
 import atotb.model.HistoryItem;
 import atotb.model.Unit;
-import atotb.view.tween.UnitAppearanceAccessor;
+import atotb.view.tween.DrawableAccessor;
 import aurelienribon.tweenengine.Tween;
 import aurelienribon.tweenengine.TweenManager;
 import aurelienribon.tweenengine.equations.Linear;
+import aurelienribon.tweenengine.equations.Quint;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
@@ -33,6 +35,8 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.ListIterator;
 
 /**
  * The view component for battles. Only responsibility is rendering the game
@@ -59,14 +63,19 @@ public class BattleScreen implements Screen, EventVisitor {
 	private int windowHeight;
 	//
 	// Animation
-	public static final float DEATH_ANIMATION_DURATION = 1;
-	public static final float MOVE_ANIMATION_DURATION = 0.2f;
-	public static final float DASH_ANIMATION_DURATION = 0.1f;
+	public static final float DEATH_ANIMATION_DURATION = 1f; //Seconds
+	public static final float MOVE_ANIMATION_DURATION = 0.2f; //Seconds per square
+	public static final float DASH_ANIMATION_DURATION = 0.1f; //Seconds per square
+	public static final float DAMAGE_MESSAGE_DURATION = 3f; //Seconds
+	public static final float DAMAGE_MESSAGE_DELAY = 0.5f; //Seconds
+	public static final float DAMAGE_MESSAGE_MOVE_SPEED = 0.5f; //Squares per second
 	public static final float CHARGE_ANIMATION_DURATION = DASH_ANIMATION_DURATION;
 	private UnitAppearance[][] appearances;
 	private final TweenManager manager = new TweenManager();
 	private final EventLog events;
 	private float animationDelay = 0;
+	private final LinkedList<Message> messages = new LinkedList<Message>();
+	private ListIterator<Message> messageIterator = messages.listIterator();
 
 	public BattleScreen(TwoBrothersGame game, BattleController controller, SpriteBatch batch, BitmapFont font) {
 		this.game = game;
@@ -246,6 +255,15 @@ public class BattleScreen implements Screen, EventVisitor {
 			batch.draw(Resources.selectionMarkerOver, vec.x - 4, vec.y + 16);
 		}
 
+		// Print messages
+		messageIterator = messages.listIterator();
+		while (messageIterator.hasNext()) {
+			Message m = messageIterator.next();
+			if (!m.isHidden()) {
+				m.draw(this, batch, vec);
+			}
+		}
+
 		// Finish drawing
 		batch.end();
 
@@ -379,9 +397,8 @@ public class BattleScreen implements Screen, EventVisitor {
 
 	@Override
 	public void visitDeathEvent(DeathEvent event) {
-		Unit u = event.getUnit();
-		Tween.to(appearances[u.getArmy().getIndex()][u.getIndex()],
-				UnitAppearanceAccessor.OPACITY, DEATH_ANIMATION_DURATION)
+		Tween.to(getAppearance(event.getUnit()),
+				DrawableAccessor.OPACITY, DEATH_ANIMATION_DURATION)
 				.target(0)
 				.ease(Linear.INOUT)
 				.delay(animationDelay)
@@ -404,13 +421,38 @@ public class BattleScreen implements Screen, EventVisitor {
 		animateAbstractMoveEvent(event, CHARGE_ANIMATION_DURATION);
 	}
 
-	public void animateAbstractMoveEvent(AbstractMoveEvent event, float timePerStep) {
+	@Override
+	public void visitDamageEvent(DamageEvent event) {
+		Message m = new Message("-" + Math.round(event.getDamage()), font,
+				event.getTarget().getPosition().x,
+				event.getTarget().getPosition().y);
+		m.setHidden(true);
+		Tween.set(m, DrawableAccessor.HIDDEN)
+				.target(0)
+				.delay(animationDelay)
+				.start(manager);
+		Tween.to(m, DrawableAccessor.OPACITY, DAMAGE_MESSAGE_DURATION)
+				.target(0)
+				.ease(Quint.IN)
+				.delay(animationDelay)
+				.start(manager);
+		Tween.to(m, DrawableAccessor.POSITION, DAMAGE_MESSAGE_DURATION)
+				.targetRelative(DAMAGE_MESSAGE_MOVE_SPEED*DAMAGE_MESSAGE_DURATION, 
+						-DAMAGE_MESSAGE_MOVE_SPEED*DAMAGE_MESSAGE_DURATION)
+				.ease(Linear.INOUT)
+				.delay(animationDelay)
+				.start(manager);
+		animationDelay += DAMAGE_MESSAGE_DELAY;
+		messages.add(m);
+	}
+
+	private void animateAbstractMoveEvent(AbstractMoveEvent event, float timePerStep) {
 		Unit u = event.getUnit();
 		float dx = event.getDestX() - event.getFromX();
 		float dy = event.getDestY() - event.getFromY();
 		float distance = (float) Math.sqrt(dx * dx + dy * dy);
-		Tween.to(appearances[u.getArmy().getIndex()][u.getIndex()], 
-				UnitAppearanceAccessor.POSITION, distance * timePerStep)
+		Tween.to(getAppearance(u),
+				DrawableAccessor.POSITION, distance * timePerStep)
 				.target(u.getPosition().x, u.getPosition().y)
 				.ease(Linear.INOUT)
 				.delay(animationDelay)
@@ -418,4 +460,11 @@ public class BattleScreen implements Screen, EventVisitor {
 		animationDelay += distance * timePerStep;
 	}
 
+	private UnitAppearance getAppearance(Unit unit) {
+		return appearances[unit.getArmy().getIndex()][unit.getIndex()];
+	}
+
+	public void removeMessage() {
+		messageIterator.remove();
+	}
 }

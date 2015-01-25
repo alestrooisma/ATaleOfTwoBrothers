@@ -8,12 +8,13 @@ Phase 2 - graphics, animation and UI
 - [x] Advanced event logging
 - [x] Death animation (fade)
 - [x] Movement animation (slide)
-- [ ] Movement path indicators
+  - [ ] Follow actual path
+- [ ] Movement path indicators	
 - [ ] Movement range indicators
 - [ ] Toggleable grid
 - [ ] Projectile animation
 - [ ] Mouse cursor messages (dashing, charging, fire)
-- [ ] Result messages on target position (damage, miss)
+- [x] Result messages on target position (damage, miss)
 - [ ] HUD
 - [ ] Evaluate the need for a message log
 

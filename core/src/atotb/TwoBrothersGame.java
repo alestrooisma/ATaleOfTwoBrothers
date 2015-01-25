@@ -3,7 +3,6 @@ package atotb;
 import atotb.controller.*;
 import atotb.controller.ai.ArtificialIntelligence;
 import atotb.controller.ai.WolfAI;
-import atotb.controller.log.Event;
 import atotb.controller.log.EventLog;
 import atotb.model.*;
 import atotb.model.actions.HealAction;
@@ -11,8 +10,9 @@ import atotb.model.actions.HealAction2;
 import atotb.model.items.*;
 import atotb.util.MessageLog;
 import atotb.view.BattleScreen;
+import atotb.view.Message;
 import atotb.view.UnitAppearance;
-import atotb.view.tween.UnitAppearanceAccessor;
+import atotb.view.tween.DrawableAccessor;
 import aurelienribon.tweenengine.Tween;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
@@ -99,7 +99,8 @@ public class TwoBrothersGame extends Game {
 		Resources.loadResources();
 
 		// Prepare Univeral Tween Engine
-		Tween.registerAccessor(UnitAppearance.class, new UnitAppearanceAccessor());
+		Tween.registerAccessor(UnitAppearance.class, new DrawableAccessor());
+		Tween.registerAccessor(Message.class, new DrawableAccessor());
 
 		// Create and set the battle screen
 		battleController = new BattleController(this);

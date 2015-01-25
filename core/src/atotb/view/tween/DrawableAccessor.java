@@ -1,6 +1,6 @@
 package atotb.view.tween;
 
-import atotb.view.UnitAppearance;
+import atotb.view.Drawable;
 import aurelienribon.tweenengine.TweenAccessor;
 
 /**
@@ -8,13 +8,14 @@ import aurelienribon.tweenengine.TweenAccessor;
  *
  * @author Ale Strooisma
  */
-public class UnitAppearanceAccessor implements TweenAccessor<UnitAppearance> {
+public class DrawableAccessor implements TweenAccessor<Drawable> {
 
 	public static final int OPACITY = 1;
 	public static final int POSITION = 2;
+	public static final int HIDDEN = 3;
 
 	@Override
-	public int getValues(UnitAppearance target, int tweenType, float[] returnValues) {
+	public int getValues(Drawable target, int tweenType, float[] returnValues) {
 		switch (tweenType) {
 			case POSITION:
 				returnValues[0] = target.getX();
@@ -23,6 +24,9 @@ public class UnitAppearanceAccessor implements TweenAccessor<UnitAppearance> {
 			case OPACITY:
 				returnValues[0] = target.getOpacity();
 				return 1;
+			case HIDDEN:
+				returnValues[0] = target.isHidden() ? 1 : 0;
+				return 1;
 			default:
 				assert false;
 				return -1;
@@ -30,7 +34,7 @@ public class UnitAppearanceAccessor implements TweenAccessor<UnitAppearance> {
 	}
 
 	@Override
-	public void setValues(UnitAppearance target, int tweenType, float[] newValues) {
+	public void setValues(Drawable target, int tweenType, float[] newValues) {
 		switch (tweenType) {
 			case POSITION:
 				target.setX(newValues[0]);
@@ -38,6 +42,9 @@ public class UnitAppearanceAccessor implements TweenAccessor<UnitAppearance> {
 				break;
 			case OPACITY:
 				target.setOpacity(newValues[0]);
+				break;
+			case HIDDEN:
+				target.setHidden(newValues[0] == 1);
 				break;
 			default:
 				assert false;

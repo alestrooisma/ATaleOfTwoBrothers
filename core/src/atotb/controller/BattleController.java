@@ -8,6 +8,7 @@ import atotb.controller.ai.ArtificialIntelligence;
 import atotb.controller.input.InputEvent;
 import atotb.controller.input.KeyEvent;
 import atotb.controller.input.MouseEvent;
+import atotb.controller.log.DamageEvent;
 import atotb.controller.log.ChargeEvent;
 import atotb.controller.log.DashEvent;
 import atotb.controller.log.DeathEvent;
@@ -493,6 +494,7 @@ public class BattleController extends ScreenController<BattleScreen> {
 	}
 
 	public void applyDamage(Unit target, double damage) {
+		game.getEventLog().push(new DamageEvent(target, damage));
 		double health = target.getCurrentHealth();
 		health -= damage;
 		if (health > 0) {
@@ -645,6 +647,7 @@ public class BattleController extends ScreenController<BattleScreen> {
 				previousUnit();
 				break;
 			case Input.Keys.N:
+			case Input.Keys.TAB:
 				nextUnit();
 				break;
 			case Input.Keys.BACKSPACE:
