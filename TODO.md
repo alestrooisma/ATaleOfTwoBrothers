@@ -9,7 +9,7 @@ Phase 2 - graphics, animation and UI
 - [x] Death animation (fade)
 - [x] Movement animation (slide)
   - [ ] Follow actual path
-- [ ] Movement path indicators	
+- [ ] Movement path indicators
 - [ ] Movement range indicators
 - [ ] Toggleable grid
 - [ ] Projectile animation

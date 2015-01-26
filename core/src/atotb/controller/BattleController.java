@@ -299,7 +299,6 @@ public class BattleController extends ScreenController<BattleScreen> {
 		} else if (u.mayDash()
 				&& distance <= u.getMovesRemaining() + u.getDashDistance()) {
 			actuallyMoveUnit(u, MovementType.DASH, destX, destY, distance, pf);
-			game.getLog().push("Dashing!");
 		}
 	}
 
@@ -371,12 +370,8 @@ public class BattleController extends ScreenController<BattleScreen> {
 	}
 
 	private boolean fireRangedWeapon(Unit user, Unit target, Weapon weapon) {
-		game.getLog().push(user.getName() + " fires at " + target.getName() + " - " + weapon.getPower() + " damage!");
 		applyDamage(target, weapon.getPower());
-		if (target.getCurrentHealth() > 0) {
-			game.getLog().push(target.getName() + "'s remaining health = " + target.getCurrentHealth());
-		} else {
-			game.getLog().push(user.getName() + " killed " + target.getName() + "!");
+		if (!target.isAlive()) {
 			battle.getBattleMap().getTile(target.getPosition()).removeUnit();
 		}
 		user.addHistoryItem(new HistoryItem.Fire());
@@ -421,7 +416,8 @@ public class BattleController extends ScreenController<BattleScreen> {
 		// Set locked into combat
 		user.setLockedIntoCombat(target);
 		target.setLockedIntoCombat(user);
-		game.getLog().push(user.getName() + " charges at " + target.getName());
+		
+		// Resolve initial round of combat
 		resolveCombat(user, target);
 		return true;
 	}
@@ -473,17 +469,9 @@ public class BattleController extends ScreenController<BattleScreen> {
 
 			// If the blow is fatal, handle the defender's death
 			if (!defender.isAlive()) {
-				game.getLog().push(attacker.getName() + " hits " + defender.getName()
-						+ " for " + damage + " damage!");
-				game.getLog().push(attacker.getName() + " killed " + defender.getName() + "!");
-				battle.getBattleMap().getTile(defender.getPosition()).removeUnit();
 				attacker.setLockedIntoCombat(null);
 				defender.setLockedIntoCombat(null);
 				break;
-			} else {
-				game.getLog().push(attacker.getName() + " hits " + defender.getName()
-						+ " for " + damage + " damage! (HP left: "
-						+ defender.getCurrentHealth() + ")");
 			}
 
 			// Switch roles of attacker and defender
@@ -495,12 +483,14 @@ public class BattleController extends ScreenController<BattleScreen> {
 
 	public void applyDamage(Unit target, double damage) {
 		game.getEventLog().push(new DamageEvent(target, damage));
-		double health = target.getCurrentHealth();
-		health -= damage;
-		if (health > 0) {
-			target.setCurrentHealth(health);
+		double remainingHealth = target.getCurrentHealth();
+		remainingHealth -= damage;
+		if (remainingHealth > 0) {
+			target.setCurrentHealth(remainingHealth);
 		} else {
 			target.setCurrentHealth(0);
+			battle.getBattleMap().getTile(target.getPosition()).removeUnit();
+			
 			boolean unitsLeft = false;
 			for (Unit u : target.getArmy().getUnits()) {
 				if (u.isAlive()) {

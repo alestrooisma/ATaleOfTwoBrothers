@@ -170,13 +170,19 @@ public class BattleScreen implements Screen, EventVisitor {
 		camera.unproject(vec);
 		screenToTileCoords(vec);
 		floor(vec);
-		int x = (int) vec.x;
-		int y = (int) vec.y;
+		int mouseTileX = (int) vec.x;
+		int mouseTileY = (int) vec.y;
 		tileToScreenCoords(vec);
 
+		// Render
+		renderScene(mouseTileX, mouseTileY);
+		renderUI(mouseTileX, mouseTileY);
+	}
+	
+	private void renderScene(int mouseTileX, int mouseTileY) {
 		// Get potential mouse action for hover position
-		MouseAction ma = controller.getMouseAction(x, y);
-
+		MouseAction ma = controller.getMouseAction(mouseTileX, mouseTileY);
+		
 		// Render map
 		mapRenderer.setView(camera);
 		mapRenderer.render();
@@ -202,18 +208,18 @@ public class BattleScreen implements Screen, EventVisitor {
 		}
 
 		// Draw walk/dash range markers - TODO order
-		Unit u = controller.getSelectedUnit();
-		if (u != null) {
+		Unit su = controller.getSelectedUnit();
+		if (su != null) {
 			for (int i = 0; i < game.getModel().getBattle().getBattleMap().getWidth(); i++) {
 				for (int j = 0; j < game.getModel().getBattle().getBattleMap().getHeight(); j++) {
 					double d = controller.getPathFinder().getDistanceToWithoutCheck(i, j);
 					if (d == 0) {
 						// Don't draw
-					} else if (d <= u.getMovesRemaining()) {
+					} else if (d <= su.getMovesRemaining()) {
 						tileToScreenCoords(i, j, vec);
 						batch.draw(Resources.walkMarker, vec.x, vec.y);
-					} else if (u.mayDash()
-							&& d <= u.getMovesRemaining() + u.getDashDistance()) {
+					} else if (su.mayDash()
+							&& d <= su.getMovesRemaining() + su.getDashDistance()) {
 						tileToScreenCoords(i, j, vec);
 						batch.draw(Resources.dashMarker, vec.x, vec.y);
 					}
@@ -224,9 +230,9 @@ public class BattleScreen implements Screen, EventVisitor {
 		}
 
 		// Draw unit selection marker underlayer
-		if (u != null) {
-			tileToScreenCoords(u.getPosition().x,
-					u.getPosition().y, vec);
+		if (su != null) {
+			tileToScreenCoords(su.getPosition().x,
+					su.getPosition().y, vec);
 			batch.draw(Resources.selectionMarkerUnder, vec.x - 4, vec.y + 16);
 		}
 
@@ -238,7 +244,7 @@ public class BattleScreen implements Screen, EventVisitor {
 		}
 
 		// Draw hover or target marker overlayer
-		tileToScreenCoords(x, y, vec);
+		tileToScreenCoords(mouseTileX, mouseTileY, vec);
 		switch (ma) {
 			case SELECT:
 				batch.draw(Resources.hoverMarkerOver, vec.x - 4, vec.y + 16);
@@ -249,9 +255,9 @@ public class BattleScreen implements Screen, EventVisitor {
 		}
 
 		// Draw unit selection marker overlayer
-		if (u != null) {
-			tileToScreenCoords(u.getPosition().x,
-					u.getPosition().y, vec);
+		if (su != null) {
+			tileToScreenCoords(su.getPosition().x,
+					su.getPosition().y, vec);
 			batch.draw(Resources.selectionMarkerOver, vec.x - 4, vec.y + 16);
 		}
 
@@ -266,8 +272,9 @@ public class BattleScreen implements Screen, EventVisitor {
 
 		// Finish drawing
 		batch.end();
+	}
 
-		// Render UI
+	private void renderUI(int x, int y) {
 		batch.setProjectionMatrix(uiCamera.combined);
 		batch.begin();
 
@@ -275,19 +282,20 @@ public class BattleScreen implements Screen, EventVisitor {
 		font.draw(batch, "" + x + ", " + y, windowWidth - 50, 20);
 
 		// Selected unit information
-		if (u != null) {
-			double dash = u.mayDash() ? u.getDashDistance() : 0;
+		Unit su = controller.getSelectedUnit();
+		if (su != null) {
+			double dash = su.mayDash() ? su.getDashDistance() : 0;
 			int h = 0;
-			h = drawString(u.getName(), h);
-			h = drawString("HP: " + u.getCurrentHealth() + "\\" + u.getMaxHealth(), h);
-			h = drawString("Moves remaining: " + u.getMovesRemaining() + "+" + dash, h);
-			h = drawString("May attack: " + (u.mayAttack() ? "yes" : "false"), h);
+			h = drawString(su.getName(), h);
+			h = drawString("HP: " + su.getCurrentHealth() + "\\" + su.getMaxHealth(), h);
+			h = drawString("Moves remaining: " + su.getMovesRemaining() + "+" + dash, h);
+			h = drawString("May attack: " + (su.mayAttack() ? "yes" : "false"), h);
 			int a = controller.getSelectedActionNumber();
-			h = drawString("Selected ability: " + (a == -1 ? "none" : "#" + a + " - " + u.getAction(a).getName()), h);
+			h = drawString("Selected ability: " + (a == -1 ? "none" : "#" + a + " - " + su.getAction(a).getName()), h);
 			h = drawString("History:", h);
-			u.getHistory().iter();
+			su.getHistory().iter();
 			HistoryItem item;
-			while ((item = u.getHistory().next()) != null) {
+			while ((item = su.getHistory().next()) != null) {
 				if (item instanceof HistoryItem.Move) {
 					h = drawString("    Moved a distance of " + ((HistoryItem.Move) item).getDistance(), h);
 				} else if (item instanceof HistoryItem.Dash) {
@@ -311,7 +319,7 @@ public class BattleScreen implements Screen, EventVisitor {
 		// Finish UI drawing
 		batch.end();
 	}
-
+	
 	private int drawString(String str, int h) {
 		font.draw(batch, str, 10, windowHeight - 10 - h);
 		return h + 20;
