@@ -11,13 +11,15 @@ public abstract class AbstractMoveEvent implements BattleEvent {
 
 	protected final Unit unit;
 	protected final int fromX, fromY, destX, destY;
+	protected final double distance;
 
-	public AbstractMoveEvent(Unit unit, int fromX, int fromY, int destX, int destY) {
+	public AbstractMoveEvent(Unit unit, int fromX, int fromY, int destX, int destY, double distance) {
 		this.unit = unit;
 		this.fromX = fromX;
 		this.fromY = fromY;
 		this.destX = destX;
 		this.destY = destY;
+		this.distance = distance;
 	}
 
 	public Unit getUnit() {
@@ -38,5 +40,9 @@ public abstract class AbstractMoveEvent implements BattleEvent {
 
 	public int getDestY() {
 		return destY;
+	}
+
+	public double getDistance() {
+		return distance;
 	}
 }

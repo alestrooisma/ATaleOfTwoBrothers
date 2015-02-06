@@ -8,9 +8,9 @@ import java.util.ListIterator;
  * 
  * @author Ale Strooisma
  */
-public class EventLog {
+public class EventLog implements EventProcessor {
     private final LinkedList<Event> events = new LinkedList<Event>();
-	private final LinkedList<EventLog> listeners = new LinkedList<EventLog>();
+	private final LinkedList<EventProcessor> listeners = new LinkedList<EventProcessor>();
 	
 	/**
 	 * Pushes an event to this event log. The event is added at the tail of the 
@@ -19,10 +19,11 @@ public class EventLog {
 	 * 
 	 * @param e the new event
 	 */
+	@Override
     public void push(Event e) {
         events.add(e);
-		for (EventLog log : listeners) {
-			log.push(e);
+		for (EventProcessor ep : listeners) {
+			ep.push(e);
 		}
     }
 	
@@ -43,7 +44,7 @@ public class EventLog {
 	 * 
 	 * @param log
 	 */
-	public void register(EventLog log) {
+	public void register(EventProcessor log) {
 		listeners.add(log);
 	}
 
@@ -53,7 +54,7 @@ public class EventLog {
 	 * @param log the log to deregister
 	 * @return true if the log is successfully deregistered
 	 */
-	public boolean deregister(EventLog log) {
+	public boolean deregister(EventProcessor log) {
 		return listeners.remove(log);
 	}
 

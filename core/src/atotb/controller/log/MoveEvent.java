@@ -9,9 +9,9 @@ import atotb.model.Unit;
  */
 public class MoveEvent extends AbstractMoveEvent {
 
-	public MoveEvent(Unit unit, int fromX, int fromY, int destX, int destY) {
-		super(unit, fromX, fromY, destX, destY);
-	}	
+	public MoveEvent(Unit unit, int fromX, int fromY, int destX, int destY, double distance) {
+		super(unit, fromX, fromY, destX, destY, distance);
+	}
 
 	@Override
 	public String toString() {

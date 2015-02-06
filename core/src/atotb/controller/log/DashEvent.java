@@ -14,8 +14,8 @@ import atotb.model.Unit;
  */
 public class DashEvent extends AbstractMoveEvent {
 
-	public DashEvent(Unit unit, int fromX, int fromY, int destX, int destY) {
-		super(unit, fromX, fromY, destX, destY);
+	public DashEvent(Unit unit, int fromX, int fromY, int destX, int destY, double distance) {
+		super(unit, fromX, fromY, destX, destY, distance);
 	}
 
 	@Override
