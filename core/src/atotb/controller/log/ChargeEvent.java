@@ -13,9 +13,16 @@ import atotb.model.Unit;
  * @author Ale Strooisma
  */
 public class ChargeEvent extends AbstractMoveEvent {
-
-	public ChargeEvent(Unit unit, int fromX, int fromY, int destX, int destY, double distance) {
+	private final Unit opponent;
+	
+	public ChargeEvent(Unit unit, Unit opponent, 
+			int fromX, int fromY, int destX, int destY, double distance) {
 		super(unit, fromX, fromY, destX, destY, distance);
+		this.opponent = opponent;
+	}
+
+	public Unit getOpponent() {
+		return opponent;
 	}
 
 	@Override

@@ -1,6 +1,9 @@
 Bugs
 ------------------
-- Can select ability even if it is not allowed regardless of target!
+- Can select ability even if it is "not allowed regardless of target".
+- Can move while locked in combat.
+- WolfAI ignores being locked in combat.
+
 
 Phase 2 - graphics, animation and UI
 ------------------

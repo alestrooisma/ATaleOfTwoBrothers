@@ -16,5 +16,7 @@ public interface EventVisitor {
 	public void visitChargeEvent(ChargeEvent event);
 
 	public void visitDamageEvent(DamageEvent event);
+
+	public void visitFireEvent(FireEvent event);
 	
 }

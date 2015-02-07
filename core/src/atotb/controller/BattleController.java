@@ -16,6 +16,7 @@ import atotb.controller.log.DeathEvent;
 import atotb.controller.log.Event;
 import atotb.controller.log.EventProcessor;
 import atotb.controller.log.EventVisitor;
+import atotb.controller.log.FireEvent;
 import atotb.controller.log.MoveEvent;
 import atotb.model.actions.Action;
 import atotb.model.Army;
@@ -334,26 +335,20 @@ public class BattleController extends ScreenController<BattleScreen> {
 				game.getLog().push(target.getName() + " is locked into combat - can't attack.");
 				return;
 			}
-			
+
 			// Get the weapon
-			Weapon w = user.getWeapon();
-			if (w == null) {
-				w = game.getUnarmed();
+			Weapon weapon = user.getWeapon();
+			if (weapon == null) {
+				weapon = game.getUnarmed();
 			}
 
 			// Execute action, depending on weapon type
-			if (w instanceof RangedWeapon) {
-				fireRangedWeapon(user, target, w);
-			} else if (w instanceof MeleeWeapon) {
+			if (weapon instanceof RangedWeapon) {
+				game.getEventLog().push(new FireEvent(user, target, weapon));
+			} else if (weapon instanceof MeleeWeapon) {
 				charge(user, target, pf);
 			}
 		}
-	}
-
-	private void fireRangedWeapon(Unit user, Unit target, Weapon weapon) {
-		double damage = weapon.getPower();
-		game.getEventLog().push(new DamageEvent(target, damage));
-		user.addHistoryItem(new HistoryItem.Fire());
 	}
 
 	private void charge(Unit user, Unit target, PathFinder pf) {
@@ -367,14 +362,9 @@ public class BattleController extends ScreenController<BattleScreen> {
 		// Check for space and range
 		if (dir != null && distance <= user.getTotalMovesRemaining()) {
 			// In range, so move there
-			game.getEventLog().push(new ChargeEvent(user,
-					user.getPosition().x, user.getPosition().y, 
+			game.getEventLog().push(new ChargeEvent(user, target,
+					user.getPosition().x, user.getPosition().y,
 					dir.getX(tx), dir.getY(ty), distance));
-
-			// Set combatants locked into combat 
-			//TODO move to BattleEventProcessor
-			user.setLockedIntoCombat(target);
-			target.setLockedIntoCombat(user);
 
 			// Resolve initial round of combat
 			resolveCombat(user, target);
@@ -412,8 +402,8 @@ public class BattleController extends ScreenController<BattleScreen> {
 	}
 
 	private void resolveCombat(Unit attacker, Unit defender) {
-		int min = 3;
-		int max = 5;
+		int min = 1;
+		int max = 1;
 		int number = MathUtils.random(min, max);
 		for (int i = 0; i < number; i++) {
 			// Get the weapon
@@ -426,10 +416,8 @@ public class BattleController extends ScreenController<BattleScreen> {
 			double damage = weapon.getPower();
 			game.getEventLog().push(new DamageEvent(defender, damage));
 
-			// If the blow is fatal, handle the defender's death
+			// If the blow is fatal, end the combat
 			if (!defender.isAlive()) {
-				attacker.setLockedIntoCombat(null);
-				defender.setLockedIntoCombat(null);
 				break;
 			}
 
@@ -441,6 +429,7 @@ public class BattleController extends ScreenController<BattleScreen> {
 	}
 
 	// Input handling
+	// TODO should be move to separate class, but waiting for input handling revision.
 	//
 	private void handleCameraControl() {
 		// Handle input
@@ -690,8 +679,28 @@ public class BattleController extends ScreenController<BattleScreen> {
 
 		@Override
 		public void visitChargeEvent(ChargeEvent event) {
+			Unit unit = event.getUnit();
+			Unit opponent = event.getOpponent();
+
+			// Handle the movement
 			handleAbstractMoveEvent(event);
 			event.getUnit().addHistoryItem(new HistoryItem.Charge());
+
+			// Lock in combat
+			unit.setLockedIntoCombat(opponent);
+			opponent.setLockedIntoCombat(unit);
+		}
+
+		private void handleAbstractMoveEvent(AbstractMoveEvent event) {
+			Unit unit = event.getUnit();
+			int x = event.getDestX();
+			int y = event.getDestY();
+
+			// Actually move the unit
+			BattleMap map = battle.getBattleMap();
+			map.getTile(unit.getPosition()).removeUnit();
+			map.getTile(x, y).setUnit(unit);
+			unit.setPosition(x, y);
 		}
 
 		@Override
@@ -706,16 +715,11 @@ public class BattleController extends ScreenController<BattleScreen> {
 			}
 		}
 
-		private void handleAbstractMoveEvent(AbstractMoveEvent event) {
-			Unit unit = event.getUnit();
-			int x = event.getDestX();
-			int y = event.getDestY();
-
-			// Actually move the unit
-			BattleMap map = battle.getBattleMap();
-			map.getTile(unit.getPosition()).removeUnit();
-			map.getTile(x, y).setUnit(unit);
-			unit.setPosition(x, y);
+		@Override
+		public void visitFireEvent(FireEvent event) {
+			double damage = event.getWeapon().getPower();
+			event.getUser().addHistoryItem(new HistoryItem.Fire());
+			game.getEventLog().push(new DamageEvent(event.getTarget(), damage));
 		}
 	}
 }

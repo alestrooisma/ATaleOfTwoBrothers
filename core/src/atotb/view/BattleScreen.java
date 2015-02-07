@@ -12,6 +12,7 @@ import atotb.controller.log.DeathEvent;
 import atotb.controller.log.Event;
 import atotb.controller.log.EventLog;
 import atotb.controller.log.EventVisitor;
+import atotb.controller.log.FireEvent;
 import atotb.controller.log.MoveEvent;
 import atotb.model.Battle;
 import atotb.model.HistoryItem;
@@ -292,6 +293,7 @@ public class BattleScreen implements Screen, EventVisitor {
 			h = drawString("May attack: " + (su.mayAttack() ? "yes" : "false"), h);
 			int a = controller.getSelectedActionNumber();
 			h = drawString("Selected ability: " + (a == -1 ? "none" : "#" + a + " - " + su.getAction(a).getName()), h);
+			h = drawString("Opponent: " + (su.getOpponent() == null ? "none" : su.getOpponent().getName()), h);
 			h = drawString("History:", h);
 			su.getHistory().iter();
 			HistoryItem item;
@@ -452,6 +454,11 @@ public class BattleScreen implements Screen, EventVisitor {
 				.start(manager);
 		animationDelay += DAMAGE_MESSAGE_DELAY;
 		messages.add(m);
+	}
+
+	@Override
+	public void visitFireEvent(FireEvent event) {
+		//TODO animate arrow
 	}
 
 	private void animateAbstractMoveEvent(AbstractMoveEvent event, float timePerStep) {
