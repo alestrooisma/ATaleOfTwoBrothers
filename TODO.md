@@ -1,8 +1,8 @@
 Bugs
 ------------------
 - Can select ability even if it is "not allowed regardless of target".
-- Can move while locked in combat.
-- WolfAI ignores being locked in combat.
+- ArrayIndexOutOfBoundsException when charging toward a unit at the edge of the map.
+- What is a unit allowed to do when his opponent dies after combat is resolved?
 
 
 Phase 2 - graphics, animation and UI

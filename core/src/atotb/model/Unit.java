@@ -134,20 +134,24 @@ public class Unit extends Element {
 	}
 
 	public double getMovesRemaining() {
-		HistoryItem item;
-		double moves = getSpeed();
-		history.iter();
-		while ((item = history.next()) != null) {
-			if (item instanceof HistoryItem.Move) {
-				moves -= ((HistoryItem.Move) item).getDistance();
-			} else if (item instanceof HistoryItem.Dash
-					|| item instanceof HistoryItem.Charge
-					|| item instanceof HistoryItem.Fire
-					|| item instanceof HistoryItem.Ability) {
-				moves = 0;
+		if (isLockedIntoCombat()) {
+			return 0;
+		} else {
+			HistoryItem item;
+			double moves = getSpeed();
+			history.iter();
+			while ((item = history.next()) != null) {
+				if (item instanceof HistoryItem.Move) {
+					moves -= ((HistoryItem.Move) item).getDistance();
+				} else if (item instanceof HistoryItem.Dash
+						|| item instanceof HistoryItem.Charge
+						|| item instanceof HistoryItem.Fire
+						|| item instanceof HistoryItem.Ability) {
+					moves = 0;
+				}
 			}
+			return moves;
 		}
-		return moves;
 	}
 
 	public double getTotalMovesRemaining() {
