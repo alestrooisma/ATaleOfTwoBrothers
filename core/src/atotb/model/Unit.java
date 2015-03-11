@@ -135,7 +135,7 @@ public class Unit extends Element {
 
 	public double getMovesRemaining() {
 		if (isLockedIntoCombat()) {
-			return 0;
+			return -1;
 		} else {
 			HistoryItem item;
 			double moves = getSpeed();
@@ -147,7 +147,7 @@ public class Unit extends Element {
 						|| item instanceof HistoryItem.Charge
 						|| item instanceof HistoryItem.Fire
 						|| item instanceof HistoryItem.Ability) {
-					moves = 0;
+					moves = -1;
 				}
 			}
 			return moves;

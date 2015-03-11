@@ -172,7 +172,7 @@ public class BattleController extends ScreenController<BattleScreen> {
 			player = battle.getCurrentPlayer();
 		}
 
-		// Select first unit
+		// Player turn - select first unit
 		if (!isBattleOver()) {
 			nextUnit();
 		}

@@ -289,6 +289,7 @@ public class BattleScreen implements Screen, EventVisitor {
 			int h = 0;
 			h = drawString(su.getName(), h);
 			h = drawString("HP: " + su.getCurrentHealth() + "\\" + su.getMaxHealth(), h);
+			h = drawString("(x, y): " + su.getPosition().x + ", " + su.getPosition().y, h);
 			h = drawString("Moves remaining: " + su.getMovesRemaining() + "+" + dash, h);
 			h = drawString("May attack: " + (su.mayAttack() ? "yes" : "false"), h);
 			int a = controller.getSelectedActionNumber();
