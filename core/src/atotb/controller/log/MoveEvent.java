@@ -11,8 +11,8 @@ import java.awt.Point;
  */
 public class MoveEvent extends AbstractMoveEvent {
 
-	public MoveEvent(Unit unit, int fromX, int fromY, Array<Point> path, double distance) {
-		super(unit, fromX, fromY, path, distance);
+	public MoveEvent(Unit unit, Array<Point> path, double distance) {
+		super(unit, path, distance);
 	}
 
 	@Override

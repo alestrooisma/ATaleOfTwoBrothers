@@ -89,7 +89,7 @@ public class PathFinder {
 		if (map[x][y] == INACCESSIBLE) {
 			return null;
 		}
-		Array<Point> path = new Array<Point>(true, (int) map[x][y], Point.class);
+		Array<Point> path = new Array<Point>(true, (int) map[x][y]+1, Point.class);
 		Point start = bmap.getTile(xi, yi).getPosition();
 		Point target = new Point(x, y);
 		Direction dir, bestDir;
@@ -115,6 +115,7 @@ public class PathFinder {
 			y = bestDir.getY(y);
 			target = new Point(x, y);
 		}
+		path.add(new Point(start));
 		path.reverse();
 		return path;
 	}

@@ -16,8 +16,8 @@ import java.awt.Point;
  */
 public class DashEvent extends AbstractMoveEvent {
 
-	public DashEvent(Unit unit, int fromX, int fromY, Array<Point> path, double distance) {
-		super(unit, fromX, fromY, path, distance);
+	public DashEvent(Unit unit, Array<Point> path, double distance) {
+		super(unit, path, distance);
 	}
 
 	@Override

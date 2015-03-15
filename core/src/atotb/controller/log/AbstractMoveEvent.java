@@ -12,14 +12,11 @@ import java.awt.Point;
 public abstract class AbstractMoveEvent implements BattleEvent {
 
 	private final Unit unit;
-	private final int fromX, fromY;
 	private final Array<Point> path;
 	private final double distance;
 
-	public AbstractMoveEvent(Unit unit, int fromX, int fromY, Array<Point> path, double distance) {
+	public AbstractMoveEvent(Unit unit, Array<Point> path, double distance) {
 		this.unit = unit;
-		this.fromX = fromX;
-		this.fromY = fromY;
 		this.path = path;
 		this.distance = distance;
 	}
@@ -29,11 +26,11 @@ public abstract class AbstractMoveEvent implements BattleEvent {
 	}
 
 	public int getFromX() {
-		return fromX;
+		return path.first().x;
 	}
 
 	public int getFromY() {
-		return fromY;
+		return path.first().y;
 	}
 
 	public int getDestinationX() {

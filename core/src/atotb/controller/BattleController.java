@@ -307,14 +307,12 @@ public class BattleController extends ScreenController<BattleScreen> {
 
 		// Check range and move if possible
 		if (distance <= u.getMovesRemaining()) {
-			game.getEventLog().push(new MoveEvent(u,
-					u.getPosition().x, u.getPosition().y, path, distance));
+			game.getEventLog().push(new MoveEvent(u, path, distance));
 			pf.calculateDistancesFrom(
 					u.getPosition().x, u.getPosition().y, u.getTotalMovesRemaining());
 		} else if (u.mayDash()
 				&& distance <= u.getMovesRemaining() + u.getDashDistance()) {
-			game.getEventLog().push(new DashEvent(u,
-					u.getPosition().x, u.getPosition().y, path, distance));
+			game.getEventLog().push(new DashEvent(u, path, distance));
 		}
 	}
 
@@ -370,7 +368,6 @@ public class BattleController extends ScreenController<BattleScreen> {
 
 				// Everything is ok, so do the charge
 				game.getEventLog().push(new ChargeEvent(user, target,
-						user.getPosition().x, user.getPosition().y, 
 						pf.getPathTo(dir.getX(tx), dir.getY(ty)), distance));
 
 				// Resolve initial round of combat

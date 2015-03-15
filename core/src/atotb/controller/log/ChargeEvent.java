@@ -17,9 +17,8 @@ import java.awt.Point;
 public class ChargeEvent extends AbstractMoveEvent {
 	private final Unit opponent;
 	
-	public ChargeEvent(Unit unit, Unit opponent, 
-			int fromX, int fromY, Array<Point> path, double distance) {
-		super(unit, fromX, fromY, path, distance);
+	public ChargeEvent(Unit unit, Unit opponent, Array<Point> path, double distance) {
+		super(unit, path, distance);
 		this.opponent = opponent;
 	}
 
