@@ -1,6 +1,8 @@
 package atotb.controller.log;
 
 import atotb.model.Unit;
+import com.badlogic.gdx.utils.Array;
+import java.awt.Point;
 
 /**
  * A superclass for all events involving movement.
@@ -9,16 +11,16 @@ import atotb.model.Unit;
  */
 public abstract class AbstractMoveEvent implements BattleEvent {
 
-	protected final Unit unit;
-	protected final int fromX, fromY, destX, destY;
-	protected final double distance;
+	private final Unit unit;
+	private final int fromX, fromY;
+	private final Array<Point> path;
+	private final double distance;
 
-	public AbstractMoveEvent(Unit unit, int fromX, int fromY, int destX, int destY, double distance) {
+	public AbstractMoveEvent(Unit unit, int fromX, int fromY, Array<Point> path, double distance) {
 		this.unit = unit;
 		this.fromX = fromX;
 		this.fromY = fromY;
-		this.destX = destX;
-		this.destY = destY;
+		this.path = path;
 		this.distance = distance;
 	}
 
@@ -34,12 +36,16 @@ public abstract class AbstractMoveEvent implements BattleEvent {
 		return fromY;
 	}
 
-	public int getDestX() {
-		return destX;
+	public int getDestinationX() {
+		return path.peek().x;
 	}
 
-	public int getDestY() {
-		return destY;
+	public int getDestinationY() {
+		return path.peek().y;
+	}
+
+	public Array<Point> getPath() {
+		return path;
 	}
 
 	public double getDistance() {

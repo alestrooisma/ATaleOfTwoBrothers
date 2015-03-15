@@ -464,8 +464,8 @@ public class BattleScreen implements Screen, EventVisitor {
 
 	private void animateAbstractMoveEvent(AbstractMoveEvent event, float timePerStep) {
 		Unit u = event.getUnit();
-		float dx = event.getDestX() - event.getFromX();
-		float dy = event.getDestY() - event.getFromY();
+		float dx = event.getDestinationX() - event.getFromX();
+		float dy = event.getDestinationY() - event.getFromY();
 		float distance = (float) Math.sqrt(dx * dx + dy * dy);
 		Tween.to(getAppearance(u),
 				DrawableAccessor.POSITION, distance * timePerStep)

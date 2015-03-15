@@ -89,32 +89,33 @@ public class PathFinder {
 		if (map[x][y] == INACCESSIBLE) {
 			return null;
 		}
-		Array<Point> path = new Array<Point>((int) map[x][y]);
+		Array<Point> path = new Array<Point>(true, (int) map[x][y], Point.class);
 		Point start = bmap.getTile(xi, yi).getPosition();
-		Point target = bmap.getTile(x, y).getPosition();
+		Point target = new Point(x, y);
 		Direction dir, bestDir;
 		double dist, bestDist;
 		while (!target.equals(start)) {
 			dir = N;
 			bestDir = dir;
 			bestDist = map[dir.getX(x)][dir.getY(y)];
-			dir = nextDir(dir);
-			do {
+			while ((dir = nextDir(dir)) != null) {
 				dist = map[dir.getX(x)][dir.getY(y)];
 				if (dist < bestDist) {
 					bestDir = dir;
 					bestDist = dist;
 				}
-				dir = nextDir(dir);
-			} while (dir != null);
+			}
 
 			if (map[x][y] <= maxDistance) {
 				path.add(target);
 			}
+			
+			// Continue searching from the point that was found to be on the path
 			x = bestDir.getX(x);
 			y = bestDir.getY(y);
 			target = new Point(x, y);
 		}
+		path.reverse();
 		return path;
 	}
 

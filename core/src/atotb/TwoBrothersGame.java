@@ -60,7 +60,7 @@ public class TwoBrothersGame extends Game {
 		// Create logs
 		log = new MessageLog(10);
 		eventLog = new EventLog();
-		
+
 		// Initialize components
 		setUpModel();
 		setUpView();

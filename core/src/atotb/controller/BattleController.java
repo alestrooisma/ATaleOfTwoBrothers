@@ -36,6 +36,8 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.Array;
+import java.awt.Point;
 import java.util.ArrayList;
 
 /**
@@ -301,17 +303,18 @@ public class BattleController extends ScreenController<BattleScreen> {
 	public void moveUnit(Unit u, int destX, int destY, PathFinder pf) {
 		// Calculate distance
 		double distance = pf.getDistanceTo(destX, destY);
+		Array<Point> path = pf.getPathTo(destX, destY);
 
 		// Check range and move if possible
 		if (distance <= u.getMovesRemaining()) {
 			game.getEventLog().push(new MoveEvent(u,
-					u.getPosition().x, u.getPosition().y, destX, destY, distance));
+					u.getPosition().x, u.getPosition().y, path, distance));
 			pf.calculateDistancesFrom(
 					u.getPosition().x, u.getPosition().y, u.getTotalMovesRemaining());
 		} else if (u.mayDash()
 				&& distance <= u.getMovesRemaining() + u.getDashDistance()) {
 			game.getEventLog().push(new DashEvent(u,
-					u.getPosition().x, u.getPosition().y, destX, destY, distance));
+					u.getPosition().x, u.getPosition().y, path, distance));
 		}
 	}
 
@@ -357,17 +360,22 @@ public class BattleController extends ScreenController<BattleScreen> {
 
 		// Find best target location
 		Direction dir = getChargingDirection(tx, ty, pf);
-		double distance = getChargingDistance(tx, ty, pf, dir);
 
-		// Check for space and range
-		if (dir != null && distance <= user.getTotalMovesRemaining()) {
-			// In range, so move there
-			game.getEventLog().push(new ChargeEvent(user, target,
-					user.getPosition().x, user.getPosition().y,
-					dir.getX(tx), dir.getY(ty), distance));
+		// Check if the target is accessible
+		if (dir != null) {
 
-			// Resolve initial round of combat
-			resolveCombat(user, target);
+			// Check if the target is in range
+			double distance = getChargingDistance(tx, ty, pf, dir);
+			if (distance <= user.getTotalMovesRemaining()) {
+
+				// Everything is ok, so do the charge
+				game.getEventLog().push(new ChargeEvent(user, target,
+						user.getPosition().x, user.getPosition().y, 
+						pf.getPathTo(dir.getX(tx), dir.getY(ty)), distance));
+
+				// Resolve initial round of combat
+				resolveCombat(user, target);
+			}
 		}
 	}
 
@@ -402,8 +410,8 @@ public class BattleController extends ScreenController<BattleScreen> {
 	}
 
 	private void resolveCombat(Unit attacker, Unit defender) {
-		int min = 1;
-		int max = 1;
+		int min = 3;
+		int max = 5;
 		int number = MathUtils.random(min, max);
 		for (int i = 0; i < number; i++) {
 			// Get the weapon
@@ -429,7 +437,7 @@ public class BattleController extends ScreenController<BattleScreen> {
 	}
 
 	// Input handling
-	// TODO should be move to separate class, but waiting for input handling revision.
+	// TODO should be moved to separate class, but waiting for input handling revision.
 	//
 	private void handleCameraControl() {
 		// Handle input
@@ -478,24 +486,29 @@ public class BattleController extends ScreenController<BattleScreen> {
 
 	private void processMousePressedEvent(int screenX, int screenY, int button) {
 		if (button == Input.Buttons.LEFT) {
+			// Convert screen coordinates to tile coordinates
 			vec.x = screenX;
 			vec.y = screenY;
 			getView().unproject(vec);
 			getView().screenToTileCoords(vec);
 			int x = (int) vec.x;
 			int y = (int) vec.y;
+
+			// Find out what the event causes
 			MouseAction ma = getMouseAction(x, y);
-			Unit u;
+
+			// The unit at the clicked tile
+			Unit u = game.getModel().getBattle().getBattleMap().getTile(x, y).getUnit();
+
+			// Process event
 			switch (ma) {
 				case SELECT:
-					u = game.getModel().getBattle().getBattleMap().getTile(x, y).getUnit();
 					selectUnit(u);
 					break;
 				case MOVE:
 					moveUnit(getSelectedUnit(), x, y, getPathFinder());
 					break;
 				case TARGET:
-					u = game.getModel().getBattle().getBattleMap().getTile(x, y).getUnit();
 					targetUnit(getSelectedUnit(), u, getSelectedAction(), getPathFinder());
 					break;
 			}
@@ -693,8 +706,8 @@ public class BattleController extends ScreenController<BattleScreen> {
 
 		private void handleAbstractMoveEvent(AbstractMoveEvent event) {
 			Unit unit = event.getUnit();
-			int x = event.getDestX();
-			int y = event.getDestY();
+			int x = event.getDestinationX();
+			int y = event.getDestinationY();
 
 			// Actually move the unit
 			BattleMap map = battle.getBattleMap();

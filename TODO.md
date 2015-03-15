@@ -1,7 +1,7 @@
 Bugs
 ------------------
 - Can select ability even if it is "not allowed regardless of target".
-- ArrayIndexOutOfBoundsException when charging toward a unit at the edge of the map.
+- ArrayIndexOutOfBoundsException when charging toward a unit at the edge of the map. Can't reproduce...
 - What is a unit allowed to do when his opponent dies after combat is resolved?
 
 
@@ -20,6 +20,8 @@ Phase 2 - graphics, animation and UI
 - [x] Result messages on target position (damage, miss)
 - [ ] HUD
 - [ ] Evaluate the need for a message log
+- [ ] Prohibit user input during certain animations, e.g. AI has to complete turn, animation-wise, before player can act again
+- [ ] Reset animation delay after certain user inputs, e.g. execute a move immediately, even if another unit is still moving
 
 Phase 3 - combat model
 ------------------

@@ -6,6 +6,8 @@
 package atotb.controller.log;
 
 import atotb.model.Unit;
+import com.badlogic.gdx.utils.Array;
+import java.awt.Point;
 
 /**
  * The event of a unit dashing.
@@ -14,13 +16,13 @@ import atotb.model.Unit;
  */
 public class DashEvent extends AbstractMoveEvent {
 
-	public DashEvent(Unit unit, int fromX, int fromY, int destX, int destY, double distance) {
-		super(unit, fromX, fromY, destX, destY, distance);
+	public DashEvent(Unit unit, int fromX, int fromY, Array<Point> path, double distance) {
+		super(unit, fromX, fromY, path, distance);
 	}
 
 	@Override
 	public String toString() {
-		return unit.getName() + " dashed to " + destX + ", " + destY;
+		return getUnit().getName() + " dashed to " + getDestinationX() + ", " + getDestinationY();
 	}
 	
 	@Override

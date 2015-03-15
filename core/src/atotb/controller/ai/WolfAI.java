@@ -11,9 +11,10 @@ import java.awt.Point;
 
 /**
  * Very simple AI intended to be used for a pack of wolves.
- * 
- * @todo units fail to move if there is no enemy unit with a neighbouring accessible tile 
- * 
+ *
+ * @todo units fail to move if there is no enemy unit with a neighbouring
+ * accessible tile
+ *
  * @author Ale Strooisma
  */
 public class WolfAI implements ArtificialIntelligence {
@@ -57,7 +58,7 @@ public class WolfAI implements ArtificialIntelligence {
 								dir.getY(ty),
 								unit.getTotalMovesRemaining());
 						if (path.size != 0) {
-							controller.moveUnit(unit, path.first().x, path.first().y, pf);
+							controller.moveUnit(unit, path.peek().x, path.peek().y, pf);
 						}
 					}
 				}

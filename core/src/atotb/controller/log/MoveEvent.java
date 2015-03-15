@@ -1,6 +1,8 @@
 package atotb.controller.log;
 
 import atotb.model.Unit;
+import com.badlogic.gdx.utils.Array;
+import java.awt.Point;
 
 /**
  * The event of a unit moving.
@@ -9,13 +11,13 @@ import atotb.model.Unit;
  */
 public class MoveEvent extends AbstractMoveEvent {
 
-	public MoveEvent(Unit unit, int fromX, int fromY, int destX, int destY, double distance) {
-		super(unit, fromX, fromY, destX, destY, distance);
+	public MoveEvent(Unit unit, int fromX, int fromY, Array<Point> path, double distance) {
+		super(unit, fromX, fromY, path, distance);
 	}
 
 	@Override
 	public String toString() {
-		return unit.getName() + " moved to " + destX + ", " + destY;
+		return getUnit().getName() + " moved to " + getDestinationX() + ", " + getDestinationY();
 	}
 
 	@Override
