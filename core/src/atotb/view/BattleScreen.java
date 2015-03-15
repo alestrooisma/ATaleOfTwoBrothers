@@ -18,6 +18,7 @@ import atotb.model.Battle;
 import atotb.model.HistoryItem;
 import atotb.model.Unit;
 import atotb.view.tween.DrawableAccessor;
+import aurelienribon.tweenengine.Timeline;
 import aurelienribon.tweenengine.Tween;
 import aurelienribon.tweenengine.TweenManager;
 import aurelienribon.tweenengine.equations.Linear;
@@ -33,8 +34,10 @@ import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.renderers.IsometricTiledMapRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import java.awt.Point;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.ListIterator;
@@ -179,11 +182,11 @@ public class BattleScreen implements Screen, EventVisitor {
 		renderScene(mouseTileX, mouseTileY);
 		renderUI(mouseTileX, mouseTileY);
 	}
-	
+
 	private void renderScene(int mouseTileX, int mouseTileY) {
 		// Get potential mouse action for hover position
 		MouseAction ma = controller.getMouseAction(mouseTileX, mouseTileY);
-		
+
 		// Render map
 		mapRenderer.setView(camera);
 		mapRenderer.render();
@@ -322,7 +325,7 @@ public class BattleScreen implements Screen, EventVisitor {
 		// Finish UI drawing
 		batch.end();
 	}
-	
+
 	private int drawString(String str, int h) {
 		font.draw(batch, str, 10, windowHeight - 10 - h);
 		return h + 20;
@@ -448,8 +451,8 @@ public class BattleScreen implements Screen, EventVisitor {
 				.delay(animationDelay)
 				.start(manager);
 		Tween.to(m, DrawableAccessor.POSITION, DAMAGE_MESSAGE_DURATION)
-				.targetRelative(DAMAGE_MESSAGE_MOVE_SPEED*DAMAGE_MESSAGE_DURATION, 
-						-DAMAGE_MESSAGE_MOVE_SPEED*DAMAGE_MESSAGE_DURATION)
+				.targetRelative(DAMAGE_MESSAGE_MOVE_SPEED * DAMAGE_MESSAGE_DURATION,
+						-DAMAGE_MESSAGE_MOVE_SPEED * DAMAGE_MESSAGE_DURATION)
 				.ease(Linear.INOUT)
 				.delay(animationDelay)
 				.start(manager);
@@ -464,16 +467,31 @@ public class BattleScreen implements Screen, EventVisitor {
 
 	private void animateAbstractMoveEvent(AbstractMoveEvent event, float timePerStep) {
 		Unit u = event.getUnit();
-		float dx = event.getDestinationX() - event.getFromX();
-		float dy = event.getDestinationY() - event.getFromY();
-		float distance = (float) Math.sqrt(dx * dx + dy * dy);
-		Tween.to(getAppearance(u),
-				DrawableAccessor.POSITION, distance * timePerStep)
-				.target(u.getPosition().x, u.getPosition().y)
-				.ease(Linear.INOUT)
-				.delay(animationDelay)
+		Array<Point> path = event.getPath();
+
+		Timeline sequence = Timeline.createSequence();
+		float totalTime = 0;
+		for (int i = 1; i < path.size; i++) {
+			Point from = path.get(i - 1);
+			Point to = path.get(i);
+			float time;
+
+			if (from.x != to.x && from.y != to.y) {
+				time = 1.5f * timePerStep;
+			} else {
+				time = 1 * timePerStep;
+			}
+
+			sequence.push(Tween
+					.to(getAppearance(u), DrawableAccessor.POSITION, time)
+					.target(to.x, to.y)
+					.ease(Linear.INOUT));
+			totalTime += time;
+		}
+
+		sequence.delay(animationDelay)
 				.start(manager);
-		animationDelay += distance * timePerStep;
+		animationDelay += totalTime;
 	}
 
 	private UnitAppearance getAppearance(Unit unit) {
