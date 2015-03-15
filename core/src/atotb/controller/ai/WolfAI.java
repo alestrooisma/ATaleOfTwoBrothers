@@ -48,17 +48,20 @@ public class WolfAI implements ArtificialIntelligence {
 					int tx = nearestEnemy.getPosition().x;
 					int ty = nearestEnemy.getPosition().y;
 					Direction dir = controller.getChargingDirection(tx, ty, pf);
-					double d = controller.getChargingDistance(tx, ty, pf, dir);
+					double distance = controller.getChargingDistance(tx, ty, pf, dir);
 
-					if (charge && d <= unit.getTotalMovesRemaining()) {
+					// If in range charge
+					if (charge && distance <= unit.getTotalMovesRemaining()) {
 						controller.targetUnit(unit, nearestEnemy, null, pf);
 					} else {
+						// Otherwist move as close as possible
 						Array<Point> path = pf.getPathTo(
 								dir.getX(tx),
 								dir.getY(ty),
 								unit.getTotalMovesRemaining());
 						if (path.size != 0) {
-							controller.moveUnit(unit, path.peek().x, path.peek().y, pf);
+							controller.moveUnit(unit, path, unit.getTotalMovesRemaining(), pf);
+							// The passed distance could be 0.5 too high, but that does not matter
 						}
 					}
 				}

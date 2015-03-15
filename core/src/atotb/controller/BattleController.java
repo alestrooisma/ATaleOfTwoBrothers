@@ -305,11 +305,18 @@ public class BattleController extends ScreenController<BattleScreen> {
 		double distance = pf.getDistanceTo(destX, destY);
 		Array<Point> path = pf.getPathTo(destX, destY);
 
+		moveUnit(u, path, distance, pf);
+	}
+	
+	public void moveUnit(Unit u, Array<Point> path, double distance, PathFinder pf) {
+
 		// Check range and move if possible
 		if (distance <= u.getMovesRemaining()) {
 			game.getEventLog().push(new MoveEvent(u, path, distance));
 			pf.calculateDistancesFrom(
 					u.getPosition().x, u.getPosition().y, u.getTotalMovesRemaining());
+			
+		// Out of range for normal movement - can we dash instead?
 		} else if (u.mayDash()
 				&& distance <= u.getMovesRemaining() + u.getDashDistance()) {
 			game.getEventLog().push(new DashEvent(u, path, distance));

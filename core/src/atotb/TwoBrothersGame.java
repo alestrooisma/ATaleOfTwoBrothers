@@ -169,7 +169,7 @@ public class TwoBrothersGame extends Game {
 		}
 
 		// Add armies to map
-		battleMap.addUnit(w1, 4, 9);
+		battleMap.addUnit(w1, 4, 10);
 		battleMap.addUnit(w2, 11, 2);
 		battleMap.addUnit(w3, 13, 5);
 		battleMap.addUnit(model.getPlayerParty().getUnits().get(0), 9, 11);
