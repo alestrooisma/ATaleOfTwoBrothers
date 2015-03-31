@@ -2,6 +2,10 @@ Bugs
 ------------------
 - Can select ability even if it is "not allowed regardless of target".
 - ArrayIndexOutOfBoundsException when charging toward a unit at the edge of the map. Can't reproduce...
+
+
+Considerations
+------------------
 - What is a unit allowed to do when his opponent dies after combat is resolved?
 
 
@@ -11,7 +15,7 @@ Phase 2 - graphics, animation and UI
 - [x] Advanced event logging
 - [x] Death animation (fade)
 - [x] Movement animation (slide)
-  - [ ] Follow actual path
+  - [x] Follow actual path
 - [ ] Movement path indicators
 - [ ] Movement range indicators
 - [ ] Toggleable grid

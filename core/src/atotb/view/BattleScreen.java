@@ -4,6 +4,7 @@ import atotb.TwoBrothersGame;
 import atotb.controller.BattleController;
 import atotb.controller.BattleController.MouseAction;
 import atotb.controller.Resources;
+import atotb.controller.input.InputEvent;
 import atotb.controller.log.AbstractMoveEvent;
 import atotb.controller.log.DamageEvent;
 import atotb.controller.log.ChargeEvent;
@@ -48,11 +49,9 @@ import java.util.ListIterator;
  *
  * @author Ale Strooisma
  */
-public class BattleScreen implements Screen, EventVisitor {
+public class BattleScreen extends AbstractScreen<BattleController> implements EventVisitor {
 
 	// Received
-	private final TwoBrothersGame game;
-	private final BattleController controller;
 	private final SpriteBatch batch;
 	private final BitmapFont font;
 	//
@@ -82,8 +81,7 @@ public class BattleScreen implements Screen, EventVisitor {
 	private ListIterator<Message> messageIterator = messages.listIterator();
 
 	public BattleScreen(TwoBrothersGame game, BattleController controller, SpriteBatch batch, BitmapFont font) {
-		this.game = game;
-		this.controller = controller;
+		super(game, controller);
 		this.batch = batch;
 		this.font = font;
 

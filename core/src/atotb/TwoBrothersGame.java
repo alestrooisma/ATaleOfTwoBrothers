@@ -31,6 +31,7 @@ import java.awt.Point;
  * responsible for switching between various states of the game (in battle, in
  * menu, on overworld, etc) and keep track of shared resources.
  *
+ * @TODO handle screen switching using the ScreenController+AbstractScreen combo, including input handling
  * @author Ale Strooisma
  */
 public class TwoBrothersGame extends Game {
@@ -102,9 +103,10 @@ public class TwoBrothersGame extends Game {
 		Tween.registerAccessor(UnitAppearance.class, new DrawableAccessor());
 		Tween.registerAccessor(Message.class, new DrawableAccessor());
 
-		// Create and set the battle screen
-		battleController = new BattleController(this);
-		battleController.setView(new BattleScreen(this, battleController, batch, font));
+		// Create and set the battle screen including its controller
+		battleController = new BattleController(this, batch, font);
+		battleHandler = new GeneralInputHandler(battleController.getView());
+		battleController.setView(battleController.getView());
 	}
 
 	private void setUpController() {
@@ -112,7 +114,6 @@ public class TwoBrothersGame extends Game {
 		inputHandlers = new InputMultiplexer();
 		inputHandlers.addProcessor(new MainInputHandler(this));
 		Gdx.input.setInputProcessor(inputHandlers);
-		battleHandler = new BattleInputHandler(battleController);
 	}
 
 	// Getters

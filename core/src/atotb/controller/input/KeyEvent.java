@@ -9,7 +9,7 @@ package atotb.controller.input;
  * @todo pooling
  */
 public class KeyEvent extends InputEvent {
-	private int keycode;
+	private final int keycode;
 
 	public KeyEvent(int keycode) {
 		this.keycode = keycode;
@@ -17,5 +17,10 @@ public class KeyEvent extends InputEvent {
 
 	public int getKeycode() {
 		return keycode;
+	}
+
+	@Override
+	public void visit(InputEventListener listener) {
+		listener.processKeyEvent(keycode);
 	}
 }

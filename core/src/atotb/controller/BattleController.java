@@ -33,6 +33,8 @@ import atotb.util.PathFinder;
 import atotb.view.BattleScreen;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
@@ -45,7 +47,7 @@ import java.util.ArrayList;
  *
  * @author Ale Strooisma
  */
-public class BattleController extends ScreenController<BattleScreen> {
+public class BattleController extends AbstractScreenController<BattleScreen> {
 
 	public static final int NONE_SELECTED = -1;
 
@@ -62,7 +64,6 @@ public class BattleController extends ScreenController<BattleScreen> {
 	private PathFinder pathfinder;
 	//
 	// Event handling
-	private final InputEvent.List events;
 	private boolean dragging = false;
 	private int startX = 0;
 	private int startY = 0;
@@ -72,11 +73,9 @@ public class BattleController extends ScreenController<BattleScreen> {
 
 	// Core functions
 	//
-	public BattleController(TwoBrothersGame game) {
+	public BattleController(TwoBrothersGame game, SpriteBatch batch, BitmapFont font) {
 		this.game = game;
-
-		// Set up the input event handler
-		events = new InputEvent.List();
+		setView(new BattleScreen(game, this, batch, font));
 
 		// Set up the battle event processor
 		processor = new BattleEventProcessor();
@@ -86,7 +85,6 @@ public class BattleController extends ScreenController<BattleScreen> {
 	@Override
 	public void update(float dt) {
 		boolean wasBattleOver = isBattleOver();
-		processEvents();
 		if (isBattleOver() && !wasBattleOver) {
 			endBattle();
 		}
@@ -462,33 +460,8 @@ public class BattleController extends ScreenController<BattleScreen> {
 		getView().getCamera().update();
 	}
 
-	private void processEvents() {
-		InputEvent event = events.next();
-		while (event != null && !isBattleOver()) {
-			if (event instanceof MouseEvent) {
-				MouseEvent me = (MouseEvent) event;
-				switch (me.getType()) {
-					case PRESSED:
-						processMousePressedEvent(
-								me.getScreenX(), me.getScreenY(), me.getButton());
-						break;
-					case RELEASED:
-						processMouseReleasedEvent(
-								me.getScreenX(), me.getScreenY(), me.getButton());
-						break;
-					case DRAGGED:
-						processMouseDraggedEvent(
-								me.getScreenX(), me.getScreenY());
-						break;
-				}
-			} else if (event instanceof KeyEvent) {
-				processKeyEvent(((KeyEvent) event).getKeycode());
-			}
-			event = events.next();
-		}
-	}
-
-	private void processMousePressedEvent(int screenX, int screenY, int button) {
+	@Override
+	public boolean processMousePressedEvent(int screenX, int screenY, int button) {
 		if (button == Input.Buttons.LEFT) {
 			// Convert screen coordinates to tile coordinates
 			vec.x = screenX;
@@ -521,23 +494,29 @@ public class BattleController extends ScreenController<BattleScreen> {
 			startX = screenX;
 			startY = screenY;
 		}
+		return true;
 	}
 
-	private void processMouseReleasedEvent(int screenX, int screenY, int button) {
+	@Override
+	public boolean processMouseReleasedEvent(int screenX, int screenY, int button) {
 		if (button == Input.Buttons.RIGHT) {
 			dragging = false;
 		}
+		return true;
 	}
 
-	private void processMouseDraggedEvent(int screenX, int screenY) {
+	@Override
+	public boolean processMouseDraggedEvent(int screenX, int screenY) {
 		if (dragging) {
 			getView().getCamera().translate(startX - screenX, screenY - startY);
 			startX = screenX;
 			startY = screenY;
 		}
+		return true;
 	}
 
-	private void processKeyEvent(int keycode) {
+	@Override
+	public boolean processKeyEvent(int keycode) {
 		switch (keycode) {
 			case Input.Keys.R: //TODO temp
 				getView().getCamera().zoom = 1;
@@ -588,11 +567,10 @@ public class BattleController extends ScreenController<BattleScreen> {
 			case Input.Keys.ENTER:
 				nextTurn();
 				break;
+			default:
+				return false;
 		}
-	}
-
-	public void addEvent(InputEvent event) {
-		events.add(event);
+		return true;
 	}
 
 	public MouseAction getMouseAction(int x, int y) {
@@ -630,6 +608,11 @@ public class BattleController extends ScreenController<BattleScreen> {
 			}
 		}
 		return MouseAction.NOTHING;
+	}
+
+	@Override
+	public boolean canContinueProcessingInputEvents() {
+		return !isBattleOver();
 	}
 
 	public enum MouseAction {

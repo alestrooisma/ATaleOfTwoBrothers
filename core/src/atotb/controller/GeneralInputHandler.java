@@ -2,6 +2,7 @@ package atotb.controller;
 
 import atotb.controller.input.KeyEvent;
 import atotb.controller.input.MouseEvent;
+import atotb.view.AbstractScreen;
 import com.badlogic.gdx.InputAdapter;
 
 /**
@@ -9,38 +10,38 @@ import com.badlogic.gdx.InputAdapter;
  * 
  * @author Ale Strooisma
  */
-public class BattleInputHandler extends InputAdapter {
+public class GeneralInputHandler extends InputAdapter {
 
-	private final BattleController controller;
+	private final AbstractScreen view;
 
-	public BattleInputHandler(BattleController screen) {
-		this.controller = screen;
+	public GeneralInputHandler(AbstractScreen view) {
+		this.view = view;
 	}
 
 	@Override
 	public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-		controller.addEvent(new MouseEvent(MouseEvent.Type.PRESSED, 
+		view.addEvent(new MouseEvent(MouseEvent.Type.PRESSED, 
 				screenX, screenY, button));
 		return true;
 	}
 
 	@Override
 	public boolean touchDragged(int screenX, int screenY, int pointer) {
-		controller.addEvent(new MouseEvent(MouseEvent.Type.DRAGGED, 
+		view.addEvent(new MouseEvent(MouseEvent.Type.DRAGGED, 
 				screenX, screenY, -1));
 		return true;
 	}
 
 	@Override
 	public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-		controller.addEvent(new MouseEvent(MouseEvent.Type.RELEASED, 
+		view.addEvent(new MouseEvent(MouseEvent.Type.RELEASED, 
 				screenX, screenY, button));
 		return true;
 	}
 
 	@Override
 	public boolean keyDown(int keycode) {
-		controller.addEvent(new KeyEvent(keycode));
+		view.addEvent(new KeyEvent(keycode));
 		return true;
 	}
 }
