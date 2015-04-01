@@ -1,6 +1,6 @@
 package atotb.controller;
 
-import atotb.controller.input.InputEventListener;
+import atotb.controller.input.InputEventAdapter;
 import atotb.view.AbstractScreen;
 import com.badlogic.gdx.Screen;
 
@@ -12,7 +12,7 @@ import com.badlogic.gdx.Screen;
  * @author Ale Strooisma
  * @param <ViewScreen> The type of the view that is controlled by this class
  */
-public abstract class AbstractScreenController<ViewScreen extends AbstractScreen> extends InputEventListener implements Screen {
+public abstract class AbstractScreenController<ViewScreen extends AbstractScreen> extends InputEventAdapter implements Screen {
 
 	private ViewScreen view;
 	
@@ -31,8 +31,6 @@ public abstract class AbstractScreenController<ViewScreen extends AbstractScreen
 	public void setView(ViewScreen view) {
 		this.view = view;
 	}
-	
-	public abstract boolean canContinueProcessingInputEvents();
 	
 	@Override
 	public void render(float dt) {

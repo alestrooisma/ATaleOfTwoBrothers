@@ -20,7 +20,7 @@ public class KeyEvent extends InputEvent {
 	}
 
 	@Override
-	public void visit(InputEventListener listener) {
-		listener.processKeyEvent(keycode);
+	public boolean visit(InputEventListener listener) {
+		return listener.processKeyEvent(keycode);
 	}
 }

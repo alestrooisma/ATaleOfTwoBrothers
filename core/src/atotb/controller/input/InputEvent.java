@@ -15,7 +15,7 @@ public abstract class InputEvent {
 		next = null;
 	}
 	
-	public abstract void visit(InputEventListener listener);
+	public abstract boolean visit(InputEventListener listener);
 	
 	public static class List {
 		InputEvent head;

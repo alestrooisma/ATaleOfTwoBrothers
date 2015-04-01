@@ -85,9 +85,13 @@ public class BattleController extends AbstractScreenController<BattleScreen> {
 	@Override
 	public void update(float dt) {
 		boolean wasBattleOver = isBattleOver();
+		
+		getView().processEvents();
+		
 		if (isBattleOver() && !wasBattleOver) {
 			endBattle();
 		}
+		
 		handleCameraControl();
 	}
 
@@ -118,6 +122,10 @@ public class BattleController extends AbstractScreenController<BattleScreen> {
 	 * turn.
 	 */
 	public void startBattle() {
+		// Add listeners
+		getView().getInputEventListeners().addFirst(this);
+		getView().getInputEventListeners().addFirst(getView());
+		
 		// Kick it off
 		startTurn();
 		if (ai[battle.getCurrentPlayer()] == null) {
@@ -129,6 +137,11 @@ public class BattleController extends AbstractScreenController<BattleScreen> {
 	 * Called when the battle has ended.
 	 */
 	public void endBattle() {
+		// remove listeners
+		getView().getInputEventListeners().remove(getView());
+		getView().getInputEventListeners().remove(this);
+		
+		// Check who won
 		boolean victory = false;
 		for (Unit u : game.getModel().getPlayerParty().getUnits()) {
 			if (u.isAlive()) {
@@ -137,12 +150,14 @@ public class BattleController extends AbstractScreenController<BattleScreen> {
 			}
 		}
 
+		// Display victory message
 		if (victory) {
 			game.getLog().push("Victory!");
 		} else {
 			game.getLog().push("Defeat...");
 		}
 
+		// Let the main controller know the battle is done
 		game.endBattle();
 	}
 
@@ -608,11 +623,6 @@ public class BattleController extends AbstractScreenController<BattleScreen> {
 			}
 		}
 		return MouseAction.NOTHING;
-	}
-
-	@Override
-	public boolean canContinueProcessingInputEvents() {
-		return !isBattleOver();
 	}
 
 	public enum MouseAction {

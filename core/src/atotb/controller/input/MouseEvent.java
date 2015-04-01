@@ -1,14 +1,15 @@
 package atotb.controller.input;
 
 /**
- * An event class used to delay mouse events such that they can be processed in 
+ * An event class used to delay mouse events such that they can be processed in
  * the game loop.
- * 
+ *
  * @author Ale Strooisma
- * 
+ *
  * @todo pooling
  */
 public class MouseEvent extends InputEvent {
+
 	private final Type type;
 	private final int screenX, screenY, button;
 
@@ -36,21 +37,21 @@ public class MouseEvent extends InputEvent {
 	}
 
 	@Override
-	public void visit(InputEventListener listener) {
+	public boolean visit(InputEventListener listener) {
 		switch (type) {
 			case PRESSED:
-				listener.processMousePressedEvent(screenX, screenY, button);
-				break;
+				return listener.processMousePressedEvent(screenX, screenY, button);
 			case RELEASED:
-				listener.processMouseReleasedEvent(screenX, screenY, button);
-				break;
+				return listener.processMouseReleasedEvent(screenX, screenY, button);
 			case DRAGGED:
-				listener.processMouseDraggedEvent(screenX, screenY);
-				break;
+				return listener.processMouseDraggedEvent(screenX, screenY);
+			default:
+				return false;
 		}
 	}
 
 	public static enum Type {
+
 		PRESSED, RELEASED, DRAGGED;
 	}
 }

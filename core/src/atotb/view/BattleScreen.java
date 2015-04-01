@@ -148,11 +148,8 @@ public class BattleScreen extends AbstractScreen<BattleController> implements Ev
 
 	@Override
 	public void render(float dt) {
-		// Clear buffers and paint the background dark gray
-		Gdx.gl.glClearColor(0.2f, 0.2f, 0.2f, 1);
-		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-		// Update the tweens
+		// Advance the tweens
 		manager.update(dt);
 		if (animationDelay < dt) {
 			animationDelay = 0;
@@ -160,11 +157,15 @@ public class BattleScreen extends AbstractScreen<BattleController> implements Ev
 			animationDelay -= dt;
 		}
 
-		// Process events
+		// Process game events
 		while (!events.isEmpty()) {
 			Event e = events.pull();
 			e.visit(this);
 		}
+		
+		// Clear buffers and paint the background dark gray
+		Gdx.gl.glClearColor(0.2f, 0.2f, 0.2f, 1);
+		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
 		// Calculate cursor position
 		vec.x = Gdx.input.getX();

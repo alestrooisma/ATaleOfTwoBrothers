@@ -3,6 +3,7 @@ package atotb;
 import atotb.controller.*;
 import atotb.controller.ai.ArtificialIntelligence;
 import atotb.controller.ai.WolfAI;
+import atotb.controller.input.InputEventListener;
 import atotb.controller.log.EventLog;
 import atotb.model.*;
 import atotb.model.actions.HealAction;
@@ -16,6 +17,7 @@ import atotb.view.tween.DrawableAccessor;
 import aurelienribon.tweenengine.Tween;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -34,7 +36,7 @@ import java.awt.Point;
  * @TODO handle screen switching using the ScreenController+AbstractScreen combo, including input handling
  * @author Ale Strooisma
  */
-public class TwoBrothersGame extends Game {
+public class TwoBrothersGame extends Game implements InputEventListener {
 
 	// Model
 	private Model model;
@@ -105,15 +107,10 @@ public class TwoBrothersGame extends Game {
 
 		// Create and set the battle screen including its controller
 		battleController = new BattleController(this, batch, font);
-		battleHandler = new GeneralInputHandler(battleController.getView());
-		battleController.setView(battleController.getView());
+		Gdx.input.setInputProcessor(new GeneralInputHandler(battleController.getView()));
 	}
 
 	private void setUpController() {
-		// Set up input listeners
-		inputHandlers = new InputMultiplexer();
-		inputHandlers.addProcessor(new MainInputHandler(this));
-		Gdx.input.setInputProcessor(inputHandlers);
 	}
 
 	// Getters
@@ -186,7 +183,6 @@ public class TwoBrothersGame extends Game {
 		// Start the battle
 		battleController.initBattle(model.getBattle(), tileMap, ai);
 		setScreen(battleController);
-		inputHandlers.addProcessor(battleHandler);
 		battleController.startBattle();
 	}
 
@@ -195,7 +191,6 @@ public class TwoBrothersGame extends Game {
 	 * game.
 	 */
 	public void endBattle() {
-		inputHandlers.removeProcessor(battleHandler);
 
 		// This is what should be done, depending on how battle end is rendered
 		// Possibly this should only be done after leaving the victory screen.
@@ -212,5 +207,31 @@ public class TwoBrothersGame extends Game {
 		font.dispose();
 		battleController.dispose();
 		Resources.unload();
+	}
+
+	@Override
+	public boolean processMousePressedEvent(int screenX, int screenY, int button) {
+		return false;
+	}
+
+	@Override
+	public boolean processMouseReleasedEvent(int screenX, int screenY, int button) {
+		return false;
+	}
+
+	@Override
+	public boolean processMouseDraggedEvent(int screenX, int screenY) {
+		return false;
+	}
+
+	@Override
+	public boolean processKeyEvent(int keycode) {
+		switch (keycode) {
+			case Input.Keys.ESCAPE:
+				Gdx.app.exit();
+				return true;
+			default:
+				return false;
+		}
 	}
 }
